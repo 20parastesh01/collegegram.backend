@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { Brand } from '../utility/brand'
 
-export type Email = Brand<number, 'Email'>
+export type Email = Brand<string, 'Email'>
 
 export const isEmail = (value: unknown): value is Email => {
     return (

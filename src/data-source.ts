@@ -3,6 +3,7 @@ dotenv.config({ path: process.cwd() })
 console.log(process.env.DB_NAME)
 import { DataSource } from 'typeorm'
 import { SampleEntity } from './modules/sample/entity/sample.entity'
+import { Redis } from './redis'
 
 export const AppDataSource = new DataSource({
     type: 'postgres',
@@ -13,7 +14,9 @@ export const AppDataSource = new DataSource({
     database: process.env.DB_NAME,
     synchronize: true,
     logging: false,
-    entities: [SampleEntity],
+    entities: ['./src/modules/**/*.entity.ts'],
     migrations: ['./src/migration/*.ts'],
     subscribers: [],
 })
+
+export const RedisRepo = new Redis()

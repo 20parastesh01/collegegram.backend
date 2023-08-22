@@ -1,11 +1,16 @@
 import { Router } from 'express'
-import { handleExpress } from '../utility/handle-express'
 import { SampleService } from '../modules/sample/sample.service'
+import { Route } from '../registry'
 
-export const makeSampleRouter = (sampleService: SampleService) => {
-    const app = Router()
+@Route('/sample', SampleService)
+export class SampleRouter {
+    makeRouter(sampleService: SampleService) {
+        const app = Router()
 
-    
+        app.get('/', (req, res) => {
+            res.send('yep')
+        })
 
-    return app
+        return app
+    }
 }
