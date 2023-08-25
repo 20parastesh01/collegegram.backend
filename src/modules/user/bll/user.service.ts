@@ -15,7 +15,7 @@ import { LoginDto } from '../dto/login.dto'
 import { BRAND } from 'zod'
 import { Email, isEmail } from '../../../data/email'
 import { Username, isUsername } from '../model/username'
-import { userEntitytoUser } from './user.dao'
+import { userEntitytoUser, userEntitytoUserBasic } from './user.dao'
 
 type LoginSignUp = UserWithToken | BadRequestError | ServerError
 
@@ -35,6 +35,7 @@ export const hash = async (input: string): Promise<Password> => {
 @Service(UserRepository)
 export class UserService implements IUserService {
     constructor(private userRepo: IUserRepository) {}
+
     async login(data: LoginDto): Promise<LoginSignUp | UnauthorizedError> {
         const usernameOrEmail = data.usernameOrEmail
         const password = data.password
@@ -52,10 +53,7 @@ export class UserService implements IUserService {
         if (!isMatchPassword) {
             return new UnauthorizedError('Invalid Password')
         }
-        const accessToken = generateToken({
-            userId: userEntity.id,
-            username: userEntity.username,
-        })
+        const accessToken = generateToken(userEntitytoUserBasic(userEntity))
         if (accessToken instanceof ServerError) return accessToken
 
         let refreshToken = await RedisRepo.getSession(userEntity.id)
@@ -71,10 +69,11 @@ export class UserService implements IUserService {
 
         return { user, accessToken, refreshToken }
     }
+
     async signup(data: SignUpDto): Promise<LoginSignUp> {
         try {
             const password = await hash(data.password)
-            const user = await this.userRepo.create({
+            const userEntity = await this.userRepo.create({
                 username: data.username,
                 email: data.email,
                 password,
@@ -83,18 +82,15 @@ export class UserService implements IUserService {
                 photo: '',
                 bio: '',
             })
-            const accessToken = generateToken({
-                userId: user.id,
-                username: user.username,
-            })
+            const accessToken = generateToken(userEntitytoUserBasic(userEntity))
             if (accessToken instanceof ServerError) return accessToken
 
-            const refreshToken = await createSession(user.id)
+            const refreshToken = await createSession(userEntity.id)
             if (refreshToken instanceof ServerError) return refreshToken
 
-            await RedisRepo.setSession(refreshToken, user.id)
+            await RedisRepo.setSession(refreshToken, userEntity.id)
 
-            const result = { user, accessToken, refreshToken }
+            const result = { user: userEntitytoUser(userEntity), accessToken, refreshToken }
             return result
         } catch (e) {
             if (e instanceof QueryFailedError) {

@@ -26,3 +26,8 @@ export interface UserWithToken {
     accessToken: Token
     refreshToken: Hashed
 }
+
+export interface UserBasic {
+    userId: UserId
+    username: Username
+}
