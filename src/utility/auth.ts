@@ -1,35 +1,28 @@
-import jwt, { JsonWebTokenError } from 'jsonwebtoken'
+import jwt, { JsonWebTokenError, TokenExpiredError } from 'jsonwebtoken'
 import { Token, isToken } from '../data/token'
 import { ServerError, UnauthorizedError } from './http-error'
 import bcrypt, { hash } from 'bcryptjs'
 import { Hashed, isHashed } from '../data/hashed'
 import { UserId, isUserId } from '../modules/user/model/user-id'
-import { Username } from '../modules/user/model/username'
+import { Username, isUsername } from '../modules/user/model/username'
 import { InputPassword } from '../modules/user/model/inputpassword'
-
-interface JwtPayload {
-    userId: UserId
-    username: Username
-}
-
-const isJwtPayload = (payload: unknown): payload is JwtPayload => {
-    return payload !== null && typeof payload == 'object' && 'userId' in payload && 'username' in payload && isUserId(payload.userId) && isUserId(payload.username)
-}
+import { UserBasic, isUserBasic } from '../modules/user/model/user'
 
 const SECRET_KEY = process.env.SECRET_KEY!
 
-export const generateToken = (data: JwtPayload): Token | ServerError => {
-    const token = jwt.sign(data, SECRET_KEY, { expiresIn: '6h' })
+export const generateToken = (data: UserBasic): Token | ServerError => {
+    const token = jwt.sign(data, SECRET_KEY, { expiresIn: 600 })
     if (isToken(token)) return token
     return new ServerError('Token Generation Failed')
 }
 
-export const verifyToken = (token: Token): JwtPayload | UnauthorizedError | ServerError => {
+export const verifyToken = (token: Token): UserBasic | UnauthorizedError | ServerError | TokenExpiredError => {
     try {
         const payload = jwt.verify(token, SECRET_KEY)
-        if (isJwtPayload(payload)) return payload
+        if (isUserBasic(payload)) return payload
         return new UnauthorizedError('Invalid Token')
     } catch (e) {
+        if (e instanceof TokenExpiredError) return e
         if (e instanceof JsonWebTokenError) return new UnauthorizedError('Invalid Token')
         return new ServerError('verifyToken')
     }

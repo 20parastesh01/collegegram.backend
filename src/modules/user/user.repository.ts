@@ -4,6 +4,7 @@ import { Username } from './model/username'
 import { Email } from '../../data/email'
 import { Password } from './model/password'
 import { Repo } from '../../registry'
+import { UserId } from './model/user-id'
 
 interface CreateUser {
     username: Username
@@ -19,6 +20,7 @@ export interface IUserRepository {
     create(data: CreateUser): Promise<UserEntity>
     findByUsername(username: Username): Promise<UserEntity | null>
     findByEmail(email: Email): Promise<UserEntity | null>
+    findById(userId: UserId): Promise<UserEntity | null>
 }
 
 @Repo()
@@ -36,5 +38,8 @@ export class UserRepository implements IUserRepository {
     }
     async create(data: CreateUser): Promise<UserEntity> {
         return this.userRepo.save({ ...data, tokens: [] })
+    }
+    async findById(userId: UserId): Promise<UserEntity | null> {
+        return this.userRepo.findOneBy({ id: userId })
     }
 }

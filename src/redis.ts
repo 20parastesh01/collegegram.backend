@@ -21,6 +21,14 @@ export class Redis {
     async setSession(session: Hashed, userId: UserId) {
         await this.client.set(session, userId)
         await this.client.set(userId + '', session)
+        await this.client.expire(session, 3600 * 6)
+        await this.client.expire(userId + '', 3600 * 6)
+    }
+
+    async setNewExpire(session: Hashed) {
+        await this.client.expire(session, 3600 * 6)
+        const userId = await this.client.get(session)
+        if (userId) await this.client.expire(userId + '', 3600 * 6)
     }
 
     async getSession(userId: UserId): Promise<Hashed | null> {

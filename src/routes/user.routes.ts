@@ -4,6 +4,7 @@ import { UserService } from '../modules/user/bll/user.service'
 import { signupDto } from '../modules/user/dto/signup.dto'
 import { handleExpress } from '../utility/handle-express'
 import { loginDto } from '../modules/user/dto/login.dto'
+import { authMiddleware } from '../auth-middleware'
 
 @Route('/user', UserService)
 export class UserRouter {
@@ -18,6 +19,10 @@ export class UserRouter {
         app.post('/login', (req, res) => {
             const data = loginDto.parse(req.body)
             handleExpress(res, () => userService.login(data))
+        })
+
+        app.get('/me', authMiddleware(userService), (req, res) => {
+            res.send(req.user)
         })
 
         return app

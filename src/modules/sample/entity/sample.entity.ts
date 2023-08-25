@@ -1,11 +1,4 @@
-import {
-    Collection,
-    Column,
-    CreateDateColumn,
-    Entity,
-    PrimaryGeneratedColumn,
-    UpdateDateColumn,
-} from 'typeorm'
+import { Collection, Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
 import { SampleId } from '../model/sample-id'
 import { Email } from '../../../data/email'
 import { Token } from '../../../data/token'
