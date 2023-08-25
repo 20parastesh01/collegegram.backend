@@ -4,7 +4,8 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "start": "ts-node --files src/main.ts",
+        "pretty": "prettier --write .",
+        "start": "ts-node --files app.ts",
         "build": "tsc",
         "test": "NODE_ENV=test jest --detectOpenHandles --testMatch **/src/**/*.spec.ts",
         "test:e2e": "NODE_ENV=test jest --detectOpenHandles --testMatch **/e2e/**/*.spec.ts",
@@ -38,6 +39,7 @@
         "mysql2": "^3.6.0",
         "nanoid": "^3.3.2",
         "pg": "^8.11.3",
+        "prettier": "^3.0.2",
         "redis": "^4.6.8",
         "reflect-metadata": "^0.1.13",
         "typeorm": "^0.3.17",

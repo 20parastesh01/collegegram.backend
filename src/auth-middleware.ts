@@ -5,9 +5,9 @@ import { SampleService } from './modules/sample/sample.service'
 import { verifyToken } from './utility/auth'
 import { isToken } from './data/token'
 
-export const authMiddleware = () => async (req: Request, res: Response, next: NextFunction) => {
+export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
     const accessToken = req.header('Authorization')?.replace('Bearer ', '')
-    if (!isToken(accessToken)) return new UnauthorizedError('Invalid Token')
+    if (!isToken(accessToken)) return res.status(401).send({ error: 'Unauthorized' })
     const authedUser = verifyToken(accessToken)
 
     if (authedUser instanceof HttpError) {

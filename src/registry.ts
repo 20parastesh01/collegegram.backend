@@ -43,7 +43,7 @@ export async function scan(app: Express) {
 
 export const Service = (...deps: any[]): ClassDecorator => {
     return (target: any) => {
-        if (deps.map(dep => dep.name).every(name => name in repos)) {
+        if (deps.map((dep) => dep.name).every((name) => name in repos)) {
             const newArgs = []
             for (let dep of deps) {
                 newArgs.push(repos[dep.name])
@@ -58,7 +58,7 @@ export const Route = (...deps: any[]): ClassDecorator => {
     return (target: any) => {
         console.log(target)
         const basePath = deps.shift()
-        if (deps.map(dep => dep.name).every(name => name in services)) {
+        if (deps.map((dep) => dep.name).every((name) => name in services)) {
             console.log('all deps')
             const newArgs = []
             for (let dep of deps) {

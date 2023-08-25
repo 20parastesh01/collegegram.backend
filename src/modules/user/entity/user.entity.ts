@@ -1,11 +1,4 @@
-import {
-    Column,
-    CreateDateColumn,
-    Entity,
-    PrimaryGeneratedColumn,
-    Unique,
-    UpdateDateColumn,
-} from 'typeorm'
+import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from 'typeorm'
 import { Email } from '../../../data/email'
 import { WholeNumber } from '../../../data/whole-number'
 import { Password } from '../model/password'

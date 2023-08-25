@@ -4,12 +4,12 @@ import { ServerError, UnauthorizedError } from './http-error'
 import bcrypt, { hash } from 'bcryptjs'
 import { Hashed, isHashed } from '../data/hashed'
 import { UserId, isUserId } from '../modules/user/model/user-id'
-import { Username } from '../modules/user/model/username'
+import { Username, isUsername } from '../modules/user/model/username'
 import { InputPassword } from '../modules/user/model/inputpassword'
 import { UserBasic } from '../modules/user/model/user'
 
 const isJwtPayload = (payload: unknown): payload is UserBasic => {
-    return payload !== null && typeof payload == 'object' && 'userId' in payload && 'username' in payload && isUserId(payload.userId) && isUserId(payload.username)
+    return payload !== null && typeof payload == 'object' && 'userId' in payload && 'username' in payload && isUserId(payload.userId) && isUsername(payload.username)
 }
 
 const SECRET_KEY = process.env.SECRET_KEY!
