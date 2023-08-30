@@ -11,7 +11,7 @@ import { InputPassword } from '../model/inputpassword'
 import { Password } from '../model/password'
 import { UserId } from '../model/user-id'
 import { Username } from '../model/username'
-import { CreateUser, IUserRepository } from '../user.repository'
+import { CreateUser, EditUser, IUserRepository } from '../user.repository'
 import { Hashed } from '../../../data/hashed'
 import { SendEmailDto } from '../dto/send-email.dto'
 import { isSimpleMessage } from '../../../data/simple-message'
@@ -56,6 +56,9 @@ class MockUserRepository implements IUserRepository {
             createdAt: new Date(),
             updatedAt: new Date(),
         })
+    }
+    edit(userId: UserId, data: EditUser): Promise<UserEntity | null> {
+        throw new Error('Method not implemented.')
     }
     async changePassword(userId: UserId, newPassword: Password): Promise<UserEntity | null> {
         const userEntity = await this.findById(userId)

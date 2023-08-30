@@ -53,8 +53,12 @@ export class Minio {
     }
 
     async getProfileUrl(userId: UserId) {
-        const minioUrl = await this.client.presignedUrl('GET', profilePhotoBucket, userId + '')
-        return '/file' + minioUrl.split(minioHost + ':' + minioPort)[1]
+        try {
+            const minioUrl = await this.client.presignedUrl('GET', profilePhotoBucket, userId + '')
+            return '/file' + minioUrl.split(minioHost + ':' + minioPort)[1]
+        } catch (e) {
+            return ''
+        }
     }
 
     async removeProfileUrl(userId: UserId) {

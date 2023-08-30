@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs'
 import { QueryFailedError } from 'typeorm'
 import { v4 } from 'uuid'
-import { RedisRepo } from '../../../data-source'
+import { MinioRepo, RedisRepo } from '../../../data-source'
 import { isEmail } from '../../../data/email'
 import { SimpleMessage } from '../../../data/simple-message'
 import { compareHash, createSession, generateToken } from '../../../utility/auth'
@@ -13,12 +13,14 @@ import { SetPasswordDto } from '../dto/set-pass.dto'
 import { SignUpDto } from '../dto/signup.dto'
 import { UserEntity } from '../entity/user.entity'
 import { Password, isPassword } from '../model/password'
-import { User, UserWithToken } from '../model/user'
+import { User, UserBasic, UserWithToken } from '../model/user'
 import { UserId } from '../model/user-id'
 import { isUsername } from '../model/username'
-import { IUserRepository, UserRepository } from '../user.repository'
-import { userEntitytoUser, userEntitytoUserBasic } from './user.dao'
+import { EditUser, IUserRepository, UserRepository } from '../user.repository'
+import { userEntitytoUser, userEntitytoUserBasic, usertoUserBasic } from './user.dao'
 import { Service } from '../../../registry/layer-decorators'
+import { EditProfileDto } from '../dto/edit-profile.dto'
+import { Token } from '../../../data/token'
 
 export type LoginSignUp = UserWithToken | BadRequestError | ServerError
 
@@ -28,6 +30,7 @@ export interface IUserService {
     getUserById(userId: UserId): Promise<User | null>
     forgetPassSendEmail(data: SendEmailDto): Promise<SimpleMessage | BadRequestError>
     forgetPassSetPass(data: SetPasswordDto): Promise<LoginSignUp>
+    editProfile(user: UserBasic, data: EditProfileDto, file?: Express.Multer.File): Promise<{ user: User, token: Token } | ServerError>
 }
 
 export const hash = async (input: string): Promise<Password> => {
@@ -40,7 +43,7 @@ export const hash = async (input: string): Promise<Password> => {
 
 @Service(UserRepository)
 export class UserService implements IUserService {
-    constructor(private userRepo: IUserRepository) {}
+    constructor(private userRepo: IUserRepository) { }
 
     async login(data: LoginDto): Promise<LoginSignUp | UnauthorizedError> {
         const usernameOrEmail = data.usernameOrEmail
@@ -151,5 +154,28 @@ export class UserService implements IUserService {
         }
         const user = userEntitytoUser(userEntity)
         return { user, accessToken, refreshToken }
+    }
+
+    async editProfile(userBasic: UserBasic, data: EditProfileDto, file?: Express.Multer.File): Promise<{ user: User, token: Token } | ServerError> {
+        const { password, ...rest } = data
+        const payload: EditUser = rest
+        if (data.password) {
+            const newPassword = await hash(data.password)
+            payload.password = newPassword
+        }
+        const editedUser = await this.userRepo.edit(userBasic.userId, payload)
+        if (!editedUser) return new ServerError()
+        if (file) {
+            await MinioRepo.uploadProfile(userBasic.userId, file)
+        }
+        const user = userEntitytoUser(editedUser)
+        const newAccessToken = generateToken(usertoUserBasic(user))
+        if (newAccessToken instanceof ServerError) return newAccessToken
+        return { user, token: newAccessToken }
+    }
+
+    async getProfilePhoto(user: UserBasic): Promise<string> {
+        const url = await MinioRepo.getProfileUrl(user.userId)
+        return url
     }
 }
