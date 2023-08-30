@@ -1,4 +1,4 @@
-import { Service } from '../../registry'
+import { Service } from '../../registry/layer-decorators'
 import { ISampleRepository, SampleRepository } from './sample.repository'
 
 export interface ISampleService {}

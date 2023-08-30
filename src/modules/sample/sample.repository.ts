@@ -1,6 +1,6 @@
 import { DataSource, Repository } from 'typeorm'
 import { SampleEntity } from './entity/sample.entity'
-import { Repo } from '../../registry'
+import { Repo } from '../../registry/layer-decorators'
 
 export interface ISampleRepository {}
 
