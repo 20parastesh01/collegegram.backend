@@ -1,8 +1,9 @@
 import { Router } from 'express'
 import { authMiddleware } from '../auth-middleware'
 import { AppDataSource } from '../data-source'
+import { upload } from '../../app'
 
-let title = 'Sample API'
+let title = 'CollegeGram API'
 let version = '1.0.0'
 export const swaggerObject: any = {
     openapi: '3.0.1',
@@ -141,11 +142,15 @@ export const Route = (basePath: string, ...deps: any[]): ClassDecorator => {
 
                         if (!swaggerObject.paths[path]) swaggerObject.paths[path] = {}
                         swaggerObject.paths[path][method] = api
-                        if (auth) {
-                            ;(router as any)[method](path, authMiddleware(userService), apiDef.bind(instance))
-                        } else {
-                            ;(router as any)[method](path, apiDef.bind(instance))
-                        }
+                        const callbacks: any[] = []
+                        if (auth) callbacks.push(authMiddleware(userService))
+                        let multerFields: any[] = []
+                        if (singlefiles && singlefiles.length > 0) multerFields = [...multerFields, ...singlefiles.map((a: any) => { return { name: a } })]
+                        if (multiplefiles && multiplefiles.length > 0) multerFields = [...multerFields, ...multiplefiles.map((a: any) => { return { name: a } })]
+                        if (multerFields.length > 0) callbacks.push(upload.fields(multerFields))
+                        callbacks.push(apiDef.bind(instance))
+                            ; (router as any)[method](path, ...callbacks)
+
                     }
                     routes.push(router)
                 }

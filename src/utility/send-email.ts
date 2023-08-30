@@ -63,21 +63,25 @@ async function getNewToken(oauth2Client: OAuth2Client): Promise<any> {
 
 const user = process.env.EMAIL_USER
 const pass = process.env.EMAIL_PASS
-const transporter = nodemailer.createTransport({
-    service: 'Zoho',
-    auth: {
-        user,
-        pass,
-    },
-})
+
 
 export const sendEmail = (to: string, subject: string, content: string) => {
+    const transporter = nodemailer.createTransport({
+        service: 'Zoho',
+        auth: {
+            user,
+            pass,
+        },
+    })
     const mailOptions = {
-        from,
+        from:user,
         to,
         subject,
         html: content,
     }
+    console.log(user)
+    console.log(pass)
+    console.log(mailOptions)
     transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
             console.log('Error:', error)

@@ -3,8 +3,8 @@ import { UserEntity } from './entity/user.entity'
 import { Username } from './model/username'
 import { Email } from '../../data/email'
 import { Password } from './model/password'
-import { Repo } from '../../registry'
 import { UserId } from './model/user-id'
+import { Repo } from '../../registry/layer-decorators'
 
 export interface CreateUser {
     username: Username

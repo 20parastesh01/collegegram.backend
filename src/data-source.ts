@@ -5,6 +5,7 @@ import { DataSource } from 'typeorm'
 import { SampleEntity } from './modules/sample/entity/sample.entity'
 import { Redis } from './redis'
 import { UserEntity } from './modules/user/entity/user.entity'
+import { Minio } from './minio'
 
 export const AppDataSource = new DataSource({
     type: 'postgres',
@@ -21,3 +22,5 @@ export const AppDataSource = new DataSource({
 })
 
 export const RedisRepo = new Redis()
+
+export const MinioRepo = new Minio()

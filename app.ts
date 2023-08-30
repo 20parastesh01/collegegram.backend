@@ -1,16 +1,22 @@
 import express, { ErrorRequestHandler } from 'express'
 import { ZodError } from 'zod'
-import { AppDataSource, RedisRepo } from './src/data-source'
-import { scan } from './src/registry'
+import { AppDataSource, MinioRepo, RedisRepo } from './src/data-source'
+import multer from 'multer'
+import http from 'http'
+import { scan } from './src/registry/registry';
+import { sendEmail } from './src/utility/send-email'
+const storage = multer.memoryStorage(); // You can adjust this storage method as needed
+export const upload = multer({ storage: storage });
 process.env.ENGINE = process.argv.some((arg) => arg.includes('ts-node')) ? 'TS_NODE' : 'NODE'
 
 const PORT = process.env.PORT || 3000
 
 export const initializeProject = async () => {
+    const app = express()
     await AppDataSource.initialize()
     await RedisRepo.initialize()
-    const app = express()
-
+    await MinioRepo.initialize(app)
+    
     app.use(express.json())
 
     await scan(app)
@@ -24,6 +30,7 @@ export const initializeProject = async () => {
             res.status(400).send({ message: err.errors })
             return
         }
+        console.log(err)
         res.status(500).send()
     }
     app.use(errorHandler)
