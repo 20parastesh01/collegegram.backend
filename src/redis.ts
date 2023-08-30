@@ -42,4 +42,8 @@ export class Redis {
         if (isUserId(userId)) return userId
         return null
     }
+
+    async disconnect() {
+        await this.client.quit()
+    }
 }

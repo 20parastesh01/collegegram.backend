@@ -10,15 +10,15 @@ import { Hashed } from '../../../data/hashed'
 import { Token } from '../../../data/token'
 import { UserEntity } from '../entity/user.entity'
 import { RedisRepo } from '../../../data-source'
+import { Service } from '../../../registry'
 import { LoginDto } from '../dto/login.dto'
 import { BRAND } from 'zod'
 import { Email, isEmail } from '../../../data/email'
 import { Username, isUsername } from '../model/username'
 import { userEntitytoUser, userEntitytoUserBasic } from './user.dao'
 import { UserId } from '../model/user-id'
-import { Service } from '../../../registry/layer-decorators'
 
-type LoginSignUp = UserWithToken | BadRequestError | ServerError
+export type LoginSignUp = UserWithToken | BadRequestError | ServerError
 
 export interface IUserService {
     signup(data: SignUpDto): Promise<LoginSignUp>

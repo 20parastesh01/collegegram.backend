@@ -3,10 +3,10 @@ import { UserEntity } from './entity/user.entity'
 import { Username } from './model/username'
 import { Email } from '../../data/email'
 import { Password } from './model/password'
+import { Repo } from '../../registry'
 import { UserId } from './model/user-id'
-import { Repo } from '../../registry/layer-decorators'
 
-interface CreateUser {
+export interface CreateUser {
     username: Username
     password: Password
     email: Email
@@ -37,7 +37,7 @@ export class UserRepository implements IUserRepository {
         return this.userRepo.findOneBy({ email })
     }
     async create(data: CreateUser): Promise<UserEntity> {
-        return this.userRepo.save({ ...data, tokens: [] })
+        return this.userRepo.save({ ...data })
     }
     async findById(userId: UserId): Promise<UserEntity | null> {
         return this.userRepo.findOneBy({ id: userId })

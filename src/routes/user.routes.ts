@@ -1,30 +1,30 @@
-import { Request, Response } from 'express'
+import { Router } from 'express'
+import { Route } from '../registry'
 import { UserService } from '../modules/user/bll/user.service'
-import { loginDto } from '../modules/user/dto/login.dto'
 import { signupDto } from '../modules/user/dto/signup.dto'
-import { Auth, Get, Post, ResponseBody } from '../registry/endpoint-decorator'
-import { Route } from '../registry/layer-decorators'
 import { handleExpress } from '../utility/handle-express'
+import { loginDto } from '../modules/user/dto/login.dto'
+import { authMiddleware } from '../auth-middleware'
 
 @Route('/user', UserService)
 export class UserRouter {
-    constructor(private userService: UserService) {}
+    makeRouter(userService: UserService) {
+        const app = Router()
 
-    @Post('/signup')
-    signup(req: Request, res: Response) {
-        const data = signupDto.parse(req.body)
-        handleExpress(res, () => this.userService.signup(data))
-    }
+        app.post('/signup', (req, res) => {
+            const data = signupDto.parse(req.body)
+            handleExpress(res, () => userService.signup(data))
+        })
 
-    @Post('/login')
-    login(req: Request, res: Response) {
-        const data = loginDto.parse(req.body)
-        handleExpress(res, () => this.userService.login(data))
-    }
+        app.post('/login', (req, res) => {
+            const data = loginDto.parse(req.body)
+            handleExpress(res, () => userService.login(data))
+        })
 
-    @Get('/me')
-    @Auth()
-    getCurrentUser(req: Request, res: Response) {
-        res.send(req.user)
+        app.get('/me', authMiddleware(userService), (req, res) => {
+            res.send(req.user)
+        })
+
+        return app
     }
 }

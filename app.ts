@@ -1,7 +1,7 @@
 import express, { ErrorRequestHandler } from 'express'
 import { ZodError } from 'zod'
 import { AppDataSource, RedisRepo } from './src/data-source'
-import { scan } from './src/registry/registry'
+import { scan } from './src/registry'
 process.env.ENGINE = process.argv.some((arg) => arg.includes('ts-node')) ? 'TS_NODE' : 'NODE'
 
 const PORT = process.env.PORT || 3000
