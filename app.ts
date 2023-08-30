@@ -1,7 +1,7 @@
 import express, { ErrorRequestHandler } from 'express'
 import { ZodError } from 'zod'
 import { AppDataSource, RedisRepo } from './src/data-source'
-import { scan } from './src/registry'
+import { scan } from './src/registry/registry'
 process.env.ENGINE = process.argv.some((arg) => arg.includes('ts-node')) ? 'TS_NODE' : 'NODE'
 
 const PORT = process.env.PORT || 3000
@@ -16,7 +16,7 @@ export const initializeProject = async () => {
     await scan(app)
 
     app.use((req, res) => {
-        res.status(404).send({ message: 'Not Found' })
+        res.status(404).send({ message: 'URL Not Found' })
     })
 
     const errorHandler: ErrorRequestHandler = (err, req, res, next) => {

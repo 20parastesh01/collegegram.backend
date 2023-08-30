@@ -3,8 +3,8 @@ import { UserEntity } from './entity/user.entity'
 import { Username } from './model/username'
 import { Email } from '../../data/email'
 import { Password } from './model/password'
-import { Repo } from '../../registry'
 import { UserId } from './model/user-id'
+import { Repo } from '../../registry/layer-decorators'
 
 export interface CreateUser {
     username: Username
@@ -21,6 +21,7 @@ export interface IUserRepository {
     findByUsername(username: Username): Promise<UserEntity | null>
     findByEmail(email: Email): Promise<UserEntity | null>
     findById(userId: UserId): Promise<UserEntity | null>
+    changePassword(userId: UserId, newPassword: Password): Promise<UserEntity | null>
 }
 
 @Repo()
@@ -29,6 +30,13 @@ export class UserRepository implements IUserRepository {
 
     constructor(appDataSource: DataSource) {
         this.userRepo = appDataSource.getRepository(UserEntity)
+    }
+    async changePassword(userId: UserId, newPassword: Password): Promise<UserEntity | null> {
+        const userEntity = await this.findById(userId)
+        if (!userEntity) return null
+        userEntity.password = newPassword
+        this.userRepo.save(userEntity)
+        return userEntity
     }
     async findByUsername(username: Username): Promise<UserEntity | null> {
         return this.userRepo.findOneBy({ username })
