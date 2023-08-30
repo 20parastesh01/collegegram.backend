@@ -2,15 +2,17 @@ import {
     Column,
     CreateDateColumn,
     Entity,
+    JoinColumn,
+    ManyToOne,
     PrimaryGeneratedColumn,
-    Unique,
     UpdateDateColumn,
 } from 'typeorm'
-import { Email } from '../../../data/email'
 import { WholeNumber } from '../../../data/whole-number'
 import { PostId } from '../model/post-id'
 import { Caption } from '../model/caption'
 import { Tag } from '../model/tag'
+import { UserId } from '../../user/model/user-id'
+import { UserEntity } from '../../user/entity/user.entity'
 
 @Entity('posts')
 export class PostEntity {
@@ -26,8 +28,9 @@ export class PostEntity {
     @Column({type: 'text', array: true, nullable: true })
     tags!: Tag[]
 
-    @Column()
-    auther!: string  //TODO: should be profileID
+    @ManyToOne(() => UserEntity)
+    @JoinColumn()
+    author!: UserId
 
     @Column('integer', { default: 0 })
     likesCount!: WholeNumber

@@ -5,8 +5,16 @@ import { NonEmptyString } from '../../../data/non-empty-string'
 
 export type Tag = Brand<NonEmptyString, 'Tag'>
 
-export const isTag = (value: unknown): value is Tag => {
-    return typeof value === 'string' && /^[a-zA-Z][a-zA-Z0-9_]{5,63}$/.test(value)
-}
+const SevenWordsValidator = (str: string): str is Tag => {
+  const words = str.trim().split(/\s+/);
+  return words.length < 8 ? true : false;
+};
 
-export const zodTag = z.string().refine(isTag)
+export const isTag = (value: string): value is Tag => {
+    return typeof value === 'string' && /^(?!.*#).*$/.test(value)
+}
+const combineAllValidator = (str: string): str is Tag => {
+  return SevenWordsValidator(str) && isTag(str);
+};
+
+export const zodTag = z.string().refine(combineAllValidator)
