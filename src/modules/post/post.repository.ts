@@ -33,6 +33,9 @@ export class PostRepository implements IPostRepository {
             where: {
                 author: userId,
             },
+            order: {
+                createdAt: 'DESC', // Sort by createdAt in descending order
+            },
         });
         return posts;
     }
@@ -43,6 +46,6 @@ export class PostRepository implements IPostRepository {
         return this.PostRepo.findOneBy({ id: postId });
     }
     async create(data: CreatePost): Promise<PostEntity> {
-        return this.PostRepo.save( data )
+        return this.PostRepo.save(data)
     }
 }
