@@ -41,5 +41,4 @@ export class UserRouter {
         const data = setPasswordDto.parse(req.body)
         handleExpress(res, () => this.userService.forgetPassSetPass(data))
     }
-
 }

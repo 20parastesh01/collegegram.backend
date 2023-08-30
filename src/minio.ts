@@ -40,11 +40,11 @@ export class Minio {
             const minioUrl = this.convert(url)
             console.log(minioUrl)
             http.get(minioUrl, (responseFromMinio) => {
-                responseFromMinio.pipe(res);
+                responseFromMinio.pipe(res)
             }).on('error', (error) => {
-                console.error('Error proxying the pre-signed URL:', error);
-                res.status(500).send('Error proxying the pre-signed URL');
-            });
+                console.error('Error proxying the pre-signed URL:', error)
+                res.status(500).send('Error proxying the pre-signed URL')
+            })
         })
     }
 

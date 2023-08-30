@@ -5,6 +5,9 @@ import MailComposer from 'nodemailer/lib/mail-composer'
 import readline from 'readline'
 import nodemailer from 'nodemailer'
 import path from 'path'
+import { services } from '../registry/layer-decorators'
+import { EmailService } from '../modules/email/bll/email.service'
+import { Email } from '../data/email'
 
 const SCOPES = ['https://www.googleapis.com/auth/gmail.send']
 const TOKEN_PATH = path.join(process.cwd(), 'token.json')
@@ -64,8 +67,7 @@ async function getNewToken(oauth2Client: OAuth2Client): Promise<any> {
 const user = process.env.EMAIL_USER
 const pass = process.env.EMAIL_PASS
 
-
-export const sendEmail = (to: string, subject: string, content: string) => {
+export const sendEmail = (to: Email, subject: string, content: string, reason: string) => {
     const transporter = nodemailer.createTransport({
         service: 'Zoho',
         auth: {
@@ -79,9 +81,10 @@ export const sendEmail = (to: string, subject: string, content: string) => {
         subject,
         html: content,
     }
-    console.log(user)
-    console.log(pass)
-    console.log(mailOptions)
+    const emailService = services['EmailService'] as EmailService
+    if (emailService) {
+        emailService.createEmail(to, subject, content, reason)
+    }
     transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
             console.log('Error:', error)

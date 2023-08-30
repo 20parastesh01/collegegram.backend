@@ -128,7 +128,7 @@ export class UserService implements IUserService {
         }
         const resetPasswordToken = v4()
         await RedisRepo.setResetPasswordToken(resetPasswordToken, userEntity.id)
-        sendEmail(userEntity.email, 'Reset Password', `https://murphyteam.ir/reset-password?token=${resetPasswordToken}`)
+        sendEmail(userEntity.email, 'Reset Password', `https://murphyteam.ir/reset-password?token=${resetPasswordToken}`, 'Forget Password')
         return { msg: 'link sent' }
     }
 

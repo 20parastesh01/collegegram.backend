@@ -25,7 +25,7 @@ export const swaggerObject: any = {
 
 const repos: any = {}
 export const routes: any = []
-const services: any = {}
+export const services: any = {}
 
 export const Repo = (): ClassDecorator => {
     return (target: any) => {
@@ -145,12 +145,23 @@ export const Route = (basePath: string, ...deps: any[]): ClassDecorator => {
                         const callbacks: any[] = []
                         if (auth) callbacks.push(authMiddleware(userService))
                         let multerFields: any[] = []
-                        if (singlefiles && singlefiles.length > 0) multerFields = [...multerFields, ...singlefiles.map((a: any) => { return { name: a } })]
-                        if (multiplefiles && multiplefiles.length > 0) multerFields = [...multerFields, ...multiplefiles.map((a: any) => { return { name: a } })]
+                        if (singlefiles && singlefiles.length > 0)
+                            multerFields = [
+                                ...multerFields,
+                                ...singlefiles.map((a: any) => {
+                                    return { name: a }
+                                }),
+                            ]
+                        if (multiplefiles && multiplefiles.length > 0)
+                            multerFields = [
+                                ...multerFields,
+                                ...multiplefiles.map((a: any) => {
+                                    return { name: a }
+                                }),
+                            ]
                         if (multerFields.length > 0) callbacks.push(upload.fields(multerFields))
                         callbacks.push(apiDef.bind(instance))
-                            ; (router as any)[method](path, ...callbacks)
-
+                        ;(router as any)[method](path, ...callbacks)
                     }
                     routes.push(router)
                 }
