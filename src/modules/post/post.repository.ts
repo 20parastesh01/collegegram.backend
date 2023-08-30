@@ -1,4 +1,4 @@
-import { DataSource, Repository } from 'typeorm'
+import { DataSource, EntityRepository, Repository } from 'typeorm'
 import { Repo } from '../../registry'
 import { Caption } from './model/caption'
 import { Tag } from './model/tag'
@@ -17,7 +17,7 @@ export interface CreatePost {
 
 export interface IPostRepository {
     create(data: CreatePost): Promise<PostEntity>
-    // findByauthor(userID: UserId): Promise<PostEntity[] | null>
+    findAllByAuthor(userId: UserId): Promise<PostEntity[] | null>
     findByID(postId: PostId): Promise<PostEntity | null>;
 }
 
@@ -27,6 +27,14 @@ export class PostRepository implements IPostRepository {
 
     constructor(appDataSource: DataSource) {
         this.PostRepo = appDataSource.getRepository(PostEntity)
+    }
+    async findAllByAuthor(userId: UserId): Promise<PostEntity[] | null> {
+        const posts = await this.PostRepo.find({
+            where: {
+                author: userId,
+            },
+        });
+        return posts;
     }
     // async findByauthor(userID: UserId): Promise<PostEntity[] | null> {
     //     return this.PostRepo.findBy({ author:userID })
