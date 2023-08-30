@@ -1,31 +1,36 @@
 import { Router } from 'express'
 import { Route } from '../registry'
-import { signupDto } from '../modules/user/dto/signup.dto'
 import { handleExpress } from '../utility/handle-express'
-import { loginDto } from '../modules/user/dto/login.dto'
-import { PostService } from '../modules/post/bll/module.service'
+import { PostService } from '../modules/post/bll/post.service'
 import { uploadPostImages } from './middlewares/uploadMultipleImage.middleware'
+import { zodCreatePostDTO } from '../modules/post/dto/createPost.dto'
+import { zodGetPostDTO } from '../modules/post/dto/getPost.dto'
+
 
 
 @Route('/post', PostService)
-export class UserRouter {
-    makeRouter(userService: PostService) {
+export class PostRouter {
+    makeRouter(postService: PostService) {
         const app = Router()
 
         app.post('/create',uploadPostImages, (req, res) => {
-            const data = signupDto.parse(req.body)
-            handleExpress(res, () => userService.signup(data))
+            const mergedData = {
+                ...req.body,
+                authorId: req.user.userId,
+              };
+            const data = zodCreatePostDTO.parse(mergedData)
+            handleExpress(res, () => postService.createPost(data))
         })
 
-        app.post('/post/getByID', (req, res) => {
-            const data = loginDto.parse(req.body)
-            handleExpress(res, () => userService.login(data))
+        app.post('/get/:postId', (req, res) => {
+            const data = zodGetPostDTO.parse(req.params.postId)
+            handleExpress(res, () => postService.getPost(data))
         })
 
-        app.post('/post/getAll', (req, res) => {
-            const data = loginDto.parse(req.body)
-            handleExpress(res, () => userService.login(data))
-        })
+        // app.post('/post/getAll', (req, res) => {
+        //     const data = loginDto.parse(req.body)
+        //     handleExpress(res, () => userService.login(data))
+        // })
 
         return app
     }

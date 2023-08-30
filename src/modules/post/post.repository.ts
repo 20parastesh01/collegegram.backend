@@ -14,10 +14,11 @@ export interface CreatePost {
     closeFriend: boolean
 }
 
+
 export interface IPostRepository {
     create(data: CreatePost): Promise<PostEntity>
     // findByauthor(userID: UserId): Promise<PostEntity[] | null>
-    // findByID(id: PostId): Promise<PostEntity | null>
+    findByID(postId: PostId): Promise<PostEntity | null>;
 }
 
 @Repo()
@@ -30,9 +31,9 @@ export class PostRepository implements IPostRepository {
     // async findByauthor(userID: UserId): Promise<PostEntity[] | null> {
     //     return this.PostRepo.findBy({ author:userID })
     // }
-    // async findByID(id: PostId): Promise<PostEntity | null> {
-    //     return this.PostRepo.findOneBy({ id })
-    // }
+    async findByID(postId: PostId): Promise<PostEntity | null> {
+        return this.PostRepo.findOneBy({ id: postId });
+    }
     async create(data: CreatePost): Promise<PostEntity> {
         return this.PostRepo.save( data )
     }

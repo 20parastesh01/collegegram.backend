@@ -11,10 +11,18 @@ const SevenWordsValidator = (str: string): str is Tag => {
 };
 
 export const isTag = (value: string): value is Tag => {
-    return typeof value === 'string' && /^(?!.*#).*$/.test(value)
+    return typeof value === 'string' && /^(?!.*#).*$/.test(value) //&& value.length <= 25
 }
-const combineAllValidator = (str: string): str is Tag => {
-  return SevenWordsValidator(str) && isTag(str);
+
+export const combineAllValidator = (tagsArray: string[]): tagsArray is Tag[] => {
+  const validatedTags = tagsArray.map(tag => {
+      if (isTag(tag)) {
+          return tag;
+      } else {
+          throw new Error(`Invalid tag: ${tag}`);
+      }
+  });
+  return SevenWordsValidator(tagsArray.join(' ')) && validatedTags.length > 0;
 };
 
-export const zodTag = z.string().refine(combineAllValidator)
+export const zodTag = z.array(z.string()).refine(combineAllValidator)

@@ -1,27 +1,21 @@
-import { Email } from '../../../data/email'
-import { Hashed } from '../../../data/hashed'
-import { NonEmptyString } from '../../../data/non-empty-string'
-import { Token } from '../../../data/token'
 import { WholeNumber } from '../../../data/whole-number'
 import { UserId } from '../../user/model/user-id'
-import { Username } from '../../user/model/username'
 import { Caption } from './caption'
 import { PostId } from './post-id'
 import { Tag } from './tag'
 
-export interface Post {
+export interface Post extends basePost {
     id: PostId
     caption: Caption
     likesCount: WholeNumber
     tags: Tag[]
-    author: UserId
-    photos: string[]
     commentsCount: WholeNumber
-    closeFriend: boolean
 }
-
-export interface thumbnailPost {
-    id: PostId
+export interface newPost extends basePost {
+    caption: Caption
+    tags: Tag[]
+}
+export interface basePost {
     author: UserId
     photos: string[]
     closeFriend: boolean
