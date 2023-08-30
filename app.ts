@@ -22,7 +22,7 @@ export const initializeProject = async () => {
     await scan(app)
 
     app.use((req, res) => {
-        res.status(404).send({ message: 'Not Found' })
+        res.status(404).send({ message: 'URL Not Found' })
     })
 
     const errorHandler: ErrorRequestHandler = (err, req, res, next) => {

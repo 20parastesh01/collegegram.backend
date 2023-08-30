@@ -1,7 +1,7 @@
 import { QueryFailedError } from 'typeorm'
-import { RedisRepo } from '../../../data-source'
 import { Email } from '../../../data/email'
 import { WholeNumber } from '../../../data/whole-number'
+import { IRedis, Redis } from '../../../redis'
 import { BadRequestError, UnauthorizedError } from '../../../utility/http-error'
 import { LoginSignUp, UserService } from '../bll/user.service'
 import { LoginDto } from '../dto/login.dto'
@@ -12,6 +12,30 @@ import { Password } from '../model/password'
 import { UserId } from '../model/user-id'
 import { Username } from '../model/username'
 import { CreateUser, IUserRepository } from '../user.repository'
+import { Hashed } from '../../../data/hashed'
+import { SendEmailDto } from '../dto/send-email.dto'
+import { isSimpleMessage } from '../../../data/simple-message'
+import { RedisRepo } from '../../../data-source'
+
+class MockRedis implements IRedis {
+    repo: any = {}
+    async setSession(session: Hashed, userId: UserId): Promise<void> {
+        this.repo[session] = userId
+    }
+    async setNewExpire(session: Hashed): Promise<void> {}
+    async getSession(userId: UserId): Promise<Hashed | null> {
+        return this.repo[userId]
+    }
+    async getUserId(session: Hashed): Promise<UserId | null> {
+        return this.repo[session]
+    }
+    async setResetPasswordToken(uuId: string, userId: UserId): Promise<void> {
+        this.repo[uuId] = userId
+    }
+    async getResetPasswordUserId(uuId: string): Promise<UserId | null> {
+        return this.repo[uuId]
+    }
+}
 
 class MockUserRepository implements IUserRepository {
     public users: UserEntity[] = []
@@ -32,6 +56,14 @@ class MockUserRepository implements IUserRepository {
             createdAt: new Date(),
             updatedAt: new Date(),
         })
+    }
+    async changePassword(userId: UserId, newPassword: Password): Promise<UserEntity | null> {
+        const userEntity = await this.findById(userId)
+        if (!userEntity) return null
+        const index = this.users.indexOf(userEntity)
+        userEntity.password = newPassword
+        this.users[index] = userEntity
+        return userEntity
     }
     async create(user: CreateUser): Promise<UserEntity> {
         const userEntityWithName = await this.findByUsername(user.username)
@@ -86,14 +118,15 @@ class MockUserRepository implements IUserRepository {
 describe('UserService', () => {
     let userService: UserService
     let mockUserRepository: MockUserRepository
-
     beforeEach(() => {
         mockUserRepository = new MockUserRepository()
         userService = new UserService(mockUserRepository)
     })
+
     beforeAll(async () => {
         await RedisRepo.initialize()
     })
+
     afterAll(async () => {
         await RedisRepo.disconnect()
     })
@@ -169,6 +202,31 @@ describe('UserService', () => {
 
         const result = await userService.signup(data)
 
+        expect(result).toBeInstanceOf(BadRequestError)
+    })
+
+    it('should send email successfully with username', async () => {
+        const data: SendEmailDto = {
+            usernameOrEmail: 'testuser1' as Username | Email,
+        }
+        const result = await userService.forgetPassSendEmail(data)
+        console.log(result)
+        expect(isSimpleMessage(result)).toBe(true)
+    })
+
+    it('should send email successfully with email', async () => {
+        const data: SendEmailDto = {
+            usernameOrEmail: 'test1@example.com' as Username | Email,
+        }
+        const result = await userService.forgetPassSendEmail(data)
+        expect(isSimpleMessage(result)).toBe(true)
+    })
+
+    it('should fail if username/email does not exist', async () => {
+        const data: SendEmailDto = {
+            usernameOrEmail: 'testuserrr' as Username | Email,
+        }
+        const result = await userService.forgetPassSendEmail(data)
         expect(result).toBeInstanceOf(BadRequestError)
     })
 })

@@ -1,21 +1,23 @@
-import { QueryFailedError } from 'typeorm'
-import { BadRequestError, ServerError, UnauthorizedError } from '../../../utility/http-error'
-import { SignUpDto } from '../dto/signup.dto'
-import { User, UserWithToken } from '../model/user'
-import { IUserRepository, UserRepository } from '../user.repository'
 import bcrypt from 'bcryptjs'
-import { Password, isPassword } from '../model/password'
-import { compareHash, createSession, generateToken } from '../../../utility/auth'
-import { Hashed } from '../../../data/hashed'
-import { Token } from '../../../data/token'
-import { UserEntity } from '../entity/user.entity'
+import { QueryFailedError } from 'typeorm'
+import { v4 } from 'uuid'
 import { RedisRepo } from '../../../data-source'
+import { isEmail } from '../../../data/email'
+import { SimpleMessage } from '../../../data/simple-message'
+import { compareHash, createSession, generateToken } from '../../../utility/auth'
+import { BadRequestError, ServerError, UnauthorizedError } from '../../../utility/http-error'
+import { sendEmail } from '../../../utility/send-email'
 import { LoginDto } from '../dto/login.dto'
-import { BRAND } from 'zod'
-import { Email, isEmail } from '../../../data/email'
-import { Username, isUsername } from '../model/username'
-import { userEntitytoUser, userEntitytoUserBasic } from './user.dao'
+import { SendEmailDto } from '../dto/send-email.dto'
+import { SetPasswordDto } from '../dto/set-pass.dto'
+import { SignUpDto } from '../dto/signup.dto'
+import { UserEntity } from '../entity/user.entity'
+import { Password, isPassword } from '../model/password'
+import { User, UserWithToken } from '../model/user'
 import { UserId } from '../model/user-id'
+import { isUsername } from '../model/username'
+import { IUserRepository, UserRepository } from '../user.repository'
+import { userEntitytoUser, userEntitytoUserBasic } from './user.dao'
 import { Service } from '../../../registry/layer-decorators'
 
 export type LoginSignUp = UserWithToken | BadRequestError | ServerError
@@ -24,6 +26,8 @@ export interface IUserService {
     signup(data: SignUpDto): Promise<LoginSignUp>
     login(data: LoginDto): Promise<LoginSignUp>
     getUserById(userId: UserId): Promise<User | null>
+    forgetPassSendEmail(data: SendEmailDto): Promise<SimpleMessage | BadRequestError>
+    forgetPassSetPass(data: SetPasswordDto): Promise<LoginSignUp>
 }
 
 export const hash = async (input: string): Promise<Password> => {
@@ -108,5 +112,44 @@ export class UserService implements IUserService {
         if (!userEntity) return null
         const user = userEntitytoUser(userEntity)
         return user
+    }
+
+    async forgetPassSendEmail(data: SendEmailDto): Promise<SimpleMessage | BadRequestError> {
+        const usernameOrEmail = data.usernameOrEmail
+        let userEntity: UserEntity | null = null
+        if (isUsername(usernameOrEmail)) {
+            userEntity = await this.userRepo.findByUsername(usernameOrEmail)
+        }
+        if (isEmail(usernameOrEmail)) {
+            userEntity = await this.userRepo.findByEmail(usernameOrEmail)
+        }
+        if (!userEntity) {
+            return new BadRequestError('Username or Email is Invalid')
+        }
+        const resetPasswordToken = v4()
+        await RedisRepo.setResetPasswordToken(resetPasswordToken, userEntity.id)
+        sendEmail(userEntity.email, 'Reset Password', `https://murphyteam.ir/reset-password?token=${resetPasswordToken}`)
+        return { msg: 'link sent' }
+    }
+
+    async forgetPassSetPass(data: SetPasswordDto): Promise<LoginSignUp> {
+        const newPassword = await hash(data.newPassword)
+        const token = data.token
+        const userId = await RedisRepo.getResetPasswordUserId(token)
+        if (!userId) return new BadRequestError('Invalid token')
+        const userEntity = await this.userRepo.changePassword(userId, newPassword)
+        if (!userEntity) return new BadRequestError('Invalid user')
+        const accessToken = generateToken(userEntitytoUserBasic(userEntity))
+        if (accessToken instanceof ServerError) return accessToken
+        let refreshToken = await RedisRepo.getSession(userId)
+        if (!refreshToken) {
+            const newRefreshToken = await createSession(userId)
+            if (newRefreshToken instanceof ServerError) return newRefreshToken
+
+            await RedisRepo.setSession(newRefreshToken, userEntity.id)
+            refreshToken = newRefreshToken
+        }
+        const user = userEntitytoUser(userEntity)
+        return { user, accessToken, refreshToken }
     }
 }

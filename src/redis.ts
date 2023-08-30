@@ -5,8 +5,15 @@ import { UserId, isUserId } from './modules/user/model/user-id'
 const redisPass = process.env.REDIS_PASS
 const redisHost = process.env.REDIS_HOST
 const redisPort = process.env.REDIS_PORT
-
-export class Redis {
+export interface IRedis {
+    setSession(session: Hashed, userId: UserId): Promise<void>
+    setNewExpire(session: Hashed): Promise<void>
+    getSession(userId: UserId): Promise<Hashed | null>
+    getUserId(session: Hashed): Promise<UserId | null>
+    setResetPasswordToken(uuId: string, userId: UserId): Promise<void>
+    getResetPasswordUserId(uuId: string): Promise<UserId | null>
+}
+export class Redis implements IRedis {
     private client
     constructor() {
         this.client = createClient({
@@ -39,11 +46,24 @@ export class Redis {
 
     async getUserId(session: Hashed): Promise<UserId | null> {
         const userId = await this.client.get(session)
-        if (isUserId(userId)) return userId
+        const convertedUserId = Number(userId)
+        if (isUserId(convertedUserId)) return convertedUserId
         return null
     }
 
     async disconnect() {
         await this.client.quit()
+    }
+
+    async setResetPasswordToken(uuId: string, userId: UserId) {
+        await this.client.set(uuId + '', userId)
+        await this.client.expire(uuId + '', 3600)
+    }
+
+    async getResetPasswordUserId(uuId: string): Promise<UserId | null> {
+        const userId = await this.client.get(uuId + '')
+        const convertedUserId = Number(userId)
+        if (isUserId(convertedUserId)) return convertedUserId
+        return null
     }
 }
