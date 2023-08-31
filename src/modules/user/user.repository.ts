@@ -3,9 +3,10 @@ import { UserEntity } from './entity/user.entity'
 import { Username } from './model/username'
 import { Email } from '../../data/email'
 import { Password } from './model/password'
-import { Repo } from '../../registry'
+import { UserId } from './model/user-id'
+import { Repo } from '../../registry/layer-decorators'
 
-interface CreateUser {
+export interface CreateUser {
     username: Username
     password: Password
     email: Email
@@ -15,10 +16,22 @@ interface CreateUser {
     bio: string
 }
 
+export interface EditUser {
+    email?: Email,
+    name?: string,
+    lastname?: string,
+    password?: Password,
+    private?: boolean,
+    bio?: string
+}
+
 export interface IUserRepository {
     create(data: CreateUser): Promise<UserEntity>
     findByUsername(username: Username): Promise<UserEntity | null>
     findByEmail(email: Email): Promise<UserEntity | null>
+    findById(userId: UserId): Promise<UserEntity | null>
+    changePassword(userId: UserId, newPassword: Password): Promise<UserEntity | null>
+    edit(userId: UserId, data: EditUser): Promise<UserEntity | null>
 }
 
 @Repo()
@@ -28,6 +41,13 @@ export class UserRepository implements IUserRepository {
     constructor(appDataSource: DataSource) {
         this.userRepo = appDataSource.getRepository(UserEntity)
     }
+    async changePassword(userId: UserId, newPassword: Password): Promise<UserEntity | null> {
+        const userEntity = await this.findById(userId)
+        if (!userEntity) return null
+        userEntity.password = newPassword
+        this.userRepo.save(userEntity)
+        return userEntity
+    }
     async findByUsername(username: Username): Promise<UserEntity | null> {
         return this.userRepo.findOneBy({ username })
     }
@@ -35,6 +55,16 @@ export class UserRepository implements IUserRepository {
         return this.userRepo.findOneBy({ email })
     }
     async create(data: CreateUser): Promise<UserEntity> {
-        return this.userRepo.save({ ...data, tokens: [] })
+        return this.userRepo.save({ ...data })
+    }
+    async findById(userId: UserId): Promise<UserEntity | null> {
+        return this.userRepo.findOneBy({ id: userId })
+    }
+    async edit(userId: UserId, data: EditUser) {
+        const userEntity = await this.findById(userId)
+        if (!userEntity) return null
+        const editedUser = { ...userEntity, ...data }
+        console.log(editedUser)
+        return this.userRepo.save(editedUser)
     }
 }

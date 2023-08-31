@@ -4,6 +4,9 @@ console.log(process.env.DB_NAME)
 import { DataSource } from 'typeorm'
 import { SampleEntity } from './modules/sample/entity/sample.entity'
 import { Redis } from './redis'
+import { UserEntity } from './modules/user/entity/user.entity'
+import { Minio } from './minio'
+import { EmailEntity } from './modules/email/entity/email.entity'
 
 export const AppDataSource = new DataSource({
     type: 'postgres',
@@ -14,9 +17,11 @@ export const AppDataSource = new DataSource({
     database: process.env.DB_NAME,
     synchronize: true,
     logging: false,
-    entities: ['./src/modules/**/*.entity.ts'],
+    entities: [EmailEntity, UserEntity, SampleEntity],
     migrations: ['./src/migration/*.ts'],
     subscribers: [],
 })
 
 export const RedisRepo = new Redis()
+
+export const MinioRepo = new Minio()
