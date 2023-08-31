@@ -13,13 +13,13 @@ import { SetPasswordDto } from '../dto/set-pass.dto'
 import { SignUpDto } from '../dto/signup.dto'
 import { UserEntity } from '../entity/user.entity'
 import { Password, isPassword } from '../model/password'
-import { User, UserBasic, UserWithToken } from '../model/user'
+import { User, UserBasic, UserWithPassword, UserWithToken } from '../model/user'
 import { UserId } from '../model/user-id'
 import { isUsername } from '../model/username'
 import { EditUser, IUserRepository, UserRepository } from '../user.repository'
-import { userEntitytoUser, userEntitytoUserBasic, usertoUserBasic } from './user.dao'
+import { userDao, userWithPasswordtoUser, usertoUserBasic } from './user.dao'
 import { Service } from '../../../registry/layer-decorators'
-import { EditProfileDto } from '../dto/edit-profile.dto'
+import { EditProfileDto, editProfileDto } from '../dto/edit-profile.dto'
 import { Token } from '../../../data/token'
 
 export type LoginSignUp = UserWithToken | BadRequestError | ServerError
@@ -48,41 +48,39 @@ export class UserService implements IUserService {
     async login(data: LoginDto): Promise<LoginSignUp | UnauthorizedError> {
         const usernameOrEmail = data.usernameOrEmail
         const password = data.password
-        let userEntity: UserEntity | null = null
+        let userWithPassword: UserWithPassword | null = null
         if (isUsername(usernameOrEmail)) {
-            userEntity = await this.userRepo.findByUsername(usernameOrEmail)
+            userWithPassword = (await this.userRepo.findByUsername(usernameOrEmail)).toUserWithPassword()
         }
         if (isEmail(usernameOrEmail)) {
-            userEntity = await this.userRepo.findByEmail(usernameOrEmail)
+            userWithPassword = (await this.userRepo.findByEmail(usernameOrEmail)).toUserWithPassword()
         }
-        if (!userEntity) {
+        if (!userWithPassword) {
             return new UnauthorizedError('Username or Email is Invalid')
         }
-        const isMatchPassword = await compareHash(password, userEntity.password)
+        const isMatchPassword = await compareHash(password, userWithPassword.password)
         if (!isMatchPassword) {
             return new UnauthorizedError('Invalid Password')
         }
-        const accessToken = generateToken(userEntitytoUserBasic(userEntity))
+        const accessToken = generateToken(usertoUserBasic(userWithPassword))
         if (accessToken instanceof ServerError) return accessToken
 
-        let refreshToken = await RedisRepo.getSession(userEntity.id)
+        let refreshToken = await RedisRepo.getSession(userWithPassword.id)
         if (!refreshToken) {
-            const newRefreshToken = await createSession(userEntity.id)
+            const newRefreshToken = await createSession(userWithPassword.id)
             if (newRefreshToken instanceof ServerError) return newRefreshToken
 
-            await RedisRepo.setSession(newRefreshToken, userEntity.id)
+            await RedisRepo.setSession(newRefreshToken, userWithPassword.id)
             refreshToken = newRefreshToken
         }
-
-        const user = userEntitytoUser(userEntity)
-
+        const user = userWithPasswordtoUser(userWithPassword)
         return { user, accessToken, refreshToken }
     }
 
     async signup(data: SignUpDto): Promise<LoginSignUp> {
         try {
             const password = await hash(data.password)
-            const userEntity = await this.userRepo.create({
+            const user = (await this.userRepo.create({
                 username: data.username,
                 email: data.email,
                 password,
@@ -90,48 +88,46 @@ export class UserService implements IUserService {
                 lastname: '',
                 photo: '',
                 bio: '',
-            })
-            const accessToken = generateToken(userEntitytoUserBasic(userEntity))
+            })).toUser()!
+            const accessToken = generateToken(usertoUserBasic(user))
+            
             if (accessToken instanceof ServerError) return accessToken
 
-            const refreshToken = await createSession(userEntity.id)
+            const refreshToken = await createSession(user.id)
             if (refreshToken instanceof ServerError) return refreshToken
 
-            await RedisRepo.setSession(refreshToken, userEntity.id)
+            await RedisRepo.setSession(refreshToken, user.id)
 
-            const result = { user: userEntitytoUser(userEntity), accessToken, refreshToken }
+            const result = { user, accessToken, refreshToken }
             return result
         } catch (e) {
             if (e instanceof QueryFailedError) {
                 return new BadRequestError(e.driverError)
             }
-            console.log(e)
             return new ServerError('signup')
         }
     }
 
     async getUserById(userId: UserId): Promise<User | null> {
-        const userEntity = await this.userRepo.findById(userId)
-        if (!userEntity) return null
-        const user = userEntitytoUser(userEntity)
+        const user = (await this.userRepo.findById(userId)).toUser()
         return user
     }
 
     async forgetPassSendEmail(data: SendEmailDto): Promise<SimpleMessage | BadRequestError> {
         const usernameOrEmail = data.usernameOrEmail
-        let userEntity: UserEntity | null = null
+        let user: User | null = null
         if (isUsername(usernameOrEmail)) {
-            userEntity = await this.userRepo.findByUsername(usernameOrEmail)
+            user = (await this.userRepo.findByUsername(usernameOrEmail)).toUser()
         }
         if (isEmail(usernameOrEmail)) {
-            userEntity = await this.userRepo.findByEmail(usernameOrEmail)
+            user = (await this.userRepo.findByEmail(usernameOrEmail)).toUser()
         }
-        if (!userEntity) {
+        if (!user) {
             return new BadRequestError('Username or Email is Invalid')
         }
         const resetPasswordToken = v4()
-        await RedisRepo.setResetPasswordToken(resetPasswordToken, userEntity.id)
-        sendEmail(userEntity.email, 'Reset Password', `https://murphyteam.ir/reset-password?token=${resetPasswordToken}`, 'Forget Password')
+        await RedisRepo.setResetPasswordToken(resetPasswordToken, user.id)
+        sendEmail(user.email, 'Reset Password', `https://murphyteam.ir/reset-password?token=${resetPasswordToken}`, 'Forget Password')
         return { msg: 'link sent' }
     }
 
@@ -140,18 +136,17 @@ export class UserService implements IUserService {
         const token = data.token
         const userId = await RedisRepo.getResetPasswordUserId(token)
         if (!userId) return new BadRequestError('Invalid token')
-        const userEntity = await this.userRepo.changePassword(userId, newPassword)
-        const accessToken = generateToken(userEntitytoUserBasic(userEntity))
+        const user = (await this.userRepo.changePassword(userId, newPassword)).toUser()!
+        const accessToken = generateToken(usertoUserBasic(user))
         if (accessToken instanceof ServerError) return accessToken
         let refreshToken = await RedisRepo.getSession(userId)
         if (!refreshToken) {
             const newRefreshToken = await createSession(userId)
             if (newRefreshToken instanceof ServerError) return newRefreshToken
 
-            await RedisRepo.setSession(newRefreshToken, userEntity.id)
+            await RedisRepo.setSession(newRefreshToken, user.id)
             refreshToken = newRefreshToken
         }
-        const user = userEntitytoUser(userEntity)
         return { user, accessToken, refreshToken }
     }
 
@@ -162,11 +157,11 @@ export class UserService implements IUserService {
             const newPassword = await hash(data.password)
             payload.password = newPassword
         }
-        const editedUser = await this.userRepo.edit(userBasic.userId, payload)
+        const user = (await this.userRepo.edit(userBasic.userId, payload)).toUser()!
         if (file) {
             await MinioRepo.uploadProfile(userBasic.userId, file)
         }
-        const user = userEntitytoUser(editedUser)
+
         const newAccessToken = generateToken(usertoUserBasic(user))
         if (newAccessToken instanceof ServerError) return newAccessToken
         return { user, token: newAccessToken }

@@ -1,1 +1,1 @@
-export type Types = 'EmailId'|'EmailHistory'|'SampleDto'|'SampleId'|'Sample'|'EditProfileDto'|'LoginDto'|'SendEmailDto'|'SetPasswordDto'|'SignUpDto'|'InputPassword'|'Password'|'UserId'|'User'|'UserWithToken'|'UserBasic'|'Username'
+export type Types = 'EmailId'|'EmailHistory'|'SampleDto'|'SampleId'|'Sample'|'EditProfileDto'|'LoginDto'|'SendEmailDto'|'SetPasswordDto'|'SignUpDto'|'InputPassword'|'Password'|'UserId'|'User'|'UserWithPassword'|'UserWithToken'|'UserBasic'|'Username'

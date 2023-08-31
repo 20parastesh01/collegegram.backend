@@ -21,6 +21,10 @@ export interface User {
     private: boolean
 }
 
+export interface UserWithPassword extends User {
+    password: Password
+}
+
 export interface UserWithToken {
     user: User
     accessToken: Token
