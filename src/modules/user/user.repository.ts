@@ -30,8 +30,8 @@ export interface IUserRepository {
     findByUsername(username: Username): Promise<UserEntity | null>
     findByEmail(email: Email): Promise<UserEntity | null>
     findById(userId: UserId): Promise<UserEntity | null>
-    changePassword(userId: UserId, newPassword: Password): Promise<UserEntity | null>
-    edit(userId: UserId, data: EditUser): Promise<UserEntity | null>
+    changePassword(userId: UserId, newPassword: Password): Promise<UserEntity>
+    edit(userId: UserId, data: EditUser): Promise<UserEntity>
 }
 
 @Repo()
@@ -41,12 +41,8 @@ export class UserRepository implements IUserRepository {
     constructor(appDataSource: DataSource) {
         this.userRepo = appDataSource.getRepository(UserEntity)
     }
-    async changePassword(userId: UserId, newPassword: Password): Promise<UserEntity | null> {
-        const userEntity = await this.findById(userId)
-        if (!userEntity) return null
-        userEntity.password = newPassword
-        this.userRepo.save(userEntity)
-        return userEntity
+    async changePassword(userId: UserId, newPassword: Password): Promise<UserEntity> {
+        return this.userRepo.save({ id: userId, password: newPassword })
     }
     async findByUsername(username: Username): Promise<UserEntity | null> {
         return this.userRepo.findOneBy({ username })
@@ -60,11 +56,7 @@ export class UserRepository implements IUserRepository {
     async findById(userId: UserId): Promise<UserEntity | null> {
         return this.userRepo.findOneBy({ id: userId })
     }
-    async edit(userId: UserId, data: EditUser) {
-        const userEntity = await this.findById(userId)
-        if (!userEntity) return null
-        const editedUser = { ...userEntity, ...data }
-        console.log(editedUser)
-        return this.userRepo.save(editedUser)
+    async edit(userId: UserId, data: EditUser):Promise<UserEntity> {
+        return this.userRepo.save({ id: userId, ...data })
     }
 }

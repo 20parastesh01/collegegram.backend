@@ -57,12 +57,14 @@ class MockUserRepository implements IUserRepository {
             updatedAt: new Date(),
         })
     }
-    edit(userId: UserId, data: EditUser): Promise<UserEntity | null> {
+    edit(userId: UserId, data: EditUser): Promise<UserEntity> {
         throw new Error('Method not implemented.')
     }
-    async changePassword(userId: UserId, newPassword: Password): Promise<UserEntity | null> {
-        const userEntity = await this.findById(userId)
-        if (!userEntity) return null
+    async changePassword(userId: UserId, newPassword: Password): Promise<UserEntity> {
+        let userEntity = await this.findById(userId)
+        if (!userEntity) {
+            throw new Error() // TODO
+        }
         const index = this.users.indexOf(userEntity)
         userEntity.password = newPassword
         this.users[index] = userEntity

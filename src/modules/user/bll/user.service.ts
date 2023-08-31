@@ -141,7 +141,6 @@ export class UserService implements IUserService {
         const userId = await RedisRepo.getResetPasswordUserId(token)
         if (!userId) return new BadRequestError('Invalid token')
         const userEntity = await this.userRepo.changePassword(userId, newPassword)
-        if (!userEntity) return new BadRequestError('Invalid user')
         const accessToken = generateToken(userEntitytoUserBasic(userEntity))
         if (accessToken instanceof ServerError) return accessToken
         let refreshToken = await RedisRepo.getSession(userId)
@@ -164,7 +163,6 @@ export class UserService implements IUserService {
             payload.password = newPassword
         }
         const editedUser = await this.userRepo.edit(userBasic.userId, payload)
-        if (!editedUser) return new ServerError()
         if (file) {
             await MinioRepo.uploadProfile(userBasic.userId, file)
         }
