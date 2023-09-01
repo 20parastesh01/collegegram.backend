@@ -11,15 +11,26 @@ process.env.ENGINE = process.argv.some((arg) => arg.includes('ts-node')) ? 'TS_N
 const PORT = process.env.PORT || 3000
 
 export const initializeProject = async () => {
-    console.log('initialize project called')
     const app = express()
     await AppDataSource.initialize()
     await RedisRepo.initialize()
-    await MinioRepo.initialize(app)
+    await MinioRepo.initialize()
+    MinioRepo.setDefaultProfileProfile()
 
     app.use(express.json())
 
     await scan(app)
+
+    app.get('/file/*', (req, res) => {
+        const url = req.url
+        const minioUrl = MinioRepo.convert(url)
+        if (!minioUrl) return res.send({ error: 'Minio Is Not Running' })
+        http.get('http://' + minioUrl, (responseFromMinio) => {
+            responseFromMinio.pipe(res)
+        }).on('error', (error) => {
+            res.status(500).send('Error proxying the pre-signed URL')
+        })
+    })
 
     app.use((req, res) => {
         res.status(404).send({ message: 'URL Not Found' })
