@@ -36,12 +36,10 @@ export class PostService implements IPostService {
             closeFriend,
         })
         const createdPost = (await this.postRepo.create(createPostRepoInput)).toPostModel()
-        if (createdPost){
-          for (let file of files) {
+        if (createdPost) {
+            const filesCount = files.length
             await MinioRepo.uploadPostPhoto(createdPost.id, files)
         }
-        }
-       
 
         return createdPost ?? new ServerError()
     }
