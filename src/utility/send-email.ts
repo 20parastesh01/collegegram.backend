@@ -8,6 +8,7 @@ import path from 'path'
 import { services } from '../registry/layer-decorators'
 import { EmailService } from '../modules/email/bll/email.service'
 import { Email } from '../data/email'
+import Mail from 'nodemailer/lib/mailer'
 
 const SCOPES = ['https://www.googleapis.com/auth/gmail.send']
 const TOKEN_PATH = path.join(process.cwd(), 'token.json')
@@ -97,7 +98,7 @@ export const sendEmail = (to: Email, subject: string, content: string, reason: s
 export const sendGmail = async (to: string, subject: string, content: string) => {
     try {
         const auth = await authorize()
-        const options = {
+        const options: Mail.Options = {
             from,
             to,
             subject,
@@ -106,7 +107,7 @@ export const sendGmail = async (to: string, subject: string, content: string) =>
         }
 
         const gmail = google.gmail({ version: 'v1', auth })
-        const mailComposer = new MailComposer(options as any)
+        const mailComposer = new MailComposer(options)
         const message = await mailComposer.compile().build()
         const rawMessage = Buffer.from(message).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
         const params = {

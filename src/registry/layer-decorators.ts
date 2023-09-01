@@ -161,7 +161,9 @@ export const Route = (basePath: string, ...deps: any[]): ClassDecorator => {
                             ]
                         if (multerFields.length > 0) callbacks.push(upload.fields(multerFields))
                         callbacks.push(apiDef.bind(instance))
-                        ;(router as any)[method](path, ...callbacks)
+                        if (typeof method == 'string' && (method == 'post' || method == 'get' || method == 'patch' || method == 'put' || method == 'delete')) {
+                            router[method](path, ...callbacks)
+                        }
                     }
                     routes.push(router)
                 }
