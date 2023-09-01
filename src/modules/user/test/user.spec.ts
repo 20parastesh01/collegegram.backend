@@ -18,6 +18,7 @@ import { isSimpleMessage } from '../../../data/simple-message'
 import { RedisRepo } from '../../../data-source'
 import { userDao } from '../bll/user.dao'
 import * as emailUtils from '../../../utility/send-email'
+import { User } from '../model/user'
 
 
 class MockRedis implements IRedis {
@@ -60,7 +61,7 @@ class MockUserRepository implements IUserRepository {
             updatedAt: new Date(),
         })
     }
-    edit(userId: UserId, data: EditUser): Promise<{ toUser(): { id: UserId; username: Username; email: Email; name: string; lastname: string; photo: string; followers: WholeNumber; following: WholeNumber; bio: string; postsCount: WholeNumber; private: boolean } | null; toUserBasic(): { userId: UserId; username: Username; name: string; lastname: string; photo: string } | null; toUserWithPassword(): { id: UserId; username: Username; password: Password; email: Email; name: string; lastname: string; photo: string; followers: WholeNumber; following: WholeNumber; bio: string; postsCount: WholeNumber; private: boolean } | null }> {
+    edit(userId: UserId, data: EditUser): Promise<{ toUser(): User; toUserBasic(): { userId: UserId; username: Username; name: string; lastname: string; photo: string }; toUserWithPassword(): { id: UserId; username: Username; password: Password; email: Email; name: string; lastname: string; photo: string; followers: WholeNumber; following: WholeNumber; bio: string; postsCount: WholeNumber; private: boolean } } | null> {
         throw new Error('Method not implemented.')
     }
 
@@ -73,17 +74,17 @@ class MockUserRepository implements IUserRepository {
         return userDao(userEntity)
     }
 
-    async create(user: CreateUser): Promise<ReturnType<typeof userDao>> {
-        const userEntityWithName = (await this.findByUsername(user.username)).toUser()
-        if (userEntityWithName) {
+    async create(inputUser: CreateUser): Promise<ReturnType<typeof userDao>> {
+        let dao = await this.findByUsername(inputUser.username)
+        if(dao){
             throw new QueryFailedError('', [''], 'Username Exists')
         }
-        const userEntityWithEmail = (await this.findByEmail(user.email)).toUser()
-        if (userEntityWithEmail) {
+        dao = await this.findByEmail(inputUser.email)
+        if (dao) {
             throw new QueryFailedError('', [''], 'Email Exists')
         }
         this.users.push({
-            ...user,
+            ...inputUser,
             id: 2 as UserId,
             name: '',
             lastname: '',
@@ -97,7 +98,7 @@ class MockUserRepository implements IUserRepository {
             updatedAt: new Date(),
         })
         return userDao({
-            ...user,
+            ...inputUser,
             id: 2 as UserId,
             name: '',
             lastname: '',

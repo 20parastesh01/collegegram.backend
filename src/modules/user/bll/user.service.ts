@@ -17,7 +17,7 @@ import { User, UserBasic, UserWithPassword, UserWithToken } from '../model/user'
 import { UserId } from '../model/user-id'
 import { isUsername } from '../model/username'
 import { EditUser, IUserRepository, UserRepository } from '../user.repository'
-import { userDao, userWithPasswordtoUser, usertoUserBasic } from './user.dao'
+import { userDao } from './user.dao'
 import { Service } from '../../../registry/layer-decorators'
 import { EditProfileDto, editProfileDto } from '../dto/edit-profile.dto'
 import { Token } from '../../../data/token'
@@ -48,21 +48,20 @@ export class UserService implements IUserService {
     async login(data: LoginDto): Promise<LoginSignUp | UnauthorizedError> {
         const usernameOrEmail = data.usernameOrEmail
         const password = data.password
-        let userWithPassword: UserWithPassword | null = null
+        let dao: ReturnType<typeof userDao> | null = null
         if (isUsername(usernameOrEmail)) {
-            userWithPassword = (await this.userRepo.findByUsername(usernameOrEmail)).toUserWithPassword()
+            dao = await this.userRepo.findByUsername(usernameOrEmail)
         }
         if (isEmail(usernameOrEmail)) {
-            userWithPassword = (await this.userRepo.findByEmail(usernameOrEmail)).toUserWithPassword()
+            dao = await this.userRepo.findByEmail(usernameOrEmail)
         }
-        if (!userWithPassword) {
-            return new UnauthorizedError('Username or Email is Invalid')
-        }
+        if (!dao) return new UnauthorizedError('Username or Email is Invalid')
+        const userWithPassword = dao.toUserWithPassword()
         const isMatchPassword = await compareHash(password, userWithPassword.password)
         if (!isMatchPassword) {
             return new UnauthorizedError('Invalid Password')
         }
-        const accessToken = generateToken(usertoUserBasic(userWithPassword))
+        const accessToken = generateToken(dao.toUserBasic())
         if (accessToken instanceof ServerError) return accessToken
 
         let refreshToken = await RedisRepo.getSession(userWithPassword.id)
@@ -73,25 +72,24 @@ export class UserService implements IUserService {
             await RedisRepo.setSession(newRefreshToken, userWithPassword.id)
             refreshToken = newRefreshToken
         }
-        const user = userWithPasswordtoUser(userWithPassword)
+        const user = dao.toUser()
         return { user, accessToken, refreshToken }
     }
 
     async signup(data: SignUpDto): Promise<LoginSignUp> {
         try {
             const password = await hash(data.password)
-            const user = (
-                await this.userRepo.create({
-                    username: data.username,
-                    email: data.email,
-                    password,
-                    name: '',
-                    lastname: '',
-                    photo: '',
-                    bio: '',
-                })
-            ).toUser()!
-            const accessToken = generateToken(usertoUserBasic(user))
+            const dao = (await this.userRepo.create({
+                username: data.username,
+                email: data.email,
+                password,
+                name: '',
+                lastname: '',
+                photo: '',
+                bio: '',
+            }))!
+            const user = dao.toUser()
+            const accessToken = generateToken(dao.toUserBasic())
 
             if (accessToken instanceof ServerError) return accessToken
 
@@ -111,22 +109,30 @@ export class UserService implements IUserService {
     }
 
     async getUserById(userId: UserId): Promise<User | null> {
-        const user = (await this.userRepo.findById(userId)).toUser()
+        const dao = await this.userRepo.findById(userId)
+        if (!dao) return null
+        const user = dao.toUser()
+        return user
+    }
+
+    async getUserBasicById(userId: UserId): Promise<UserBasic | null> {
+        const dao = await this.userRepo.findById(userId)
+        if (!dao) return null
+        const user = dao.toUserBasic()
         return user
     }
 
     async forgetPassSendEmail(data: SendEmailDto): Promise<SimpleMessage | BadRequestError> {
         const usernameOrEmail = data.usernameOrEmail
-        let user: User | null = null
+        let dao: ReturnType<typeof userDao> | null = null
         if (isUsername(usernameOrEmail)) {
-            user = (await this.userRepo.findByUsername(usernameOrEmail)).toUser()
+            dao = await this.userRepo.findByUsername(usernameOrEmail)
         }
         if (isEmail(usernameOrEmail)) {
-            user = (await this.userRepo.findByEmail(usernameOrEmail)).toUser()
+            dao = await this.userRepo.findByEmail(usernameOrEmail)
         }
-        if (!user) {
-            return new BadRequestError('Username or Email is Invalid')
-        }
+        if (!dao) return new BadRequestError('Username or Email is Invalid')
+        const user = dao.toUser()
         const resetPasswordToken = v4()
         await RedisRepo.setResetPasswordToken(resetPasswordToken, user.id)
         sendEmail(user.email, 'Reset Password', `https://murphyteam.ir/reset-password?token=${resetPasswordToken}`, 'Forget Password')
@@ -138,8 +144,9 @@ export class UserService implements IUserService {
         const token = data.token
         const userId = await RedisRepo.getResetPasswordUserId(token)
         if (!userId) return new BadRequestError('Invalid token')
-        const user = (await this.userRepo.changePassword(userId, newPassword)).toUser()!
-        const accessToken = generateToken(usertoUserBasic(user))
+        const dao = (await this.userRepo.changePassword(userId, newPassword))!
+        const user = dao.toUser()!
+        const accessToken = generateToken(dao.toUserBasic())
         if (accessToken instanceof ServerError) return accessToken
         let refreshToken = await RedisRepo.getSession(userId)
         if (!refreshToken) {
@@ -159,12 +166,13 @@ export class UserService implements IUserService {
             const newPassword = await hash(data.password)
             payload.password = newPassword
         }
-        const user = (await this.userRepo.edit(userBasic.userId, payload)).toUser()!
+        const dao = (await this.userRepo.edit(userBasic.userId, payload))!
+        const user = dao.toUser()
         if (file) {
             await MinioRepo.uploadProfile(userBasic.userId, file)
         }
 
-        const newAccessToken = generateToken(usertoUserBasic(user))
+        const newAccessToken = generateToken(dao.toUserBasic())
         if (newAccessToken instanceof ServerError) return newAccessToken
         return { user, token: newAccessToken }
     }
@@ -174,9 +182,10 @@ export class UserService implements IUserService {
         return url || ''
     }
 
-    async getCurrentUser(id: UserId): Promise<any> {
-        const user = (await this.userRepo.findById(id)).toUser()
-        if (!user) return new UnauthorizedError()
+    async getCurrentUser(id: UserId): Promise<User | null> {
+        const dao = (await this.userRepo.findById(id))!
+        if (!dao) return null
+        const user = dao.toUser()
         const profile = await MinioRepo.getProfileUrl(id)
         user.photo = profile || ''
         return user
