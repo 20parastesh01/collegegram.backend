@@ -5,7 +5,7 @@ import { PostService } from '../modules/post/bll/post.service'
 import { uploadPostImages } from './middlewares/uploadMultipleImage.middleware'
 import { zodCreatePostDTO } from '../modules/post/dto/createPost.dto'
 import { zodGetPostDTO } from '../modules/post/dto/getPost.dto'
-import { zodGetAllPostDTO } from '../modules/post/dto/getAllPost.dto'
+import { zodGetAllPostsDTO } from '../modules/post/dto/getAllPosts.dto'
 
 
 
@@ -29,7 +29,7 @@ export class PostRouter {
         })
 
         app.post('/getAll', (req, res) => {
-            const data = zodGetAllPostDTO.parse(req.user.userId)
+            const data = zodGetAllPostsDTO.parse(req.user.userId)
             handleExpress(res, () => postService.getAllPost(data))
         })
 
