@@ -12,7 +12,7 @@ import { editProfileDto } from '../modules/user/dto/edit-profile.dto'
 
 @Route('/user', UserService)
 export class UserRouter {
-    constructor(private userService: UserService) { }
+    constructor(private userService: UserService) {}
     @Post('/signup')
     @RequestBody('SignUpDto')
     signup(req: Request, res: Response) {
@@ -30,7 +30,7 @@ export class UserRouter {
     @Get('/me')
     @Auth()
     getCurrentUser(req: Request, res: Response) {
-        res.send(req.user)
+        handleExpress(res, () => this.userService.getCurrentUser(req.user.userId))
     }
 
     @Post('/forgetpassword')
@@ -51,7 +51,7 @@ export class UserRouter {
     @RequestBody('EditProfileDto')
     editProfile(req: Request, res: Response) {
         const data = editProfileDto.parse(req.body)
-        const file = req.files ? (req.files as any)['profile'] ? (req.files as any)['profile'][0] : null : null
+        const file = req.files ? ((req.files as any)['profile'] ? (req.files as any)['profile'][0] : null) : null
         handleExpress(res, () => this.userService.editProfile(req.user, data, file))
     }
 

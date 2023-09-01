@@ -30,7 +30,7 @@ export interface IUserService {
     getUserById(userId: UserId): Promise<User | null>
     forgetPassSendEmail(data: SendEmailDto): Promise<SimpleMessage | BadRequestError>
     forgetPassSetPass(data: SetPasswordDto): Promise<LoginSignUp>
-    editProfile(user: UserBasic, data: EditProfileDto, file?: Express.Multer.File): Promise<{ user: User, token: Token } | ServerError>
+    editProfile(user: UserBasic, data: EditProfileDto, file?: Express.Multer.File): Promise<{ user: User; token: Token } | ServerError>
 }
 
 export const hash = async (input: string): Promise<Password> => {
@@ -43,7 +43,7 @@ export const hash = async (input: string): Promise<Password> => {
 
 @Service(UserRepository)
 export class UserService implements IUserService {
-    constructor(private userRepo: IUserRepository) { }
+    constructor(private userRepo: IUserRepository) {}
 
     async login(data: LoginDto): Promise<LoginSignUp | UnauthorizedError> {
         const usernameOrEmail = data.usernameOrEmail
@@ -80,17 +80,19 @@ export class UserService implements IUserService {
     async signup(data: SignUpDto): Promise<LoginSignUp> {
         try {
             const password = await hash(data.password)
-            const user = (await this.userRepo.create({
-                username: data.username,
-                email: data.email,
-                password,
-                name: '',
-                lastname: '',
-                photo: '',
-                bio: '',
-            })).toUser()!
+            const user = (
+                await this.userRepo.create({
+                    username: data.username,
+                    email: data.email,
+                    password,
+                    name: '',
+                    lastname: '',
+                    photo: '',
+                    bio: '',
+                })
+            ).toUser()!
             const accessToken = generateToken(usertoUserBasic(user))
-            
+
             if (accessToken instanceof ServerError) return accessToken
 
             const refreshToken = await createSession(user.id)
@@ -150,7 +152,7 @@ export class UserService implements IUserService {
         return { user, accessToken, refreshToken }
     }
 
-    async editProfile(userBasic: UserBasic, data: EditProfileDto, file?: Express.Multer.File): Promise<{ user: User, token: Token } | ServerError> {
+    async editProfile(userBasic: UserBasic, data: EditProfileDto, file?: Express.Multer.File): Promise<{ user: User; token: Token } | ServerError> {
         const { password, ...rest } = data
         const payload: EditUser = rest
         if (data.password) {
@@ -169,6 +171,14 @@ export class UserService implements IUserService {
 
     async getProfilePhoto(user: UserBasic): Promise<string> {
         const url = await MinioRepo.getProfileUrl(user.userId)
-        return url
+        return url || ''
+    }
+
+    async getCurrentUser(id: UserId): Promise<any> {
+        const user = (await this.userRepo.findById(id)).toUser()
+        if (!user) return new UnauthorizedError()
+        const profile = await MinioRepo.getProfileUrl(id)
+        user.photo = profile || ''
+        return user
     }
 }
