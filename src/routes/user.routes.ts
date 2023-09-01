@@ -51,7 +51,7 @@ export class UserRouter {
     @RequestBody('EditProfileDto')
     editProfile(req: Request, res: Response) {
         const data = editProfileDto.parse(req.body)
-        const file = req.files ? ((req.files as any)['profile'] ? (req.files as any)['profile'][0] : null) : null
+        const file = req.files && !Array.isArray(req.files) && req.files['profile'] ? req.files['profile'][0] : undefined
         handleExpress(res, () => this.userService.editProfile(req.user, data, file))
     }
 
