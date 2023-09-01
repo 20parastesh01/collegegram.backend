@@ -1,4 +1,4 @@
-import { DataSource, EntityRepository, Repository } from 'typeorm'
+import { DataSource, Repository } from 'typeorm'
 import { Repo } from '../../registry'
 import { Caption } from './model/caption'
 import { Tag } from './model/tag'

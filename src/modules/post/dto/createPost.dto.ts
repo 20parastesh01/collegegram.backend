@@ -8,7 +8,7 @@ export const zodCreatePostDTO = z.object({
   caption: zodCaption,
   closeFriend: z.boolean(),
   images: z.array(z.string()),
-  authorId: zodUserId,
+  author: zodUserId,
 });
 
 export type CreatePostDTO = z.infer<typeof zodCreatePostDTO>;
