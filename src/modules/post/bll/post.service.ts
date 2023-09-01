@@ -13,7 +13,7 @@ type GetCreatePost = Post | BadRequestError | ServerError
 export interface IPostService {
   createPost(data: CreatePostDTO): Promise<GetCreatePost>
   getPost(postId: PostId): Promise<Post | null>;
-  getAllPost(userId: UserId): Promise<Post[] | null>;
+  getAllPosts(userId: UserId): Promise<Post[] | null>;
 }
 
 @Service(PostRepository)
@@ -21,7 +21,7 @@ export class PostService implements IPostService {
   constructor(private postRepo: IPostRepository) { }
 
 
-  getAllPost(userId: UserId): Promise<Post[] | null> {
+  getAllPosts(userId: UserId): Promise<Post[] | null> {
     return this.postRepo.findAllByAuthor(userId);
   }
 

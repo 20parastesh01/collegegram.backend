@@ -30,7 +30,7 @@ export class PostRouter {
 
         app.post('/getAll', (req, res) => {
             const data = zodGetAllPostsDTO.parse(req.user.userId)
-            handleExpress(res, () => postService.getAllPost(data))
+            handleExpress(res, () => postService.getAllPosts(data))
         })
 
         return app
