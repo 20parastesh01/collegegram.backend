@@ -14,6 +14,7 @@ import { PostId } from '../../post/model/post-id'
 import { PostEntity } from '../../post/entity/post.entity'
 import { UserEntity } from '../../user/entity/user.entity'
 import { UserId } from '../../user/model/user-id'
+import { ParentId } from '../model/parent-id'
 
 @Entity('comments')
 export class CommentEntity {
@@ -27,9 +28,9 @@ export class CommentEntity {
     @JoinColumn()
     postId!: PostId
 
-    @ManyToOne(() => CommentEntity)
+    @ManyToOne(() => CommentEntity,{ nullable: true })
     @JoinColumn()
-    parentId?: CommentId | null
+    parentId!: ParentId
     
     @ManyToOne(() => UserEntity)
     @JoinColumn()

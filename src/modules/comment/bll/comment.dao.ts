@@ -1,6 +1,7 @@
 import { zodWholeNumber } from "../../../data/whole-number";
 import { CommentEntity } from "../entity/comment.entity";
 import { NewComment, Comment } from "../model/comment";
+import { isParentId, zodParentId } from "../model/parent-id";
 
 
 export const toCommentModel = (entity: CommentEntity): Comment => {
@@ -8,9 +9,9 @@ export const toCommentModel = (entity: CommentEntity): Comment => {
   return rest;
 }
 
-export const NewCommentModelToEntity = (comment: NewComment): CommentEntity => {
+export const newCommentModelToEntity = (comment: NewComment): CommentEntity => {
   const {
-    parentId = null, // Set parentId to null if not provided
+    parentId = zodParentId.parse(null), // Set parentId to null if not provided
     ...rest
   } = comment;
 
@@ -25,7 +26,7 @@ export const NewCommentModelToEntity = (comment: NewComment): CommentEntity => {
 export const commentModelToEntity = (comment: Comment): CommentEntity => {
   const {
     likesCount = zodWholeNumber.parse(0), // Set likesCount to 0 if not provided
-    parentId = null, // Set parentId to null if not provided
+    parentId = zodParentId.parse(null), // Set parentId to null if not provided
     ...rest
   } = comment;
 
