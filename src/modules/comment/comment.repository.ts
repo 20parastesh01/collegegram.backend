@@ -32,6 +32,9 @@ export class CommentRepository implements ICommentRepository {
             where: {
                 postId: postId,
             },
+            order: {
+                createdAt: 'DESC', // Sort by createdAt in descending order
+            },
         });
         return comments;
     }
