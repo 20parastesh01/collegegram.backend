@@ -1,9 +1,9 @@
-import multer , {FileFilterCallback} from 'multer';
+import multer, { FileFilterCallback } from 'multer';
 import { NextFunction, Request, Response } from 'express';
 
 const multerStorage = multer.memoryStorage();
 
-const multerFilter = (req: Request, file: Express.Multer.File , cb: FileFilterCallback) => {
+const multerFilter = (req: Request, file: Express.Multer.File, cb: FileFilterCallback) => {
   if (!file.mimetype.startsWith("image")) {
     return cb(new multer.MulterError('LIMIT_UNEXPECTED_FILE'));
   }
@@ -17,6 +17,6 @@ const upload = multer({
 });
 
 export const uploadPostImages = upload.fields([
-    { name: 'image', maxCount: 1 },
-    { name: 'images', maxCount: 5 },
+  { name: 'image', maxCount: 1 },
+  { name: 'images', maxCount: 5 },
 ]);

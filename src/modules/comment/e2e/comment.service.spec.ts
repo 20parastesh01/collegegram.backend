@@ -1,12 +1,12 @@
 import { WholeNumber } from '../../../data/whole-number';
 import { UserId } from '../../user/model/user-id';
-import { IPostService, PostService } from '../bll/post.service';
-import { CreatePostDTO } from '../dto/createPost.dto';
-import { PostEntity } from '../entity/post.entity';
-import { Caption } from '../model/caption';
-import { PostId } from '../model/post-id';
+import { IPostService, PostService } from '../bll/comment.service';
+import { CreatePostDTO } from '../dto/createComment.dto';
+import { PostEntity } from '../entity/comment.entity';
+import { Caption } from '../model/content';
+import { PostId } from '../model/comment-id';
 import { Tag } from '../model/tag';
-import { IPostRepository } from '../post.repository';
+import { IPostRepository } from '../comment.repository';
 
 describe('PostService e2e', () => {
   let postService: IPostService;

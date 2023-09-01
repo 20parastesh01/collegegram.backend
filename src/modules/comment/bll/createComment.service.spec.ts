@@ -1,32 +1,27 @@
-import { WholeNumber } from '../../../data/whole-number';
-import { UserId } from '../../user/model/user-id';
-import { IPostService, PostService } from '../bll/post.service';
-import { CreatePostDTO } from '../dto/createPost.dto';
-import { PostEntity } from '../entity/post.entity';
-import { Caption } from '../model/caption';
-import { PostId } from '../model/post-id';
-import { Tag } from '../model/tag';
-import { IPostRepository } from '../post.repository';
+import { WholeNumber } from "../../../data/whole-number";
+import { UserId, isUserId, zodUserId } from "../../user/model/user-id";
+import { CreatePostDTO } from "../dto/createComment.dto";
+import { PostEntity } from "../entity/comment.entity";
+import { Caption, zodCaption } from "../model/content";
+import { PostId, zodPostId } from "../model/comment-id";
+import { Tag, zodTag } from "../model/tag";
+import { IPostRepository } from "../comment.repository";
+import { PostService } from "./comment.service";
 
-describe('PostService e2e', () => {
-  let postService: IPostService;
+describe('PostService', () => {
+  let postService: PostService;
   let mockPostRepository: jest.Mocked<IPostRepository>;
 
   beforeEach(() => {
-
     mockPostRepository = {
       create: jest.fn(),
-      findByID: jest.fn(),
-      findAllByAuthor: jest.fn(),
-    };
-
+    } as any;
 
     postService = new PostService(mockPostRepository);
   });
 
   it('should create a post', async () => {
-
-    const mockDto: CreatePostDTO = {
+    const mockDto = {
       tags: ["tag1", "tag2", "tag3"] as Tag[],
       caption: 'Test caption' as Caption,
       closeFriend: false,
@@ -34,13 +29,17 @@ describe('PostService e2e', () => {
       authorId: 123 as UserId,
     };
 
+    const validatedTags = zodTag.parse(mockDto.tags);
+    const validatedCaption = zodCaption.parse(mockDto.caption);
+    const validatedAuthorId = zodUserId.parse(mockDto.authorId);
+    const validatedId = zodPostId.parse(1);
 
     const mockCreatedPost: PostEntity = {
-      id: 1 as PostId,
-      caption: mockDto.caption,
-      tags: mockDto.tags,
+      id: validatedId,
+      caption: validatedCaption,
+      tags: validatedTags,
       photos: mockDto.images,
-      author: mockDto.authorId,
+      author: validatedAuthorId,
       closeFriend: mockDto.closeFriend,
       likesCount: 1 as WholeNumber,
       commentsCount: 1 as WholeNumber,
@@ -48,12 +47,9 @@ describe('PostService e2e', () => {
       updatedAt: new Date(),
     };
 
-
     mockPostRepository.create.mockResolvedValue(mockCreatedPost);
 
-
     const result = await postService.createPost(mockDto);
-
 
     expect(result).toEqual(mockCreatedPost);
     expect(mockPostRepository.create).toHaveBeenCalledWith(expect.objectContaining(mockDto));

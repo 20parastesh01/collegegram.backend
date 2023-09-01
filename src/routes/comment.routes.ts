@@ -9,7 +9,7 @@ import { zodGetAllPostDTO } from '../modules/post/dto/getAllPost.dto'
 
 
 
-@Route('/post', PostService)
+@Route('/comment', PostService)
 export class PostRouter {
     makeRouter(postService: PostService) {
         const app = Router()

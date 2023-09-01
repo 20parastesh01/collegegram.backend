@@ -1,11 +1,11 @@
 import { BadRequestError, ServerError, UnauthorizedError } from '../../../utility/http-error'
-import { IPostRepository, PostRepository } from '../post.repository'
+import { IPostRepository, PostRepository } from '../comment.repository'
 import { Service } from '../../../registry'
-import { CreatePostDTO } from '../dto/createPost.dto'
-import { Post } from '../model/post'
-import { PostEntity } from '../entity/post.entity'
-import { PostId } from '../model/post-id'
-import { newPostModelToEntity, toPostModel } from './post.dao'
+import { CreatePostDTO } from '../dto/createComment.dto'
+import { Post } from '../model/comment'
+import { PostEntity } from '../entity/comment.entity'
+import { PostId } from '../model/comment-id'
+import { newPostModelToEntity, toPostModel } from './comment.dao'
 import { UserId } from '../../user/model/user-id'
 
 type GetCreatePost = Post | BadRequestError | ServerError
@@ -30,6 +30,11 @@ export class PostService implements IPostService {
   async createPost(dto: CreatePostDTO): Promise<PostEntity> {
     const { tags, caption, images, authorId, closeFriend } = dto;
     //Refactor:
+    //const validatedTags = tags.split(' ').map(tag => zodTag.parse(tag));
+
+    //const validatedCaption = zodCaption.parse(caption);
+    //const validatedCaption :Caption = caption;
+
     // const post = {
     //   caption: caption,
     //   tags: tags,

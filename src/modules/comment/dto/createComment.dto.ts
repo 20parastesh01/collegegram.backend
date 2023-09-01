@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { zodTag } from '../model/tag';
-import { zodCaption } from '../model/caption';
+import { zodCaption } from '../model/content';
 import { zodUserId } from '../../user/model/user-id';
 
 export const zodCreatePostDTO = z.object({

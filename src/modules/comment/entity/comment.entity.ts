@@ -8,38 +8,35 @@ import {
     UpdateDateColumn,
 } from 'typeorm'
 import { WholeNumber } from '../../../data/whole-number'
-import { PostId } from '../model/post-id'
-import { Caption } from '../model/caption'
-import { Tag } from '../model/tag'
-import { UserId } from '../../user/model/user-id'
+import { CommentId } from '../model/comment-id'
+import { Content } from '../model/content'
+import { PostId } from '../../post/model/post-id'
+import { PostEntity } from '../../post/entity/post.entity'
 import { UserEntity } from '../../user/entity/user.entity'
+import { UserId } from '../../user/model/user-id'
 
-@Entity('posts')
-export class PostEntity {
+@Entity('comments')
+export class CommentEntity {
     @PrimaryGeneratedColumn()
-    id!: PostId
+    id!: CommentId
 
     @Column()
-    caption!: Caption
+    content!: Content
 
-    @Column({ type: 'text', array: true })
-    photos!: string[]
+    @ManyToOne(() => PostEntity)
+    @JoinColumn()
+    postId!: PostId
 
-    @Column({ type: 'text', array: true, nullable: true })
-    tags!: Tag[]
-
+    @ManyToOne(() => CommentEntity)
+    @JoinColumn()
+    parentId?: CommentId | null
+    
     @ManyToOne(() => UserEntity)
     @JoinColumn()
     author!: UserId
 
     @Column('integer', { default: 0 })
     likesCount!: WholeNumber
-
-    @Column('integer', { default: 0 })
-    commentsCount!: WholeNumber
-
-    @Column('boolean', { default: false })
-    closeFriend!: boolean
 
     @CreateDateColumn()
     createdAt!: Date
