@@ -1,36 +1,35 @@
 import { Router } from 'express'
 import { Route } from '../registry'
 import { handleExpress } from '../utility/handle-express'
-import { PostService } from '../modules/post/bll/post.service'
-import { uploadPostImages } from './middlewares/uploadMultipleImage.middleware'
-import { zodCreatePostDTO } from '../modules/post/dto/createPost.dto'
-import { zodGetPostDTO } from '../modules/post/dto/getPost.dto'
-import { zodGetAllPostDTO } from '../modules/post/dto/getAllPost.dto'
+import { CommentService } from '../modules/comment/bll/comment.service'
+//import { zodGetCommentDTO } from '../modules/comment/dto/getComment.dto'
+import { zodGetAllCommentsDTO } from '../modules/comment/dto/getAllComments.dto'
+import { zodCreateCommentDTO } from '../modules/comment/dto/createComment.dto'
 
 
 
-@Route('/comment', PostService)
-export class PostRouter {
-    makeRouter(postService: PostService) {
+@Route('/comment', CommentService)
+export class CommentRouter {
+    makeRouter(commentService: CommentService) {
         const app = Router()
 
-        app.post('/create', uploadPostImages, (req, res) => {
+        app.post('/create', (req, res) => {
             const mergedData = {
                 ...req.body,
-                authorId: req.user.userId,
+                author: req.user.userId,
             };
-            const data = zodCreatePostDTO.parse(mergedData)
-            handleExpress(res, () => postService.createPost(data))
+            const data = zodCreateCommentDTO.parse(mergedData)
+            handleExpress(res, () => commentService.createComment(data))
         })
 
-        app.post('/get/:postId', (req, res) => {
-            const data = zodGetPostDTO.parse(req.params.postId)
-            handleExpress(res, () => postService.getPost(data))
-        })
+        // app.post('/get/:commentId', (req, res) => {
+        //     const data = zodGetCommentDTO.parse(req.params.commentId)
+        //     handleExpress(res, () => commentService.getComment(data))
+        // })
 
         app.post('/getAll', (req, res) => {
-            const data = zodGetAllPostDTO.parse(req.user.userId)
-            handleExpress(res, () => postService.getAllPost(data))
+            const data = zodGetAllCommentsDTO.parse(req.user.userId)
+            handleExpress(res, () => commentService.getAllComment(data))
         })
 
         return app

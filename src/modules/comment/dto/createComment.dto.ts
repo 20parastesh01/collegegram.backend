@@ -1,14 +1,13 @@
 import { z } from 'zod'
-import { zodTag } from '../model/tag';
-import { zodCaption } from '../model/content';
+import { zodContent } from '../model/content';
 import { zodUserId } from '../../user/model/user-id';
+import { zodPostId } from '../../post/model/post-id';
 
-export const zodCreatePostDTO = z.object({
-  tags: zodTag,
-  caption: zodCaption,
-  closeFriend: z.boolean(),
+export const zodCreateCommentDTO = z.object({
+  content: zodContent,
   images: z.array(z.string()),
-  authorId: zodUserId,
+  author: zodUserId,
+  postId: zodPostId,
 });
 
-export type CreatePostDTO = z.infer<typeof zodCreatePostDTO>;
+export type CreateCommentDTO = z.infer<typeof zodCreateCommentDTO>;

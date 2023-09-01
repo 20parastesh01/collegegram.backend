@@ -1,5 +1,5 @@
 import { ZodType, z } from 'zod';
-import { PostId, isPostId, zodPostId } from '../model/comment-id';
+import { CommentId, isCommentId, zodCommentId } from '../model/comment-id';
 
 
-export const zodGetPostDTO = z.coerce.number().refine(isPostId)
+export const zodGetCommentDTO = z.coerce.number().refine(isCommentId)
