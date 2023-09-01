@@ -1,9 +1,8 @@
 import { WholeNumber } from "../../../data/whole-number";
-import { UserId, isUserId, zodUserId } from "../../user/model/user-id";
-import { CreatePostDTO } from "../dto/createPost.dto";
+import { UserId, zodUserId } from "../../user/model/user-id";
 import { PostEntity } from "../entity/post.entity";
 import { Caption, zodCaption } from "../model/caption";
-import { PostId, zodPostId } from "../model/post-id";
+import { zodPostId } from "../model/post-id";
 import { Tag, zodTag } from "../model/tag";
 import { IPostRepository } from "../post.repository";
 import { PostService } from "./post.service";
@@ -26,12 +25,12 @@ describe('PostService', () => {
       caption: 'Test caption' as Caption,
       closeFriend: false,
       images: ['image1.jpg', 'image2.jpg'],
-      authorId: 123 as UserId,
+      author: 123 as UserId,
     };
 
     const validatedTags = zodTag.parse(mockDto.tags);
     const validatedCaption = zodCaption.parse(mockDto.caption);
-    const validatedAuthorId = zodUserId.parse(mockDto.authorId);
+    const validatedAuthor = zodUserId.parse(mockDto.author);
     const validatedId = zodPostId.parse(1);
 
     const mockCreatedPost: PostEntity = {
@@ -39,7 +38,7 @@ describe('PostService', () => {
       caption: validatedCaption,
       tags: validatedTags,
       photos: mockDto.images,
-      author: validatedAuthorId,
+      author: validatedAuthor,
       closeFriend: mockDto.closeFriend,
       likesCount: 1 as WholeNumber,
       commentsCount: 1 as WholeNumber,

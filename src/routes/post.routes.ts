@@ -17,7 +17,7 @@ export class PostRouter {
         app.post('/create', uploadPostImages, (req, res) => {
             const mergedData = {
                 ...req.body,
-                authorId: req.user.userId,
+                author: req.user.userId,
             };
             const data = zodCreatePostDTO.parse(mergedData)
             handleExpress(res, () => postService.createPost(data))

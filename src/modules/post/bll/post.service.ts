@@ -1,4 +1,4 @@
-import { BadRequestError, ServerError, UnauthorizedError } from '../../../utility/http-error'
+import { BadRequestError, ServerError } from '../../../utility/http-error'
 import { IPostRepository, PostRepository } from '../post.repository'
 import { Service } from '../../../registry'
 import { CreatePostDTO } from '../dto/createPost.dto'
@@ -28,18 +28,18 @@ export class PostService implements IPostService {
 
 
   async createPost(dto: CreatePostDTO): Promise<PostEntity> {
-    const { tags, caption, images, authorId, closeFriend } = dto;
+    const { tags, caption, images, author, closeFriend } = dto;
     //Refactor:
     // const post = {
     //   caption: caption,
     //   tags: tags,
     //   photos: images,
-    //   author: authorId,
+    //   author: author,
     //   closeFriend: closeFriend,
     // };
 
     const postEntity = newPostModelToEntity({
-      tags, caption, photos: images, author: authorId, closeFriend
+      tags, caption, photos: images, author, closeFriend
     })
     const createdPost = await this.postRepo.create(postEntity);
     return createdPost;
