@@ -4,11 +4,11 @@ import { zodCaption } from '../model/caption';
 import { zodUserId } from '../../user/model/user-id';
 
 export const zodCreatePostDTO = z.object({
-  tags: zodTag.optional(),
-  caption: zodCaption.optional(),
-  closeFriend: z.coerce.boolean().optional(),
-  images: z.array(z.string()).optional(),
-  author: zodUserId.optional(),
+  tags: zodTag,
+  caption: zodCaption,
+  closeFriend: z.coerce.boolean(),
+  images: z.array(z.string()),
+  author: zodUserId,
 });
 
 export type CreatePostDTO = z.infer<typeof zodCreatePostDTO>;
