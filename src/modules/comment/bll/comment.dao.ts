@@ -1,6 +1,6 @@
 import { zodWholeNumber } from "../../../data/whole-number";
 import { CommentEntity } from "../entity/comment.entity";
-import { newComment, Comment } from "../model/comment";
+import { NewComment, Comment } from "../model/comment";
 
 
 export const toCommentModel = (entity: CommentEntity): Comment => {
@@ -8,7 +8,7 @@ export const toCommentModel = (entity: CommentEntity): Comment => {
   return rest;
 }
 
-export const newCommentModelToEntity = (comment: newComment): CommentEntity => {
+export const NewCommentModelToEntity = (comment: NewComment): CommentEntity => {
   const {
     parentId = null, // Set parentId to null if not provided
     ...rest

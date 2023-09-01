@@ -1,6 +1,6 @@
 import { zodWholeNumber } from "../../../data/whole-number";
 import { PostEntity } from "../entity/post.entity";
-import { Post, newPost, basePost } from "../model/post";
+import { Post, NewPost, BasePost } from "../model/post";
 
 
 export const toPostModel = (entity: PostEntity): Post => {
@@ -8,12 +8,12 @@ export const toPostModel = (entity: PostEntity): Post => {
   return rest;
 }
 
-export const toThumbnailModel = (entity: PostEntity): basePost => {
+export const toThumbnailModel = (entity: PostEntity): BasePost => {
   const { createdAt, updatedAt, caption, likesCount, tags, commentsCount, ...rest } = entity;
   return rest;
 }
 
-export const newPostModelToEntity = (post: newPost): PostEntity => {
+export const newPostModelToEntity = (post: NewPost): PostEntity => {
   
   const postEntity = new PostEntity();
   postEntity.likesCount = zodWholeNumber.parse(0); //will not provided in create stage
