@@ -7,7 +7,6 @@ import { isToken } from './data/token'
 import { RedisRepo } from './data-source'
 import { isHashed } from './data/hashed'
 import { UserService } from './modules/user/bll/user.service'
-import { usertoUserBasic } from './modules/user/bll/user.dao'
 
 export const authMiddleware = (userService: UserService) => async (req: Request, res: Response, next: NextFunction) => {
     const accessToken = req.header('Authorization')?.replace('Bearer ', '')
@@ -25,9 +24,8 @@ export const authMiddleware = (userService: UserService) => async (req: Request,
         if (!isHashed(refreshToken)) return res.status(401).send({ error: 'Unauthorized' })
         const userId = await RedisRepo.getUserId(refreshToken)
         if (!userId) return res.status(401).send({ error: 'Unauthorized' })
-        const user = await userService.getUserById(userId)
-        if (!user) return res.status(401).send({ error: 'Unauthorized' })
-        const userBasic = usertoUserBasic(user)
+        const userBasic = await userService.getUserBasicById(userId)
+        if (!userBasic) return res.status(401).send({ error: 'Unauthorized' })
         const newToken = generateToken(userBasic)
         if (newToken instanceof ServerError) return res.status(newToken.status).send({ error: newToken.message })
         res.header('Authorization', newToken)
