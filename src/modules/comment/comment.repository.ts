@@ -5,12 +5,13 @@ import { CommentId } from './model/comment-id'
 import { CommentEntity } from './entity/comment.entity'
 import { UserId } from '../user/model/user-id'
 import { PostId } from '../post/model/post-id'
+import { ParentId } from './model/parent-id'
 
 export interface CreateComment {
     content: Content
     author: UserId
     postId: PostId
-    parentId?: CommentId | null
+    parentId: ParentId
 }
 
 
