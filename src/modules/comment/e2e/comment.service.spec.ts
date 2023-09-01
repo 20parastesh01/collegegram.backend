@@ -1,61 +1,63 @@
 import { WholeNumber } from '../../../data/whole-number';
-import { UserId } from '../../user/model/user-id';
-import { IPostService, PostService } from '../bll/comment.service';
-import { CreatePostDTO } from '../dto/createComment.dto';
-import { PostEntity } from '../entity/comment.entity';
-import { Caption } from '../model/content';
-import { PostId } from '../model/comment-id';
-import { Tag } from '../model/tag';
-import { IPostRepository } from '../comment.repository';
+import { UserId, zodUserId } from '../../user/model/user-id';
+import { ICommentService, CommentService } from '../bll/comment.service';
+import { CreateCommentDTO } from '../dto/createComment.dto';
+import { CommentEntity } from '../entity/comment.entity';
+import { Content, zodContent } from '../model/content';
+import { CommentId, zodCommentId } from '../model/comment-id';
+import { ICommentRepository } from '../comment.repository';
+import { PostId, zodPostId } from '../../post/model/post-id';
+import { zodParentId } from '../model/parent-id';
 
-describe('PostService e2e', () => {
-  let postService: IPostService;
-  let mockPostRepository: jest.Mocked<IPostRepository>;
+describe('CommentService e2e', () => {
+  let commentService: ICommentService;
+  let mockCommentRepository: jest.Mocked<ICommentRepository>;
 
   beforeEach(() => {
 
-    mockPostRepository = {
+    mockCommentRepository = {
       create: jest.fn(),
-      findByID: jest.fn(),
-      findAllByAuthor: jest.fn(),
-    };
+      findAllByPost: jest.fn(),
+    } as any;
 
 
-    postService = new PostService(mockPostRepository);
+    commentService = new CommentService(mockCommentRepository);
   });
 
-  it('should create a post', async () => {
+  it('should create a comment', async () => {
 
-    const mockDto: CreatePostDTO = {
-      tags: ["tag1", "tag2", "tag3"] as Tag[],
-      caption: 'Test caption' as Caption,
-      closeFriend: false,
-      images: ['image1.jpg', 'image2.jpg'],
-      authorId: 123 as UserId,
+    const mockDto: CreateCommentDTO = {
+      content: 'Test content' as Content,
+      postId: 123 as PostId,
+      parentId: null,
+      author: 123 as UserId,
     };
 
+    const validatedPostId = zodPostId.parse(mockDto.postId);
+    const validatedParentId = zodParentId.parse(mockDto.parentId);
+    const validatedContent = zodContent.parse(mockDto.content);
+    const validatedAuthor = zodUserId.parse(mockDto.author);
+    const validatedId = zodCommentId.parse(1);
 
-    const mockCreatedPost: PostEntity = {
-      id: 1 as PostId,
-      caption: mockDto.caption,
-      tags: mockDto.tags,
-      photos: mockDto.images,
-      author: mockDto.authorId,
-      closeFriend: mockDto.closeFriend,
+    const mockCreatedComment: CommentEntity = {
+      id: validatedId,
+      postId: validatedPostId,
+      parentId: validatedParentId,
+      content: validatedContent,
+      author: validatedAuthor,
       likesCount: 1 as WholeNumber,
-      commentsCount: 1 as WholeNumber,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
 
-    mockPostRepository.create.mockResolvedValue(mockCreatedPost);
+    mockCommentRepository.create.mockResolvedValue(mockCreatedComment);
 
 
-    const result = await postService.createPost(mockDto);
+    const result = await commentService.createComment(mockDto);
 
 
-    expect(result).toEqual(mockCreatedPost);
-    expect(mockPostRepository.create).toHaveBeenCalledWith(expect.objectContaining(mockDto));
+    expect(result).toEqual(mockCreatedComment);
+    expect(mockCommentRepository.create).toHaveBeenCalledWith(expect.objectContaining(mockDto));
   });
 });
