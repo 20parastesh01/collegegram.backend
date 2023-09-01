@@ -19,11 +19,11 @@ export class PostEntity {
     @PrimaryGeneratedColumn()
     id!: PostId
 
-    @Column()
-    caption!: Caption
+    @Column({ nullable: true })
+    caption?: Caption
 
-    @Column({ type: 'text', array: true })
-    photos!: string[]
+    @Column('integer', { default: 0 })
+    photosCount!: WholeNumber
 
     @Column({ type: 'text', array: true, nullable: true })
     tags!: Tag[]

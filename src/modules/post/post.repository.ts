@@ -12,7 +12,7 @@ export interface CreatePost {
     caption: Caption
     tags: Tag[]
     author: UserId
-    photos: string[]
+    photosCount: WholeNumber
     closeFriend: boolean
     likesCount: WholeNumber
     commentsCount: WholeNumber

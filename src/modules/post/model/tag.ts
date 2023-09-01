@@ -13,15 +13,20 @@ export const isTag = (value: string): value is Tag => {
   return typeof value === 'string' && /^(?!.*#).*$/.test(value) //&& value.length <= 25
 }
 
-export const combineAllValidator = (tagsArray: string[]): tagsArray is Tag[] => {
-  const validatedTags = tagsArray.map(tag => {
+export const combineAllValidator = (tagsArray: string): tagsArray is Tag[] => {
+  const validatedTags = tagsArray.trim().split(/\s+/).map(tag => {
     if (isTag(tag)) {
       return tag;
     } else {
       throw new Error(`Invalid tag: ${tag}`);
     }
   });
-  return SevenWordsValidator(tagsArray.join(' ')) && validatedTags.length > 0;
+  return SevenWordsValidator(tagsArray) && validatedTags.length > 0;
 };
 
-export const zodTag = z.array(z.string()).refine(combineAllValidator)
+export const zodTag = z.string().refine(combineAllValidator)
+
+export const parseTagsWithZod = (tagsString: string): Tag[] => {
+  const tagStrings = tagsString.trim().split(/\s+/);
+  return tagStrings.filter((tag) => isTag(tag)) as Tag[];
+};
