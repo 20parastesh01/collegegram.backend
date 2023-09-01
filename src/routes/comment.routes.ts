@@ -18,7 +18,7 @@ export class CommentRouter {
             const mergedData = {
                 ...req.body,
                 author: req.user.userId,
-                parentId: req.body.parentId || null, // Set parentId to null if it's not provided
+                parentId: req.body.parentId  ?? null, // Set parentId to null if it's not provided
             };
             const data = zodCreateCommentDTO.parse(mergedData)
             handleExpress(res, () => commentService.createComment(data))

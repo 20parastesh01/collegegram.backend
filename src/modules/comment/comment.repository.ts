@@ -1,23 +1,24 @@
 import { DataSource, Repository } from 'typeorm'
 import { Repo } from '../../registry'
 import { Content } from './model/content'
-import { CommentId } from './model/comment-id'
 import { CommentEntity } from './entity/comment.entity'
 import { UserId } from '../user/model/user-id'
 import { PostId } from '../post/model/post-id'
 import { ParentId } from './model/parent-id'
+import { WholeNumber } from '../../data/whole-number'
+import { commentDao } from './bll/comment.dao'
 
 export interface CreateComment {
     content: Content
     author: UserId
     postId: PostId
-    parentId: ParentId | null
+    parentId?: ParentId
+    likesCount: WholeNumber
 }
 
-
 export interface ICommentRepository {
-    create(data: CreateComment): Promise<CommentEntity>
-    findAllByPost(postId: PostId): Promise<CommentEntity[] | null>
+    create(data: CreateComment): Promise<ReturnType<typeof commentDao>>
+    findAllByPost(postId: PostId): Promise<ReturnType<typeof commentDao>>
     //findByID(postId: PostId): Promise<CommentEntity | null>;
 }
 
@@ -28,7 +29,7 @@ export class CommentRepository implements ICommentRepository {
     constructor(appDataSource: DataSource) {
         this.CommentRepo = appDataSource.getRepository(CommentEntity)
     }
-    async findAllByPost(postId: PostId): Promise<CommentEntity[] | null> {
+    async findAllByPost(postId: PostId): Promise<ReturnType<typeof commentDao>> {
         const comments = await this.CommentRepo.find({
             where: {
                 postId: postId,
@@ -37,7 +38,7 @@ export class CommentRepository implements ICommentRepository {
                 createdAt: 'DESC', // Sort by createdAt in descending order
             },
         });
-        return comments;
+        return commentDao(comments);
     }
     // async findByauthor(userID: UserId): Promise<PostEntity[] | null> {
     //     return this.PostRepo.findBy({ author:userID })
@@ -45,7 +46,8 @@ export class CommentRepository implements ICommentRepository {
     // async findByID(postId: PostId): Promise<CommentEntity | null> {
     //     return this.CommentRepo.findOneBy({ id: CommentId });
     // }
-    async create(data: CreateComment): Promise<CommentEntity> {
-        return this.CommentRepo.save(data)
+    async create(data: CreateComment): Promise<ReturnType<typeof commentDao>> {
+        const commentEntity = await this.CommentRepo.save(data)
+        return commentDao(commentEntity)
     }
 }

@@ -1,39 +1,55 @@
 import { zodWholeNumber } from "../../../data/whole-number";
 import { PostEntity } from "../entity/post.entity";
 import { Post, NewPost, BasePost } from "../model/post";
+import { CreatePost } from "../post.repository";
 
-
-export const toPostModel = (entity: PostEntity): Post => {
-  const { createdAt, updatedAt, ...rest } = entity;
-  return rest;
-}
-
-export const toThumbnailModel = (entity: PostEntity): BasePost => {
-  const { createdAt, updatedAt, caption, likesCount, tags, commentsCount, ...rest } = entity;
-  return rest;
-}
-
-export const newPostModelToEntity = (post: NewPost): PostEntity => {
-  
-  const postEntity = new PostEntity();
-  postEntity.likesCount = zodWholeNumber.parse(0); //will not provided in create stage
-  postEntity.commentsCount = zodWholeNumber.parse(0); //will not provided in create stage
-  Object.assign(postEntity, post);
-
-  return postEntity;
+export const postDao = (input: (PostEntity[] | PostEntity | null)) => {
+  return {
+    toPostModel(): Post | null {
+      if (input === null) return null
+      if (Array.isArray(input)) {
+        // Handle the case when input is an array of PostEntity
+        //trow error
+        return null
+      } else {
+        // Handle the case when input is a single PostEntity
+        const { createdAt, updatedAt, ...rest } = input;
+        return rest;
+      }
+    },
+    toThumbnailModel(): BasePost | null {
+      if (input === null) return null;
+      if (Array.isArray(input)) {
+        // Handle the case when input is an array of PostEntity
+        return null
+      }
+      const { createdAt, updatedAt, caption, likesCount, tags, commentsCount, ...rest } = input;
+      return rest;
+    },
+    toPostModelList(): Post[] {
+      if (input === null) return [];
+      if (Array.isArray(input)) {
+        // Handle the case when input is an array of PostEntity
+        return input.map((entity) => {
+          const { createdAt, updatedAt, ...rest } = entity;
+          return rest;
+        });
+      } else {
+        // Handle the case when input is a single PostEntity
+        const { createdAt, updatedAt, ...rest } = input;
+        return [rest];
+      }
+    },
+  };
 };
 
-export const postModelToEntity = (post: Post): PostEntity => {
-  const {
-    likesCount = zodWholeNumber.parse(0), // Set likesCount to 0 if not provided
-    commentsCount = zodWholeNumber.parse(0),// Set commentsCount to 0 if not provided
-    ...rest
-  } = post;
+export const newPostModelToRepoInput = (post: NewPost): CreatePost => {
 
-  const postEntity = new PostEntity();
-  postEntity.likesCount = likesCount;
-  postEntity.commentsCount = commentsCount;
-  Object.assign(postEntity, rest);
+  const createPostEntity: CreatePost = {
+    likesCount: zodWholeNumber.parse(0), //will not provided in create stage
+    commentsCount: zodWholeNumber.parse(0), //will not provided in create stage
+    ...post
+  }
 
-  return postEntity;
+  return createPostEntity;
 };

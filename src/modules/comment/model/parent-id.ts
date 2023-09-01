@@ -5,7 +5,7 @@ import { isCommentId } from './comment-id'
 
 export type ParentId = Brand<WholeNumber, 'ParentId'> 
 
-export const isParentId = (value: unknown): value is (ParentId | null)=> {
+export const isParentId = (value: unknown): value is (ParentId | undefined )=> {
     if (value === null) {
         return true
     }
@@ -15,5 +15,5 @@ export const isParentId = (value: unknown): value is (ParentId | null)=> {
 }
 
 export const zodParentId = z
-  .union([z.number().nullable(), z.null()])
+  .union([z.number().nullable(), z.undefined()])
   .refine(isParentId);

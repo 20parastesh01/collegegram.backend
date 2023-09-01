@@ -1,40 +1,48 @@
 import { zodWholeNumber } from "../../../data/whole-number";
+import { CreateComment } from "../comment.repository";
 import { CommentEntity } from "../entity/comment.entity";
 import { NewComment, Comment } from "../model/comment";
-import { isParentId, zodParentId } from "../model/parent-id";
+import { zodParentId } from "../model/parent-id";
 
 
-export const toCommentModel = (entity: CommentEntity): Comment => {
-  const { createdAt, updatedAt, ...rest } = entity;
-  return rest;
+export const commentDao = (input: (CommentEntity[] | CommentEntity | null)) => {
+  return {
+    toCommentModel(): Comment | undefined {
+      if (!input) return undefined
+      if (Array.isArray(input)) {
+        // Handle the case when input is an array of PostEntity
+        //trow error
+        return undefined
+      } else {
+        const { createdAt, updatedAt, ...rest } = input;
+        return rest;
+      }
+    },
+    toCommentModelList(): Comment[] {
+      if (!input) return []
+      if (Array.isArray(input)) {
+        // Handle the case when input is an array of PostEntity
+        //trow error
+        return input.map((entity) => {
+          const { createdAt, updatedAt, ...rest } = entity;
+          return rest;
+        });
+      } else {
+        const { createdAt, updatedAt, ...rest } = input;
+        return [rest];
+      }
+    }
+  }
 }
 
-export const newCommentModelToEntity = (comment: NewComment): CommentEntity => {
-  const {
-    parentId = zodParentId.parse(null), // Set parentId to null if not provided
+
+export const newCommentModelToRepoInput = (comment: NewComment): CreateComment => {
+  const {parentId , ...rest} = comment
+  const createCommentEntity : CreateComment = {
+    likesCount: zodWholeNumber.parse(0), //will not provided in create stage
+    parentId :  parentId ?? zodParentId.parse(undefined), // Set parentId to null if not provided
     ...rest
-  } = comment;
+  };
 
-  const commentEntity = new CommentEntity();
-  commentEntity.likesCount = zodWholeNumber.parse(0); //will not provided in create stage
-  commentEntity.parentId = parentId
-  Object.assign(commentEntity, rest);
-
-  return commentEntity;
-};
-
-export const commentModelToEntity = (comment: Comment): CommentEntity => {
-  const {
-    likesCount = zodWholeNumber.parse(0), // Set likesCount to 0 if not provided
-    parentId = zodParentId.parse(null), // Set parentId to null if not provided
-    ...rest
-  } = comment;
-
-  const commentEntity = new CommentEntity();
-  commentEntity.likesCount = likesCount;
-  commentEntity.parentId = parentId
-  Object.assign(commentEntity, rest);
-
-
-  return commentEntity;
+  return createCommentEntity;
 };

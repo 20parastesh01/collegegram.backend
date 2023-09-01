@@ -28,8 +28,8 @@ export class PostRouter {
             handleExpress(res, () => postService.getPost(data))
         })
 
-        app.post('/getAll', (req, res) => {
-            const data = zodGetAllPostsDTO.parse(req.user.userId)
+        app.post('/getAll:userId', (req, res) => {
+            const data = zodGetAllPostsDTO.parse(req.params.userId)
             handleExpress(res, () => postService.getAllPosts(data))
         })
 

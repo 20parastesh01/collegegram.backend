@@ -1,19 +1,19 @@
-import { BadRequestError, ServerError } from '../../../utility/http-error'
+import { BadRequestError, NotFoundError, ServerError } from '../../../utility/http-error'
 import { IPostRepository, PostRepository } from '../post.repository'
 import { Service } from '../../../registry'
 import { CreatePostDTO } from '../dto/createPost.dto'
 import { Post } from '../model/post'
-import { PostEntity } from '../entity/post.entity'
 import { PostId } from '../model/post-id'
-import { newPostModelToEntity, toPostModel } from './post.dao'
+import { newPostModelToRepoInput,  } from './post.dao'
 import { UserId } from '../../user/model/user-id'
 
-type GetCreatePost = Post | BadRequestError | ServerError
+type resPost = Post | BadRequestError | ServerError | NotFoundError
+type resPosts = Post[] | BadRequestError | ServerError
 
 export interface IPostService {
-  createPost(data: CreatePostDTO): Promise<GetCreatePost>
-  getPost(postId: PostId): Promise<Post | null>;
-  getAllPosts(userId: UserId): Promise<Post[] | null>;
+  createPost(data: CreatePostDTO): Promise<resPost>
+  getPost(postId: PostId): Promise<resPost>;
+  getAllPosts(userId: UserId): Promise<resPosts>;
 }
 
 @Service(PostRepository)
@@ -21,35 +21,22 @@ export class PostService implements IPostService {
   constructor(private postRepo: IPostRepository) { }
 
 
-  getAllPosts(userId: UserId): Promise<Post[] | null> {
-    return this.postRepo.findAllByAuthor(userId);
+  async getAllPosts(userId: UserId): Promise<resPosts> {
+    return (await this.postRepo.findAllByAuthor(userId)).toPostModelList();
   }
 
-
-
-  async createPost(dto: CreatePostDTO): Promise<PostEntity> {
+  async createPost(dto: CreatePostDTO): Promise<resPost> {
     const { tags, caption, images, author, closeFriend } = dto;
-    //Refactor:
-    // const post = {
-    //   caption: caption,
-    //   tags: tags,
-    //   photos: images,
-    //   author: author,
-    //   closeFriend: closeFriend,
-    // };
 
-    const postEntity = newPostModelToEntity({
+    const createPostRepoInput = newPostModelToRepoInput({
       tags, caption, photos: images, author, closeFriend
     })
-    const createdPost = await this.postRepo.create(postEntity);
-    return createdPost;
+    const createdPost = (await this.postRepo.create(createPostRepoInput)).toPostModel();
+    return createdPost ?? new ServerError()
   }
 
-  async getPost(postId: PostId): Promise<Post | null> {
-    const postEntity = await this.postRepo.findByID(postId);
-    if (postEntity) {
-      return toPostModel(postEntity);
-    }
-    return null;
+  async getPost(postId: PostId): Promise<resPost> {
+    const postEntity = (await this.postRepo.findByID(postId)).toPostModel();
+      return postEntity ?? new NotFoundError('post');
   }
 }
