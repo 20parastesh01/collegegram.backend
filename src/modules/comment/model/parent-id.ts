@@ -3,10 +3,17 @@ import { Brand } from '../../../utility/brand'
 import { WholeNumber } from '../../../data/whole-number'
 import { isCommentId } from './comment-id'
 
-export type ParentId = Brand<WholeNumber | null, 'ParentId'>
+export type ParentId = Brand<WholeNumber, 'ParentId'> 
 
-export const isParentId = (value: unknown): value is ParentId => {
-    return isCommentId(value)
+export const isParentId = (value: unknown): value is (ParentId | null)=> {
+    if (value === null) {
+        return true
+    }
+    else{
+        return isCommentId(value)    
+    }
 }
 
-export const zodParentId = z.coerce.number().refine(isParentId)
+export const zodParentId = z
+  .union([z.number().nullable(), z.null()])
+  .refine(isParentId);

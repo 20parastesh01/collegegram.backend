@@ -30,7 +30,7 @@ export class CommentEntity {
 
     @ManyToOne(() => CommentEntity,{ nullable: true })
     @JoinColumn()
-    parentId!: ParentId
+    parentId!: ParentId | null
     
     @ManyToOne(() => UserEntity)
     @JoinColumn()

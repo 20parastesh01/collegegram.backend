@@ -11,7 +11,7 @@ export interface CreateComment {
     content: Content
     author: UserId
     postId: PostId
-    parentId: ParentId
+    parentId: ParentId | null
 }
 
 
