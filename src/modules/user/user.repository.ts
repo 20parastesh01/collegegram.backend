@@ -5,6 +5,7 @@ import { Email } from '../../data/email'
 import { Password } from './model/password'
 import { UserId } from './model/user-id'
 import { Repo } from '../../registry/layer-decorators'
+import { userDao } from './bll/user.dao'
 
 export interface CreateUser {
     username: Username
@@ -26,12 +27,12 @@ export interface EditUser {
 }
 
 export interface IUserRepository {
-    create(data: CreateUser): Promise<UserEntity>
-    findByUsername(username: Username): Promise<UserEntity | null>
-    findByEmail(email: Email): Promise<UserEntity | null>
-    findById(userId: UserId): Promise<UserEntity | null>
-    changePassword(userId: UserId, newPassword: Password): Promise<UserEntity | null>
-    edit(userId: UserId, data: EditUser): Promise<UserEntity | null>
+    create(data: CreateUser): Promise<ReturnType<typeof userDao>>
+    findByUsername(username: Username): Promise<ReturnType<typeof userDao>>
+    findByEmail(email: Email): Promise<ReturnType<typeof userDao>>
+    findById(userId: UserId): Promise<ReturnType<typeof userDao>>
+    changePassword(userId: UserId, newPassword: Password): Promise<ReturnType<typeof userDao>>
+    edit(userId: UserId, data: EditUser): Promise<ReturnType<typeof userDao>>
 }
 
 @Repo()
@@ -41,30 +42,28 @@ export class UserRepository implements IUserRepository {
     constructor(appDataSource: DataSource) {
         this.userRepo = appDataSource.getRepository(UserEntity)
     }
-    async changePassword(userId: UserId, newPassword: Password): Promise<UserEntity | null> {
-        const userEntity = await this.findById(userId)
-        if (!userEntity) return null
-        userEntity.password = newPassword
-        this.userRepo.save(userEntity)
-        return userEntity
+    async changePassword(userId: UserId, newPassword: Password): Promise<ReturnType<typeof userDao>> {
+        const userEntity = await this.userRepo.save({ id: userId, password: newPassword })
+        return userDao(userEntity)
     }
-    async findByUsername(username: Username): Promise<UserEntity | null> {
-        return this.userRepo.findOneBy({ username })
+    async findByUsername(username: Username): Promise<ReturnType<typeof userDao>> {
+        const userEntity = await this.userRepo.findOneBy({ username })
+        return userDao(userEntity)
     }
-    async findByEmail(email: Email): Promise<UserEntity | null> {
-        return this.userRepo.findOneBy({ email })
+    async findByEmail(email: Email): Promise<ReturnType<typeof userDao>> {
+        const userEntity = await this.userRepo.findOneBy({ email })
+        return userDao(userEntity)
     }
-    async create(data: CreateUser): Promise<UserEntity> {
-        return this.userRepo.save({ ...data })
+    async create(data: CreateUser) {
+        const userEntity = await this.userRepo.save({ ...data })
+        return userDao(userEntity)
     }
-    async findById(userId: UserId): Promise<UserEntity | null> {
-        return this.userRepo.findOneBy({ id: userId })
+    async findById(userId: UserId): Promise<ReturnType<typeof userDao>> {
+        const userEntity = await this.userRepo.findOneBy({ id: userId })
+        return userDao(userEntity)
     }
-    async edit(userId: UserId, data: EditUser) {
-        const userEntity = await this.findById(userId)
-        if (!userEntity) return null
-        const editedUser = { ...userEntity, ...data }
-        console.log(editedUser)
-        return this.userRepo.save(editedUser)
+    async edit(userId: UserId, data: EditUser): Promise<ReturnType<typeof userDao>> {
+        const userEntity = await this.userRepo.save({ id: userId, ...data })
+        return userDao(userEntity)
     }
 }

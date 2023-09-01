@@ -16,13 +16,16 @@ import { Hashed } from '../../../data/hashed'
 import { SendEmailDto } from '../dto/send-email.dto'
 import { isSimpleMessage } from '../../../data/simple-message'
 import { RedisRepo } from '../../../data-source'
+import { userDao } from '../bll/user.dao'
+import * as emailUtils from '../../../utility/send-email'
+
 
 class MockRedis implements IRedis {
     repo: any = {}
     async setSession(session: Hashed, userId: UserId): Promise<void> {
         this.repo[session] = userId
     }
-    async setNewExpire(session: Hashed): Promise<void> {}
+    async setNewExpire(session: Hashed): Promise<void> { }
     async getSession(userId: UserId): Promise<Hashed | null> {
         return this.repo[userId]
     }
@@ -57,25 +60,27 @@ class MockUserRepository implements IUserRepository {
             updatedAt: new Date(),
         })
     }
-    edit(userId: UserId, data: EditUser): Promise<UserEntity | null> {
+    edit(userId: UserId, data: EditUser): Promise<{ toUser(): { id: UserId; username: Username; email: Email; name: string; lastname: string; photo: string; followers: WholeNumber; following: WholeNumber; bio: string; postsCount: WholeNumber; private: boolean } | null; toUserBasic(): { userId: UserId; username: Username; name: string; lastname: string; photo: string } | null; toUserWithPassword(): { id: UserId; username: Username; password: Password; email: Email; name: string; lastname: string; photo: string; followers: WholeNumber; following: WholeNumber; bio: string; postsCount: WholeNumber; private: boolean } | null }> {
         throw new Error('Method not implemented.')
     }
-    async changePassword(userId: UserId, newPassword: Password): Promise<UserEntity | null> {
-        const userEntity = await this.findById(userId)
-        if (!userEntity) return null
+
+    async changePassword(userId: UserId, newPassword: Password): Promise<ReturnType<typeof userDao>> {
+        let userEntity = this.users.find(a => a.id == userId)
+        if (!userEntity) throw new Error('User not Found')
         const index = this.users.indexOf(userEntity)
         userEntity.password = newPassword
         this.users[index] = userEntity
-        return userEntity
+        return userDao(userEntity)
     }
-    async create(user: CreateUser): Promise<UserEntity> {
-        const userEntityWithName = await this.findByUsername(user.username)
+
+    async create(user: CreateUser): Promise<ReturnType<typeof userDao>> {
+        const userEntityWithName = (await this.findByUsername(user.username)).toUser()
         if (userEntityWithName) {
-            throw new QueryFailedError('', [''], '')
+            throw new QueryFailedError('', [''], 'Username Exists')
         }
-        const userEntityWithEmail = await this.findByEmail(user.email)
+        const userEntityWithEmail = (await this.findByEmail(user.email)).toUser()
         if (userEntityWithEmail) {
-            throw new QueryFailedError('', [''], '')
+            throw new QueryFailedError('', [''], 'Email Exists')
         }
         this.users.push({
             ...user,
@@ -91,7 +96,7 @@ class MockUserRepository implements IUserRepository {
             createdAt: new Date(),
             updatedAt: new Date(),
         })
-        return {
+        return userDao({
             ...user,
             id: 2 as UserId,
             name: '',
@@ -104,17 +109,17 @@ class MockUserRepository implements IUserRepository {
             private: false,
             createdAt: new Date(),
             updatedAt: new Date(),
-        }
+        })
     }
 
-    async findById(userId: UserId): Promise<UserEntity | null> {
-        return this.users.find((user) => user.id === userId) || null
+    async findById(userId: UserId): Promise<ReturnType<typeof userDao>> {
+        return userDao(this.users.find((user) => user.id === userId) || null)
     }
-    async findByUsername(username: Username): Promise<UserEntity | null> {
-        return this.users.find((user) => user.username === username) || null
+    async findByUsername(username: Username): Promise<ReturnType<typeof userDao>> {
+        return userDao(this.users.find((user) => user.username === username) || null)
     }
-    async findByEmail(email: Email): Promise<UserEntity | null> {
-        return this.users.find((user) => user.email === email) || null
+    async findByEmail(email: Email): Promise<ReturnType<typeof userDao>> {
+        return userDao(this.users.find((user) => user.email === email) || null)
     }
 }
 
@@ -209,11 +214,14 @@ describe('UserService', () => {
     })
 
     it('should send email successfully with username', async () => {
+        const sendEmailMock = jest.spyOn(emailUtils, 'sendEmail');
+        sendEmailMock.mockImplementation(() => {
+            
+        });
         const data: SendEmailDto = {
             usernameOrEmail: 'testuser1' as Username | Email,
         }
         const result = await userService.forgetPassSendEmail(data)
-        console.log(result)
         expect(isSimpleMessage(result)).toBe(true)
     })
 

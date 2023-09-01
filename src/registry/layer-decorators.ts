@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import { authMiddleware } from '../auth-middleware'
 import { AppDataSource } from '../data-source'
-import { upload } from '../../app'
+import { upload } from '../multer'
 
 let title = 'CollegeGram API'
 let version = '1.0.0'

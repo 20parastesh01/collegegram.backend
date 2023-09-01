@@ -13,6 +13,7 @@ process.env.ENGINE = process.argv.some((arg) => arg.includes('ts-node')) ? 'TS_N
 const PORT = process.env.PORT || 3000
 
 export const initializeProject = async () => {
+    console.log('initialize project called')
     const app = express()
     await AppDataSource.initialize()
     await RedisRepo.initialize()
