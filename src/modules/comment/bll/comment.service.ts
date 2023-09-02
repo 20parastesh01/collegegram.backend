@@ -15,7 +15,7 @@ type resComments = { result: Comment[]; total: number } | BadRequestError | Serv
 
 export interface ICommentService {
     createComment(data: CreateCommentDTO, userId: UserId): Promise<resComment>
-  //getComment(commentId: CommentId): Promise<Comment | null>;
+    //getComment(commentId: CommentId): Promise<Comment | null>;
     getAllComments(postId: PostId): Promise<resComments>
 }
 
@@ -26,26 +26,29 @@ export class CommentService implements ICommentService {
     async getAllComments(postId: PostId): Promise<resComments> {
         const comments = (await this.commentRepo.findAllByPost(postId)).toCommentModelList()
         for (let comment of comments) {
-            const profilePhoto = await MinioRepo.getProfileUrl(comment.author)
+            const profilePhoto = await MinioRepo.getProfileUrl((comment.author as any).id) //TODO: FIX AS ANY!
             if (profilePhoto) comment.authorProfile = profilePhoto
         }
         return { result: comments, total: comments.length }
-  }
+    }
 
-  async createComment(dto: CreateCommentDTO, userId: UserId): Promise<resComment> {
-    const { parentId, content, postId} = dto;
-    const commentEntity = newCommentModelToRepoInput({
-      parentId, content, postId, author: userId
-    })
+    async createComment(dto: CreateCommentDTO, userId: UserId): Promise<resComment> {
+        const { parentId, content, postId } = dto
+        const commentEntity = newCommentModelToRepoInput({
+            parentId,
+            content,
+            postId,
+            author: userId,
+        })
         const createdComment = (await this.commentRepo.create(commentEntity)).toCommentModel()
         return createdComment ?? new ServerError()
-  }
+    }
 
-  // async getComment(commentId: CommentId): Promise<Comment | null> {
-  //   const commentEntity = await this.commentRepo.findByID(commentId);
-  //   if (commentEntity) {
-  //     return toCommentModel(commentEntity);
-  //   }
-  //   return null;
-  // }
+    // async getComment(commentId: CommentId): Promise<Comment | null> {
+    //   const commentEntity = await this.commentRepo.findByID(commentId);
+    //   if (commentEntity) {
+    //     return toCommentModel(commentEntity);
+    //   }
+    //   return null;
+    // }
 }
