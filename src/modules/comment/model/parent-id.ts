@@ -9,4 +9,4 @@ export const isParentId = (value: unknown): value is ParentId=> {
         return isCommentId(value)    
 }
 
-export const zodParentId = z.number().refine(isParentId);
+export const zodParentId = z.number().nullable().refine(isParentId);
