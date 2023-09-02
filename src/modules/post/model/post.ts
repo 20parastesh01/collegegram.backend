@@ -17,6 +17,7 @@ export interface NewPost extends BasePost {
 }
 export interface BasePost {
     author: UserId
+    photos?: string[]
     photosCount: WholeNumber
     closeFriend: boolean
 }
