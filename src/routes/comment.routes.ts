@@ -11,7 +11,7 @@ import { Auth, Get, Post, RequestBody } from '../registry/endpoint-decorator'
 export class CommentRouter {
     constructor(private commentService: CommentService) {}
 
-    @Post('/create')
+    @Post('/')
     @Auth()
     @RequestBody('CreateCommentDTO')
     createComment(req: Request, res: Response) {
@@ -24,7 +24,7 @@ export class CommentRouter {
         handleExpress(res, () => this.commentService.createComment(data))
     }
 
-    @Get('/all/:postId')
+    @Get('/:postId')
     @Auth()
     getAllCommentsByPost(req: Request, res: Response) {
         const data = zodGetAllCommentsDTO.parse(req.params.postId)

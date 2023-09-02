@@ -10,10 +10,10 @@ import { MinioRepo } from '../../../data-source'
 import { zodWholeNumber } from '../../../data/whole-number'
 
 type resPost = Post | BadRequestError | ServerError | NotFoundError
-type resPosts = Post[] | BadRequestError | ServerError
+type resPosts = { result: Post[]; total: number } | BadRequestError | ServerError
 
 export interface IPostService {
-    createPost(dto: CreatePostDTO, files: Express.Multer.File[], userId:UserId): Promise<resPost>
+    createPost(dto: CreatePostDTO, files: Express.Multer.File[], userId: UserId): Promise<resPost>
     getPost(postId: PostId): Promise<resPost>
     getAllPosts(userId: UserId): Promise<resPosts>
 }
@@ -23,19 +23,19 @@ export class PostService implements IPostService {
     constructor(private postRepo: IPostRepository) {}
 
     async getAllPosts(userId: UserId): Promise<resPosts> {
-        return (await this.postRepo.findAllByAuthor(userId)).toPostModelList()
+        const result = (await this.postRepo.findAllByAuthor(userId)).toPostModelList()
+        return { result, total: result.length }
     }
 
-    async createPost(dto: CreatePostDTO, files: Express.Multer.File[], userId:UserId): Promise<resPost> {
+    async createPost(dto: CreatePostDTO, files: Express.Multer.File[], userId: UserId): Promise<resPost> {
         //const { tags, caption, photosCount , author, closeFriend } = dto
-        const photosCount = zodWholeNumber.parse( files.length)
-        const createPostRepoInput = newPostModelToRepoInput({...dto , photosCount, author:userId})
+        const photosCount = zodWholeNumber.parse(files.length)
+        const createPostRepoInput = newPostModelToRepoInput({ ...dto, photosCount, author: userId })
         const createdPost = (await this.postRepo.create(createPostRepoInput)).toPostModel()
         if (createdPost) {
             //const filesCount = files.length
             await MinioRepo.uploadPostPhoto(createdPost.id, files)
         }
-        
 
         return createdPost ?? new ServerError()
     }
