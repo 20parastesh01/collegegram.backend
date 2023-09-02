@@ -17,11 +17,10 @@ export class CommentRouter {
     createComment(req: Request, res: Response) {
         const mergedData = {
             ...req.body,
-            author: req.user.userId,
             parentId: req.body.parentId ?? null, // Set parentId to null if it's not provided
         }
         const data = zodCreateCommentDTO.parse(mergedData)
-        handleExpress(res, () => this.commentService.createComment(data))
+        handleExpress(res, () => this.commentService.createComment(data , req.user.userId))
     }
 
     @Get('/:postId')
