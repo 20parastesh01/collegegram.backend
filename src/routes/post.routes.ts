@@ -18,7 +18,7 @@ export class PostRouter {
     @Auth()
     createPost(req: Request, res: Response) {
         const data = zodCreatePostDTO.parse(req.body)
-        const files = (req.files && !Array.isArray(req.files) && req.files['profile']) || []
+        const files = (req.files && !Array.isArray(req.files) && req.files['photos']) || []
         handleExpress(res, () => this.postService.createPost(data, files, req.user.userId))
     }
 
