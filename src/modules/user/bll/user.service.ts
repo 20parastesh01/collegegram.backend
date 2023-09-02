@@ -69,7 +69,7 @@ export class UserService implements IUserService {
             const newRefreshToken = await createSession(userWithPassword.id)
             if (newRefreshToken instanceof ServerError) return newRefreshToken
 
-            await RedisRepo.setSession(newRefreshToken, userWithPassword.id)
+            await RedisRepo.setSession(newRefreshToken, userWithPassword.id, data.rememberMe)
             refreshToken = newRefreshToken
         }
         const user = dao.toUser()
@@ -96,7 +96,7 @@ export class UserService implements IUserService {
             const refreshToken = await createSession(user.id)
             if (refreshToken instanceof ServerError) return refreshToken
 
-            await RedisRepo.setSession(refreshToken, user.id)
+            await RedisRepo.setSession(refreshToken, user.id, false)
 
             const result = { user, accessToken, refreshToken }
             return result
@@ -153,7 +153,7 @@ export class UserService implements IUserService {
             const newRefreshToken = await createSession(userId)
             if (newRefreshToken instanceof ServerError) return newRefreshToken
 
-            await RedisRepo.setSession(newRefreshToken, user.id)
+            await RedisRepo.setSession(newRefreshToken, user.id, false)
             refreshToken = newRefreshToken
         }
         return { user, accessToken, refreshToken }
