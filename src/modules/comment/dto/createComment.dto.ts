@@ -6,8 +6,7 @@ import { zodParentId } from '../model/parent-id';
 
 export const zodCreateCommentDTO = z.object({
   content: zodContent,
-  parentId: zodParentId,
-  author: zodUserId,
+  parentId: zodParentId.optional(),
   postId: zodPostId,
 });
 

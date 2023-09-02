@@ -45,7 +45,6 @@ export const newCommentModelToRepoInput = (comment: NewComment): CreateComment =
   const { parentId, ...rest } = comment
   const createCommentEntity: CreateComment = {
     likesCount: zodWholeNumber.parse(0), //will not provided in create stage
-    parentId: parentId ?? zodParentId.parse(undefined), // Set parentId to null if not provided
     ...rest
   };
 

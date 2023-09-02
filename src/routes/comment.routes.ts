@@ -15,13 +15,8 @@ export class CommentRouter {
     @Auth()
     @RequestBody('CreateCommentDTO')
     createComment(req: Request, res: Response) {
-        const mergedData = {
-            ...req.body,
-            author: req.user.userId,
-            parentId: req.body.parentId ?? null, // Set parentId to null if it's not provided
-        }
-        const data = zodCreateCommentDTO.parse(mergedData)
-        handleExpress(res, () => this.commentService.createComment(data))
+        const data = zodCreateCommentDTO.parse(req.body)
+        handleExpress(res, () => this.commentService.createComment(data , req.user.userId))
     }
 
     @Get('/:postId')
