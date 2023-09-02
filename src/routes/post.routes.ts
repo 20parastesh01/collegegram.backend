@@ -17,17 +17,9 @@ export class PostRouter {
     @Files('photos')
     @Auth()
     createPost(req: Request, res: Response) {
-        const body = {
-            ...req.body,
-            author: req.user.userId,
-        }
-        const data = zodCreatePostDTO.parse(body)
+        const data = zodCreatePostDTO.parse(req.body)
         const files = (req.files && !Array.isArray(req.files) && req.files['profile']) || []
-        const MergedBody = {
-            ...body,
-            photosCount: files.length,
-        }
-        handleExpress(res, () => this.postService.createPost(MergedBody, files))
+        handleExpress(res, () => this.postService.createPost(data, files, req.user.userId))
     }
 
     @Post('/get/:postId')

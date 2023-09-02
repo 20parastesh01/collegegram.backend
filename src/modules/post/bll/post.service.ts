@@ -7,12 +7,13 @@ import { newPostModelToRepoInput } from './post.dao'
 import { UserId } from '../../user/model/user-id'
 import { Service } from '../../../registry/layer-decorators'
 import { MinioRepo } from '../../../data-source'
+import { zodWholeNumber } from '../../../data/whole-number'
 
 type resPost = Post | BadRequestError | ServerError | NotFoundError
 type resPosts = Post[] | BadRequestError | ServerError
 
 export interface IPostService {
-    createPost(dto: CreatePostDTO, files: Express.Multer.File[]): Promise<resPost>
+    createPost(dto: CreatePostDTO, files: Express.Multer.File[], userId:UserId): Promise<resPost>
     getPost(postId: PostId): Promise<resPost>
     getAllPosts(userId: UserId): Promise<resPosts>
 }
@@ -25,15 +26,16 @@ export class PostService implements IPostService {
         return (await this.postRepo.findAllByAuthor(userId)).toPostModelList()
     }
 
-    async createPost(dto: CreatePostDTO, files: Express.Multer.File[]): Promise<resPost> {
+    async createPost(dto: CreatePostDTO, files: Express.Multer.File[], userId:UserId): Promise<resPost> {
         //const { tags, caption, photosCount , author, closeFriend } = dto
-
-        const createPostRepoInput = newPostModelToRepoInput(dto)
+        const photosCount = zodWholeNumber.parse( files.length)
+        const createPostRepoInput = newPostModelToRepoInput({...dto , photosCount, author:userId})
         const createdPost = (await this.postRepo.create(createPostRepoInput)).toPostModel()
         if (createdPost) {
             //const filesCount = files.length
             await MinioRepo.uploadPostPhoto(createdPost.id, files)
         }
+        
 
         return createdPost ?? new ServerError()
     }
