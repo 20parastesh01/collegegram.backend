@@ -4,7 +4,7 @@ import { UserId, zodUserId } from '../../user/model/user-id'
 import { PostEntity } from '../entity/post.entity'
 import { Caption, zodCaption } from '../model/caption'
 import { Post } from '../model/post'
-import { zodPostId } from '../model/post-id'
+import { PostId, zodPostId } from '../model/post-id'
 import { Tag, zodTags } from '../model/tag'
 import { IPostRepository } from '../post.repository'
 import { PostService } from './post.service'
@@ -15,17 +15,16 @@ describe('PostService', () => {
 
     beforeEach(() => {
         mockPostRepository = {
-            create: jest.fn(),
+            findByID : jest.fn(),
         } as any
 
         postService = new PostService(mockPostRepository)
     })
 
     it('should create a post', async () => {
-        const mockcreatePostDto = {
-            tags: ['tag1', 'tag2', 'tag3'] as Tag[],
-            caption: 'Test caption' as Caption,
-            closeFriend: false,
+        const mockGetPostDto = {
+            
+            postId: 1 as PostId,
         }
         const userId = 123 as UserId
         const photosCount = 2 as WholeNumber
@@ -59,18 +58,19 @@ describe('PostService', () => {
                 buffer: Buffer.alloc(0), // Empty buffer
             },
         ]
+        
 
         const mockCreatedPost: Post = {
-            id: zodPostId.parse(1),
-            caption: mockcreatePostDto.caption,
-            tags: mockcreatePostDto.tags,
+            id: mockGetPostDto.postId,
+            caption: "test" as Caption,
+            tags: ["a","b"] as Tag[],
             photosCount: photosCount,
             author: userId,
-            closeFriend: mockcreatePostDto.closeFriend,
-            likesCount: 1 as WholeNumber,
-            commentsCount: 1 as WholeNumber,
+            closeFriend: false,
+            likesCount: 0 as WholeNumber,
+            commentsCount: 0 as WholeNumber,
         }
-        const postDao = (input: Post) => {
+        const postOrNullDao = (input: Post) => {
             return {
                 toPostModel(): Post {
                     return input
@@ -78,11 +78,11 @@ describe('PostService', () => {
             }
         }
 
-        mockPostRepository.create.mockResolvedValue(postDao(mockCreatedPost))
+        mockPostRepository.create.mockResolvedValue(postOrNullDao(mockCreatedPost))
 
-        const result = await postService.createPost(mockcreatePostDto, mockFiles, userId)
+        const result = await postService.getPost(mockGetPostDto.postId)
 
         expect(result).toEqual(mockCreatedPost)
-        expect(mockPostRepository.create).toHaveBeenCalledWith(expect.objectContaining(mockCreatedPost))
+        expect(mockPostRepository.findByID).toHaveBeenCalledWith(expect.objectContaining(mockCreatedPost))
     })
 })
