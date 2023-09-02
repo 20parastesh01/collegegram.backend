@@ -1,12 +1,4 @@
-import {
-    Column,
-    CreateDateColumn,
-    Entity,
-    JoinColumn,
-    ManyToOne,
-    PrimaryGeneratedColumn,
-    UpdateDateColumn,
-} from 'typeorm'
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
 import { WholeNumber } from '../../../data/whole-number'
 import { PostId } from '../model/post-id'
 import { Caption } from '../model/caption'
@@ -25,7 +17,7 @@ export class PostEntity {
     @Column('integer', { default: 0 })
     photosCount!: WholeNumber
 
-    @Column({ type: 'text', array: true, nullable: true })
+    @Column({ type: 'text', array: true, default: [] })
     tags?: Tag[]
 
     @ManyToOne(() => UserEntity)
