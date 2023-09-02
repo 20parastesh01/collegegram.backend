@@ -5,7 +5,7 @@ import { UserId } from '../user/model/user-id'
 import { PostId } from '../post/model/post-id'
 import { ParentId } from './model/parent-id'
 import { WholeNumber } from '../../data/whole-number'
-import { commentDao } from './bll/comment.dao'
+import { commentDao, commentListDao } from './bll/comment.dao'
 import { Repo } from '../../registry/layer-decorators'
 
 export interface CreateComment {
@@ -18,7 +18,7 @@ export interface CreateComment {
 
 export interface ICommentRepository {
     create(data: CreateComment): Promise<ReturnType<typeof commentDao>>
-    findAllByPost(postId: PostId): Promise<ReturnType<typeof commentDao>>
+    findAllByPost(postId: PostId): Promise<ReturnType<typeof commentListDao>>
     //findByID(postId: PostId): Promise<CommentEntity | null>;
 }
 
@@ -29,7 +29,7 @@ export class CommentRepository implements ICommentRepository {
     constructor(appDataSource: DataSource) {
         this.CommentRepo = appDataSource.getRepository(CommentEntity)
     }
-    async findAllByPost(postId: PostId): Promise<ReturnType<typeof commentDao>> {
+    async findAllByPost(postId: PostId): Promise<ReturnType<typeof commentListDao>> {
         const comments = await this.CommentRepo.find({
             where: {
                 postId: postId,
@@ -38,7 +38,7 @@ export class CommentRepository implements ICommentRepository {
                 createdAt: 'DESC', // Sort by createdAt in descending order
             },
         });
-        return commentDao(comments);
+        return commentListDao(comments);
     }
     // async findByauthor(userID: UserId): Promise<PostEntity[] | null> {
     //     return this.PostRepo.findBy({ author:userID })

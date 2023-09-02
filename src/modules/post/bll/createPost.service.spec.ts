@@ -26,10 +26,9 @@ describe('PostService', () => {
             tags: ['tag1', 'tag2', 'tag3'] as Tag[],
             caption: 'Test caption' as Caption,
             closeFriend: false,
-            author: 123 as UserId,
-            photosCount: 1 as WholeNumber,
         }
-
+        const userId = 123 as UserId
+        const photosCount = 2 as WholeNumber
         const mockFiles: Express.Multer.File[] = [
             {
                 fieldname: 'file1',
@@ -61,17 +60,12 @@ describe('PostService', () => {
             },
         ]
 
-        // const validatedTags = zodTags.parse(mockcreatePostDto.tags);
-        // const validatedCaption = zodCaption.parse(mockcreatePostDto.caption);
-        // const validatedAuthor = zodUserId.parse(mockcreatePostDto.author);
-        // const validatedId = zodPostId.parse(1);
-
         const mockCreatedPost: Post = {
             id: zodPostId.parse(1),
             caption: mockcreatePostDto.caption,
             tags: mockcreatePostDto.tags,
-            photosCount: mockcreatePostDto.photosCount,
-            author: mockcreatePostDto.author,
+            photosCount: photosCount,
+            author: userId,
             closeFriend: mockcreatePostDto.closeFriend,
             likesCount: 1 as WholeNumber,
             commentsCount: 1 as WholeNumber,
@@ -86,7 +80,7 @@ describe('PostService', () => {
 
         mockPostRepository.create.mockResolvedValue(postDao(mockCreatedPost))
 
-        const result = await postService.createPost(mockcreatePostDto, mockFiles)
+        const result = await postService.createPost(mockcreatePostDto, mockFiles, userId)
 
         expect(result).toEqual(mockCreatedPost)
         expect(mockPostRepository.create).toHaveBeenCalledWith(expect.objectContaining(mockcreatePostDto))
