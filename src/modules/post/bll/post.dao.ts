@@ -9,13 +9,13 @@ export const postOrNullDao = (input: ( PostEntity | null)) => {
       if (input === null) return null
       else {
         // Handle the case when input is a single PostEntity
-        const { createdAt, updatedAt, ...rest } = input;
+        const {  updatedAt, ...rest } = input;
         return rest;
       }
     },
     toThumbnailModel(): BasePost | null {
       if (input === null) return null;
-      const { createdAt, updatedAt, caption, likesCount, tags, commentsCount, ...rest } = input;
+      const {  updatedAt, caption, likesCount, tags, commentsCount, ...rest } = input;
       return rest;
     },
   };
@@ -24,7 +24,7 @@ export const postDao = (input: PostEntity ) => {
   return {
     toPostModel(): Post {
         // Handle the case when input is a single PostEntity
-        const { createdAt, updatedAt, ...rest } = input;
+        const {  updatedAt, ...rest } = input;
         return rest;
     },
   };
@@ -34,14 +34,14 @@ export const postArrayDao = (input: (PostEntity[])) => {
     toPostModelList(): Post[] {
       // Handle the case when input is an array of PostEntity
       return input.map((entity) => {
-        const { createdAt, updatedAt, ...rest } = entity;
+        const {  updatedAt, ...rest } = entity;
         return rest;
       });
     },
     toThumbnailModelList(): BasePost[] {
       // Handle the case when input is an array of PostEntity
       return input.map((entity) => {
-        const { createdAt, updatedAt, caption, likesCount, tags, commentsCount, ...rest } = entity;
+        const {  updatedAt, caption, likesCount, tags, commentsCount, ...rest } = entity;
         return rest;
       });
     },

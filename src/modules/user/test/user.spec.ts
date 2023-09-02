@@ -63,11 +63,7 @@ class MockUserRepository implements IUserRepository {
     edit(
         userId: UserId,
         data: EditUser
-    ): Promise<{
-        toUser(): User
-        toUserBasic(): { userId: UserId; username: Username; name: string; lastname: string; photo: string }
-        toUserWithPassword(): { id: UserId; username: Username; password: Password; email: Email; name: string; lastname: string; photo: string; followers: WholeNumber; following: WholeNumber; bio: string; postsCount: WholeNumber; private: boolean }
-    } | null> {
+    ): Promise<ReturnType<typeof userDao>> {
         throw new Error('Method not implemented.')
     }
 
