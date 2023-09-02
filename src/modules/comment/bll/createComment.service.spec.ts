@@ -34,7 +34,7 @@ describe('CommentService', () => {
             id: 1 as CommentId,
             content: mockcreateCommentDto.content,
             author: userId,
-            likesCount: 1 as WholeNumber,
+            likesCount: 0 as WholeNumber,
             parentId: mockcreateCommentDto.parentId,
             postId: mockcreateCommentDto.postId
         }
