@@ -24,6 +24,12 @@ export class PostService implements IPostService {
 
     async getAllPosts(userId: UserId): Promise<resPosts> {
         const result = (await this.postRepo.findAllByAuthor(userId)).toPostModelList()
+        for (let post of result) {
+            const photos = await MinioRepo.getPostPhotoUrl(post.id, post.photosCount)
+            if (photos) {
+                post.photos = await MinioRepo.getPostPhotoUrl(post.id, post.photosCount)
+            }
+        }
         return { result, total: result.length }
     }
 
@@ -33,7 +39,10 @@ export class PostService implements IPostService {
         const createPostRepoInput = newPostModelToRepoInput({ ...dto, photosCount, author: userId })
         const createdPost = (await this.postRepo.create(createPostRepoInput)).toPostModel()
         if (createdPost) {
-            //const filesCount = files.length
+            const photos = await MinioRepo.getPostPhotoUrl(createdPost.id, createdPost.photosCount)
+            if (photos) {
+                createdPost.photos = await MinioRepo.getPostPhotoUrl(createdPost.id, createdPost.photosCount)
+            }
             await MinioRepo.uploadPostPhoto(createdPost.id, files)
         }
 
@@ -41,7 +50,13 @@ export class PostService implements IPostService {
     }
 
     async getPost(postId: PostId): Promise<resPost> {
-        const postEntity = (await this.postRepo.findByID(postId)).toPostModel()
-        return postEntity ?? new NotFoundError('post')
+        const post = (await this.postRepo.findByID(postId)).toPostModel()
+        if (post) {
+            const photos = await MinioRepo.getPostPhotoUrl(post.id, post.photosCount)
+            if (photos) {
+                post.photos = await MinioRepo.getPostPhotoUrl(post.id, post.photosCount)
+            }
+        }
+        return post ?? new NotFoundError('post')
     }
 }

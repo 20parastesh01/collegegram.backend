@@ -73,11 +73,17 @@ export class Minio {
         return files.length
     }
 
-    async getPostPhotoUrl(postId: PostId) {
-        if (!this.client || !this.config) return console.log('Minio Is Not Running')
+    async getPostPhotoUrl(postId: PostId, count: number) {
+        if (!this.client || !this.config) {
+            console.log('Minio Is Not Running')
+            return undefined
+        }
         const result = []
-        const minioUrl = await this.client.presignedUrl('GET', postPhotoBucket, postId + '')
-        result.push('/file' + minioUrl.split(this.config.endPoint + ':' + this.config.port)[1])
+        for (let i = 1; i <= count; i++) {
+            const minioUrl = await this.client.presignedUrl('GET', postPhotoBucket, postId + '-' + i)
+            result.push('/file' + minioUrl.split(this.config.endPoint + ':' + this.config.port)[1])
+        }
+
         return result
     }
 
