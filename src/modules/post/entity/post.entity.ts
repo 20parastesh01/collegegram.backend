@@ -17,7 +17,7 @@ export class PostEntity {
     @Column('integer', { default: 0 })
     photosCount!: WholeNumber
 
-    @Column({ type: 'text', array: true, default: [] })
+    @Column({ type: 'text', array: true, default: [], nullable:true })
     tags?: Tag[]
 
     @ManyToOne(() => UserEntity)
