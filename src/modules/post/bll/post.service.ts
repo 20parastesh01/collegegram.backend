@@ -26,15 +26,9 @@ export class PostService implements IPostService {
     }
 
     async createPost(dto: CreatePostDTO, files: Express.Multer.File[]): Promise<resPost> {
-        const { tags, caption, photosCount , author, closeFriend } = dto
+        //const { tags, caption, photosCount , author, closeFriend } = dto
 
-        const createPostRepoInput = newPostModelToRepoInput({
-            tags,
-            caption,
-            photosCount,
-            author,
-            closeFriend,
-        })
+        const createPostRepoInput = newPostModelToRepoInput(dto)
         const createdPost = (await this.postRepo.create(createPostRepoInput)).toPostModel()
         if (createdPost) {
             //const filesCount = files.length

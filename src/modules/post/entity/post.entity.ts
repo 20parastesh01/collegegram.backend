@@ -19,14 +19,14 @@ export class PostEntity {
     @PrimaryGeneratedColumn()
     id!: PostId
 
-    @Column({ nullable: true })
-    caption?: Caption
+    @Column()
+    caption!: Caption
 
     @Column('integer', { default: 0 })
     photosCount!: WholeNumber
 
     @Column({ type: 'text', array: true, nullable: true })
-    tags!: Tag[]
+    tags?: Tag[]
 
     @ManyToOne(() => UserEntity)
     @JoinColumn()

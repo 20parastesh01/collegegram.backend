@@ -5,12 +5,12 @@ import { PostId } from './model/post-id'
 import { PostEntity } from './entity/post.entity'
 import { UserId } from '../user/model/user-id'
 import { WholeNumber } from '../../data/whole-number'
-import { postDao } from './bll/post.dao'
+import { postArrayDao, postDao, postOrNullDao } from './bll/post.dao'
 import { Repo } from '../../registry/layer-decorators'
 
 export interface CreatePost {
     caption: Caption
-    tags: Tag[]
+    tags?: Tag[]
     author: UserId
     photosCount: WholeNumber
     closeFriend: boolean
@@ -21,8 +21,8 @@ export interface CreatePost {
 
 export interface IPostRepository {
     create(data: CreatePost): Promise<ReturnType<typeof postDao>>
-    findAllByAuthor(userId: UserId): Promise<ReturnType<typeof postDao>>
-    findByID(postId: PostId): Promise<ReturnType<typeof postDao>>;
+    findAllByAuthor(userId: UserId): Promise<ReturnType<typeof postArrayDao>>
+    findByID(postId: PostId): Promise<ReturnType<typeof postOrNullDao>>;
 }
 
 @Repo()
@@ -32,7 +32,7 @@ export class PostRepository implements IPostRepository {
     constructor(appDataSource: DataSource) {
         this.PostRepo = appDataSource.getRepository(PostEntity)
     }
-    async findAllByAuthor(userId: UserId): Promise<ReturnType<typeof postDao>> {
+    async findAllByAuthor(userId: UserId): Promise<ReturnType<typeof postArrayDao>> {
         const posts : PostEntity[] = await this.PostRepo.find({
             where: {
                 author: userId,
@@ -41,11 +41,11 @@ export class PostRepository implements IPostRepository {
                 createdAt: 'DESC', // Sort by createdAt in descending order
             },
         });
-        return postDao(posts)
+        return postArrayDao(posts)
     }
-    async findByID(postId: PostId): Promise<ReturnType<typeof postDao>> {
+    async findByID(postId: PostId): Promise<ReturnType<typeof postOrNullDao>> {
         const postEntity =  await this.PostRepo.findOneBy({ id: postId });
-        return postDao(postEntity)
+        return postOrNullDao(postEntity)
     }
     async create(data: CreatePost): Promise<ReturnType<typeof postDao>> {
         const postEntity = await this.PostRepo.save(data)

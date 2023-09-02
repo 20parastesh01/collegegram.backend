@@ -2,31 +2,25 @@ import { z } from 'zod'
 import { Brand } from '../../../utility/brand'
 import { NonEmptyString } from '../../../data/non-empty-string'
 
+const TagsSchema = z.array(z.string());
+
 export type Tag = Brand<NonEmptyString, 'Tag'>
 
-const SevenWordsValidator = (str: string): str is Tag => {
-  const words = str.trim().split(/\s+/);
-  return words.length < 8;
-};
+const spliter = (str: string) : string[] => {
+  const words = str.trim().split(/\s+/).map(x => x.trim());
+  return words;
+}
 
 export const isTag = (value: string): value is Tag => {
   return typeof value === 'string' && /^(?!.*#).*$/.test(value) //&& value.length <= 25
 }
 
-export const combineAllValidator = (tagsArray: string): tagsArray is Tag[] => {
-  const validatedTags = tagsArray.trim().split(/\s+/).map(tag => {
-    if (isTag(tag)) {
-      return tag;
-    } else {
-      throw new Error(`Invalid tag: ${tag}`);
-    }
-  });
-  return SevenWordsValidator(tagsArray) && validatedTags.length > 0;
+export const isTags = (tagsArray: string[]): tagsArray is Tag[] => {
+  
+  const validatedTags = tagsArray.every(tag => isTag(tag))
+
+  return tagsArray.length <8 && tagsArray.length > 0 && validatedTags;
 };
 
-export const zodTag = z.string().refine(combineAllValidator)
-
-export const parseTagsWithZod = (tagsString: string): Tag[] => {
-  const tagStrings = tagsString.trim().split(/\s+/);
-  return tagStrings.filter((tag) => isTag(tag)) as Tag[];
-};
+export const zodTags = z.string().transform(x=>spliter(x)).refine(isTags)
+//export const zodTag = z.string().refine(isTag)

@@ -1,11 +1,11 @@
 import { z } from 'zod'
-import { zodTag } from '../model/tag';
+import { zodTags } from '../model/tag';
 import { zodCaption } from '../model/caption';
 import { zodUserId } from '../../user/model/user-id';
 import { zodWholeNumber } from '../../../data/whole-number';
 
 export const zodCreatePostDTO = z.object({
-  tags: zodTag,
+  tags: zodTags.optional(),
   caption: zodCaption,
   closeFriend: z.coerce.boolean(),
   author: zodUserId,

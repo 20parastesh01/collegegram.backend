@@ -8,12 +8,12 @@ export interface Post extends BasePost {
     id: PostId
     caption: Caption
     likesCount: WholeNumber
-    tags: Tag[]
+    tags?: Tag[]
     commentsCount: WholeNumber
 }
 export interface NewPost extends BasePost {
     caption: Caption
-    tags: Tag[]
+    tags?: Tag[]
 }
 export interface BasePost {
     author: UserId

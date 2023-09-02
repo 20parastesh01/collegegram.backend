@@ -27,7 +27,7 @@ export class PostRouter {
             ...body,
             photosCount: files.length,
         }
-        handleExpress(res, () => this.postService.createPost(data, files))
+        handleExpress(res, () => this.postService.createPost(MergedBody, files))
     }
 
     @Post('/get/:postId')
