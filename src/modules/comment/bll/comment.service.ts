@@ -8,6 +8,7 @@ import { newCommentModelToRepoInput } from './comment.dao'
 import { UserId } from '../../user/model/user-id'
 import { PostId } from '../../post/model/post-id'
 import { Service } from '../../../registry/layer-decorators'
+import { MinioRepo } from '../../../data-source'
 
 type resComment = Comment | BadRequestError | ServerError | NotFoundError
 type resComments = { result: Comment[]; total: number } | BadRequestError | ServerError
@@ -24,6 +25,10 @@ export class CommentService implements ICommentService {
 
     async getAllComments(postId: PostId): Promise<resComments> {
         const comments = (await this.commentRepo.findAllByPost(postId)).toCommentModelList()
+        for (let comment of comments) {
+            const profilePhoto = await MinioRepo.getProfileUrl(comment.author)
+            if (profilePhoto) comment.authorProfile = profilePhoto
+        }
         return { result: comments, total: comments.length }
     }
 

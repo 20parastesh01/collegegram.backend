@@ -30,15 +30,22 @@ export class CommentRepository implements ICommentRepository {
         this.CommentRepo = appDataSource.getRepository(CommentEntity)
     }
     async findAllByPost(postId: PostId): Promise<ReturnType<typeof commentListDao>> {
-        const comments = await this.CommentRepo.find({
-            where: {
-                postId: postId,
-            },
-            order: {
-                createdAt: 'DESC', // Sort by createdAt in descending order
-            },
-        });
-        return commentListDao(comments);
+        const comments = await this.CommentRepo.createQueryBuilder('comment')
+            .where('comment.postId = :postId', { postId })
+            .orderBy('comment.createdAt', 'DESC')
+            .leftJoinAndSelect('comment.author', 'author')
+            .select([
+                'comment.id',
+                'comment.content',
+                'comment.postId',
+                'comment.likesCount',
+                'author.id',
+                'author.username',
+                'author.name',
+                'author.lastname'
+            ])
+            .getMany()
+        return commentListDao(comments)
     }
     // async findByauthor(userID: UserId): Promise<PostEntity[] | null> {
     //     return this.PostRepo.findBy({ author:userID })

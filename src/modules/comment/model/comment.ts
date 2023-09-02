@@ -8,6 +8,7 @@ import { ParentId } from './parent-id'
 export interface Comment extends BaseComment {
     id: CommentId
     likesCount: WholeNumber
+    authorProfile?: string
     parentId?: ParentId 
 }
 export interface NewComment extends BaseComment {

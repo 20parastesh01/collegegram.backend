@@ -107,6 +107,7 @@ export const Route = (basePath: string, ...deps: any[]): ClassDecorator => {
                         const apiDef = instance[key]
                         const { auth, method, path: givenPath, summary, description, givenTag, multipart, response, body, singlefiles, multiplefiles } = apiDef
                         let path: string = basePath + (givenPath || '')
+                        let originalPath = path
                         let tag = getTag(givenTag, basePath)
 
                         const api: any = {}
@@ -162,7 +163,7 @@ export const Route = (basePath: string, ...deps: any[]): ClassDecorator => {
                         if (multerFields.length > 0) callbacks.push(upload.fields(multerFields))
                         callbacks.push(apiDef.bind(instance))
                         if (typeof method == 'string' && (method == 'post' || method == 'get' || method == 'patch' || method == 'put' || method == 'delete')) {
-                            router[method](path, ...callbacks)
+                            router[method](originalPath, ...callbacks)
                         }
                     }
                     routes.push(router)
