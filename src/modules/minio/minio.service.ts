@@ -4,6 +4,7 @@ import http from 'http'
 import { getMinioConfig } from './mino.config'
 import { UserId } from '../user/model/user-id'
 import path from 'path'
+import { PostId } from '../post/model/post-id'
 
 export const profilePhotoBucket = 'userprofile'
 export const postPhotoBucket = 'post'
@@ -64,7 +65,7 @@ export class Minio {
         await this.client.removeObject(profilePhotoBucket, userId + '')
     }
 
-    async uploadPostPhoto(postId: number, files: Express.Multer.File[]) {
+    async uploadPostPhoto(postId: PostId, files: Express.Multer.File[]) {
         if (!this.client) return console.log('Minio Is Not Running')
         for (let i = 0; i < files.length; i++) {
             await this.client.putObject(postPhotoBucket, postId + '-' + (i + 1), files[i].buffer)
@@ -72,7 +73,7 @@ export class Minio {
         return files.length
     }
 
-    async getPostPhotoUrl(postId: number) {
+    async getPostPhotoUrl(postId: PostId) {
         if (!this.client || !this.config) return console.log('Minio Is Not Running')
         const result = []
         const minioUrl = await this.client.presignedUrl('GET', postPhotoBucket, postId + '')
@@ -80,7 +81,7 @@ export class Minio {
         return result
     }
 
-    async deletePostPhoto(postId: number, count: number) {
+    async deletePostPhoto(postId: PostId, count: number) {
         if (!this.client) return console.log('Minio Is Not Running')
         for (let i = 1; i <= count; i++) {
             await this.client.removeObject(postPhotoBucket, postId + '-' + i)

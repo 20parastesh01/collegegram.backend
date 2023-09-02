@@ -7,6 +7,8 @@ import { Redis } from './redis'
 import { UserEntity } from './modules/user/entity/user.entity'
 import { EmailEntity } from './modules/email/entity/email.entity'
 import { Minio } from './modules/minio/minio.service'
+import { CommentEntity } from './modules/comment/entity/comment.entity'
+import { PostEntity } from './modules/post/entity/post.entity'
 
 export const AppDataSource = new DataSource({
     type: 'postgres',
@@ -17,7 +19,7 @@ export const AppDataSource = new DataSource({
     database: process.env.DB_NAME,
     synchronize: true,
     logging: false,
-    entities: [EmailEntity, UserEntity, SampleEntity],
+    entities: [EmailEntity, UserEntity, SampleEntity, CommentEntity, PostEntity],
     migrations: ['./src/migration/*.ts'],
     subscribers: [],
 })
