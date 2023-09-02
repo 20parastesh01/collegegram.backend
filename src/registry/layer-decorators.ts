@@ -116,7 +116,7 @@ export const Route = (basePath: string, ...deps: any[]): ClassDecorator => {
                             api.parameters = [...(api.parameters || []), ...pathparameters]
                         }
                         path = path.replace(/:(\w+)/g, '{$1}')
-
+                        path = '/api' + path
                         if (auth) api.security = [{ jwt: [] }]
 
                         api.summary = (summary || '').trim()
