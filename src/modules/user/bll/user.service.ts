@@ -65,6 +65,9 @@ export class UserService implements IUserService {
         if (accessToken instanceof ServerError) return accessToken
 
         let refreshToken = await RedisRepo.getSession(userWithPassword.id)
+        if (refreshToken) {
+            RedisRepo.setNewExpire(refreshToken)
+        }
         if (!refreshToken) {
             const newRefreshToken = await createSession(userWithPassword.id)
             if (newRefreshToken instanceof ServerError) return newRefreshToken
