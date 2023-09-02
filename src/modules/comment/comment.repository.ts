@@ -38,6 +38,7 @@ export class CommentRepository implements ICommentRepository {
                 'comment.id',
                 'comment.content',
                 'comment.postId',
+                'comment.createdAt',
                 'comment.likesCount',
                 'author.id',
                 'author.username',
