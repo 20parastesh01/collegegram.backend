@@ -6,7 +6,7 @@ import { loginDto } from '../modules/user/dto/login.dto'
 import { authMiddleware } from '../auth-middleware'
 import { sendEmailDto } from '../modules/user/dto/send-email.dto'
 import { SetPasswordDto, setPasswordDto } from '../modules/user/dto/set-pass.dto'
-import { Auth, File, Get, Patch, Post, RequestBody } from '../registry/endpoint-decorator'
+import { Auth, File, Files, Get, Patch, Post, RequestBody } from '../registry/endpoint-decorator'
 import { Route } from '../registry/layer-decorators'
 import { editProfileDto } from '../modules/user/dto/edit-profile.dto'
 

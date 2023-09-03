@@ -20,13 +20,12 @@ import { userDao } from '../bll/user.dao'
 import * as emailUtils from '../../../utility/send-email'
 import { User } from '../model/user'
 
-
 class MockRedis implements IRedis {
     repo: any = {}
     async setSession(session: Hashed, userId: UserId): Promise<void> {
         this.repo[session] = userId
     }
-    async setNewExpire(session: Hashed): Promise<void> { }
+    async setNewExpire(session: Hashed): Promise<void> {}
     async getSession(userId: UserId): Promise<Hashed | null> {
         return this.repo[userId]
     }
@@ -61,12 +60,19 @@ class MockUserRepository implements IUserRepository {
             updatedAt: new Date(),
         })
     }
-    edit(userId: UserId, data: EditUser): Promise<{ toUser(): User; toUserBasic(): { userId: UserId; username: Username; name: string; lastname: string; photo: string }; toUserWithPassword(): { id: UserId; username: Username; password: Password; email: Email; name: string; lastname: string; photo: string; followers: WholeNumber; following: WholeNumber; bio: string; postsCount: WholeNumber; private: boolean } } | null> {
+    edit(
+        userId: UserId,
+        data: EditUser
+    ): Promise<{
+        toUser(): User
+        toUserBasic(): { userId: UserId; username: Username; name: string; lastname: string; photo: string }
+        toUserWithPassword(): { id: UserId; username: Username; password: Password; email: Email; name: string; lastname: string; photo: string; followers: WholeNumber; following: WholeNumber; bio: string; postsCount: WholeNumber; private: boolean }
+    } | null> {
         throw new Error('Method not implemented.')
     }
 
     async changePassword(userId: UserId, newPassword: Password): Promise<ReturnType<typeof userDao>> {
-        let userEntity = this.users.find(a => a.id == userId)
+        let userEntity = this.users.find((a) => a.id == userId)
         if (!userEntity) throw new Error('User not Found')
         const index = this.users.indexOf(userEntity)
         userEntity.password = newPassword
@@ -76,7 +82,7 @@ class MockUserRepository implements IUserRepository {
 
     async create(inputUser: CreateUser): Promise<ReturnType<typeof userDao>> {
         let dao = await this.findByUsername(inputUser.username)
-        if(dao){
+        if (dao) {
             throw new QueryFailedError('', [''], 'Username Exists')
         }
         dao = await this.findByEmail(inputUser.email)
@@ -144,6 +150,7 @@ describe('UserService', () => {
         const data: LoginDto = {
             usernameOrEmail: 'testuser1' as Username | Email,
             password: 'hashedpassword1' as InputPassword,
+            rememberMe: false,
         }
 
         const result: LoginSignUp = await userService.login(data)
@@ -157,6 +164,7 @@ describe('UserService', () => {
         const data: LoginDto = {
             usernameOrEmail: 'test1@example.com' as Username | Email,
             password: 'hashedpassword1' as InputPassword,
+            rememberMe: false,
         }
         const result: LoginSignUp = await userService.login(data)
 
@@ -166,13 +174,13 @@ describe('UserService', () => {
     })
 
     it('should fail login with incorrect password', async () => {
-        const data: LoginDto = { usernameOrEmail: 'testuser1' as Username | Email, password: 'wrongpassword' as InputPassword }
+        const data: LoginDto = { usernameOrEmail: 'testuser1' as Username | Email, password: 'wrongpassword' as InputPassword, rememberMe: false }
         const result = await userService.login(data)
         expect(result).toBeInstanceOf(UnauthorizedError)
     })
 
     it('should fail login with non-existent username/email', async () => {
-        const data: LoginDto = { usernameOrEmail: 'testuser3' as Username | Email, password: 'hashedpassword3' as InputPassword }
+        const data: LoginDto = { usernameOrEmail: 'testuser3' as Username | Email, password: 'hashedpassword3' as InputPassword, rememberMe: false }
         const result = await userService.login(data)
         expect(result).toBeInstanceOf(UnauthorizedError)
     })
@@ -215,10 +223,8 @@ describe('UserService', () => {
     })
 
     it('should send email successfully with username', async () => {
-        const sendEmailMock = jest.spyOn(emailUtils, 'sendEmail');
-        sendEmailMock.mockImplementation(() => {
-            
-        });
+        const sendEmailMock = jest.spyOn(emailUtils, 'sendEmail')
+        sendEmailMock.mockImplementation(() => {})
         const data: SendEmailDto = {
             usernameOrEmail: 'testuser1' as Username | Email,
         }

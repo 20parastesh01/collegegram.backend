@@ -8,31 +8,31 @@ export class HttpError extends Error {
 }
 
 export class ForbiddenError extends HttpError {
-    constructor(message = 'Forbidden') {
+    constructor(message = 'دسترسی ممنوع است') {
         super(403, message)
     }
 }
 
 export class NotFoundError extends HttpError {
-    constructor(message = 'Not Found') {
+    constructor(message = 'درخواست پیدا نشد.') {
         super(404, message)
     }
 }
 
 export class UnauthorizedError extends HttpError {
-    constructor(message = 'Unauthorized') {
+    constructor(message = 'اجازه دسترسی به این منبع وجود ندارد.') {
         super(401, message)
     }
 }
 
 export class BadRequestError extends HttpError {
-    constructor(message = 'Bad Request') {
+    constructor(message = 'درخواست نامعتبر است.') {
         super(401, message)
     }
 }
 
 export class ServerError extends HttpError {
-    constructor(message = 'Server Error') {
+    constructor(message = 'خطای سرور رخ داده است.') {
         super(500, message)
     }
 }
