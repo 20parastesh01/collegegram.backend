@@ -21,6 +21,7 @@ import { userDao } from './user.dao'
 import { Service } from '../../../registry/layer-decorators'
 import { EditProfileDto, editProfileDto } from '../dto/edit-profile.dto'
 import { Token } from '../../../data/token'
+import { PersianErrors } from '../../../utility/persian-errors'
 
 export type LoginSignUp = UserWithToken | BadRequestError | ServerError
 
@@ -38,7 +39,7 @@ export const hash = async (input: string): Promise<Password> => {
     if (isPassword(hashed)) {
         return hashed
     }
-    throw new ServerError('Hashing Went Wrong')
+    throw new ServerError()
 }
 
 @Service(UserRepository)
@@ -55,21 +56,24 @@ export class UserService implements IUserService {
         if (isEmail(usernameOrEmail)) {
             dao = await this.userRepo.findByEmail(usernameOrEmail)
         }
-        if (!dao) return new UnauthorizedError('Username or Email is Invalid')
+        if (!dao) return new UnauthorizedError(PersianErrors.EmailOrUsernameNotFound)
         const userWithPassword = dao.toUserWithPassword()
         const isMatchPassword = await compareHash(password, userWithPassword.password)
         if (!isMatchPassword) {
-            return new UnauthorizedError('Invalid Password')
+            return new UnauthorizedError(PersianErrors.InvalidPassword)
         }
         const accessToken = generateToken(dao.toUserBasic())
         if (accessToken instanceof ServerError) return accessToken
 
         let refreshToken = await RedisRepo.getSession(userWithPassword.id)
+        if (refreshToken) {
+            RedisRepo.setNewExpire(refreshToken)
+        }
         if (!refreshToken) {
             const newRefreshToken = await createSession(userWithPassword.id)
             if (newRefreshToken instanceof ServerError) return newRefreshToken
 
-            await RedisRepo.setSession(newRefreshToken, userWithPassword.id)
+            await RedisRepo.setSession(newRefreshToken, userWithPassword.id, data.rememberMe)
             refreshToken = newRefreshToken
         }
         const user = dao.toUser()
@@ -96,15 +100,15 @@ export class UserService implements IUserService {
             const refreshToken = await createSession(user.id)
             if (refreshToken instanceof ServerError) return refreshToken
 
-            await RedisRepo.setSession(refreshToken, user.id)
+            await RedisRepo.setSession(refreshToken, user.id, false)
 
             const result = { user, accessToken, refreshToken }
             return result
         } catch (e) {
             if (e instanceof QueryFailedError) {
-                return new BadRequestError(e.driverError)
+                return new BadRequestError(PersianErrors.EmailOrUsernameExists)
             }
-            return new ServerError('signup')
+            return new ServerError()
         }
     }
 
@@ -131,7 +135,7 @@ export class UserService implements IUserService {
         if (isEmail(usernameOrEmail)) {
             dao = await this.userRepo.findByEmail(usernameOrEmail)
         }
-        if (!dao) return new BadRequestError('Username or Email is Invalid')
+        if (!dao) return new BadRequestError(PersianErrors.EmailOrUsernameNotFound)
         const user = dao.toUser()
         const resetPasswordToken = v4()
         await RedisRepo.setResetPasswordToken(resetPasswordToken, user.id)
@@ -143,7 +147,7 @@ export class UserService implements IUserService {
         const newPassword = await hash(data.newPassword)
         const token = data.token
         const userId = await RedisRepo.getResetPasswordUserId(token)
-        if (!userId) return new BadRequestError('Invalid token')
+        if (!userId) return new BadRequestError(PersianErrors.InvalidToken)
         const dao = (await this.userRepo.changePassword(userId, newPassword))!
         const user = dao.toUser()!
         const accessToken = generateToken(dao.toUserBasic())
@@ -153,7 +157,7 @@ export class UserService implements IUserService {
             const newRefreshToken = await createSession(userId)
             if (newRefreshToken instanceof ServerError) return newRefreshToken
 
-            await RedisRepo.setSession(newRefreshToken, user.id)
+            await RedisRepo.setSession(newRefreshToken, user.id, false)
             refreshToken = newRefreshToken
         }
         return { user, accessToken, refreshToken }
