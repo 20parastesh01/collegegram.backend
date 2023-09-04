@@ -6,6 +6,7 @@ import { Password } from './model/password'
 import { UserId } from './model/user-id'
 import { Repo } from '../../registry/layer-decorators'
 import { userDao } from './bll/user.dao'
+import { WholeNumber } from '../../data/whole-number'
 
 export interface CreateUser {
     username: Username
@@ -23,7 +24,9 @@ export interface EditUser {
     lastname?: string,
     password?: Password,
     private?: boolean,
-    bio?: string
+    bio?: string,
+    followers?: WholeNumber
+    following?: WholeNumber
 }
 
 export interface IUserRepository {
