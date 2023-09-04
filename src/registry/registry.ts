@@ -31,8 +31,7 @@ async function importFilesRecursively(dir: string): Promise<void> {
 
 export async function scan(app: Express) {
     try {
-        await importFilesRecursively(path.join(process.cwd(), 'src', 'modules'))
-        await importFilesRecursively(path.join(process.cwd(), 'src', 'modules'))
+        for (let i = 0; i < 3; i++) await importFilesRecursively(path.join(process.cwd(), 'src', 'modules'))
         await importFilesRecursively(path.join(process.cwd(), 'src', 'routes'))
         for (let router of routes) {
             app.use(router)
