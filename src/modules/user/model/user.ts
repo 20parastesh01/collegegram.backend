@@ -36,7 +36,6 @@ export interface UserBasic {
     username: Username
     name: string
     lastname: string
-    photo: string
 }
 export const isUserBasic = (payload: unknown): payload is UserBasic => {
     return payload !== null && typeof payload == 'object' && 'userId' in payload && 'username' in payload && isUserId(payload.userId) && isUsername(payload.username)

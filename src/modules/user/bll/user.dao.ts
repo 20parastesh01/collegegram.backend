@@ -7,15 +7,15 @@ export const userDao = (input: UserEntity | null) => {
     return {
         toUser(): User {
             const { createdAt, updatedAt, password, ...rest } = input
-            return rest
+            return { ...rest, photo: '' }
         },
         toUserBasic() {
-            const { id: userId, username, name, lastname, photo } = input
-            return { userId, username, name, lastname, photo }
+            const { id: userId, username, name, lastname } = input
+            return { userId, username, name, lastname }
         },
         toUserWithPassword() {
             const { createdAt, updatedAt, ...rest } = input
             return rest
-        }
+        },
     }
 }

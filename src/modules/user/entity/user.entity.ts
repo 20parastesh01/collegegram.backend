@@ -21,14 +21,11 @@ export class UserEntity {
     @Column()
     email!: Email
 
-    @Column()
+    @Column({ default: '' })
     name!: string
 
-    @Column()
+    @Column({ default: '' })
     lastname!: string
-
-    @Column()
-    photo!: string
 
     @Column('integer', { default: 0 })
     followers!: WholeNumber
@@ -36,7 +33,7 @@ export class UserEntity {
     @Column('integer', { default: 0 })
     following!: WholeNumber
 
-    @Column()
+    @Column({ default: '' })
     bio!: string
 
     @Column('integer', { default: 0 })
