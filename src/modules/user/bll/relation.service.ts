@@ -17,6 +17,11 @@ export class RelationService {
         const target = await this.userService.getUserById(targetId)
         if (!target) return new NotFoundError(messages.userNotFound.persian)
         const relationDao = await this.relationRepo.getRelation(userId, target.id)
+        const reverseRelationDao = await this.relationRepo.getRelation(target.id, userId)
+        if (reverseRelationDao) {
+            const status = reverseRelationDao.toRelation().status
+            if (status === 'Blocked') return new ForbiddenError(messages.cantRequest.persian)
+        }
         if (relationDao) {
             const status = relationDao.toRelation().status
             switch (status) {
@@ -33,9 +38,11 @@ export class RelationService {
             payload.status = 'Pending'
         }
         await this.relationRepo.createRelation(payload)
-        await this.userService.increaseFollower(targetId)
-        await this.userService.increaseFollowing(userId)
-        if (payload.status === 'Following') return { msg: messages.followSuccess.persian }
+        if (payload.status === 'Following') {
+            await this.userService.increaseFollower(targetId)
+            await this.userService.increaseFollowing(userId)
+            return { msg: messages.followSuccess.persian }
+        }
         return { msg: messages.requested.persian }
     }
 
@@ -81,12 +88,13 @@ export class RelationService {
     async block(userId: UserId, targetId: UserId) {
         const target = await this.userService.getUserById(targetId)
         if (!target) return new NotFoundError(messages.userNotFound.persian)
-        const dao = await this.relationRepo.getRelation(userId, target.id)
+        const dao = await this.relationRepo.getRelation(target.id, userId)
         if (dao) {
             const status = dao.toRelation().status
             if (status === 'Following') {
                 await this.userService.decreaseFollowing(targetId)
                 await this.userService.decreaseFollower(userId)
+                this.relationRepo.deleteRelation({ userA: target.id, userB: userId })
             }
         }
         await this.relationRepo.updateRelation({ userA: userId, userB: targetId, status: 'Blocked' })
