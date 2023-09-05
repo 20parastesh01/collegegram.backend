@@ -15,7 +15,7 @@ describe('PostService', () => {
 
     beforeEach(() => {
         mockPostRepository = {
-            findByID : jest.fn(),
+            findByID: jest.fn(),
         } as any
 
         postService = new PostService(mockPostRepository)
@@ -23,7 +23,6 @@ describe('PostService', () => {
 
     it('should create a post', async () => {
         const mockGetPostDto = {
-            
             postId: 1 as PostId,
         }
         const userId = 123 as UserId
@@ -58,12 +57,11 @@ describe('PostService', () => {
                 buffer: Buffer.alloc(0), // Empty buffer
             },
         ]
-        
 
         const mockCreatedPost: Post = {
             id: mockGetPostDto.postId,
-            caption: "test" as Caption,
-            tags: ["a","b"] as Tag[],
+            caption: 'test' as Caption,
+            tags: ['a', 'b'] as Tag[],
             photosCount: photosCount,
             author: userId,
             closeFriend: false,

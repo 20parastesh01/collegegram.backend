@@ -6,7 +6,9 @@ import { zodCreatePostDTO } from '../modules/post/dto/createPost.dto'
 import { zodGetPostDTO } from '../modules/post/dto/getPost.dto'
 import { zodGetAllPostsDTO } from '../modules/post/dto/getAllPosts.dto'
 import { Route } from '../registry/layer-decorators'
-import { Auth, Files, Get, Post, RequestBody } from '../registry/endpoint-decorator'
+import { Auth, Delete, Files, Get, Post, RequestBody } from '../registry/endpoint-decorator'
+import { zodUserId } from '../modules/user/model/user-id'
+import { zodPostId } from '../modules/post/model/post-id'
 
 @Route('/post', PostService)
 export class PostRouter {
@@ -34,6 +36,17 @@ export class PostRouter {
     getAllPost(req: Request, res: Response) {
         const data = zodGetAllPostsDTO.parse(req.params.userId)
         handleExpress(res, () => this.postService.getAllPosts(data))
+    }
+    @Post('/:id/like')
+    @Auth()
+    followOrRequestForFollow(req: Request, res: Response) {
+        handleExpress(res, () => this.postService.likePost(req.user.userId, zodPostId.parse(req.params.id)))
+    }
+
+    @Delete('/:id/unlike')
+    @Auth()
+    unfollowOrDeleteRequestForFollow(req: Request, res: Response) {
+        handleExpress(res, () => this.postService.unlikePost(req.user.userId, zodPostId.parse(req.params.id)))
     }
     
 }

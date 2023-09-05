@@ -36,7 +36,7 @@ describe('CommentService', () => {
             author: userId,
             likesCount: 0 as WholeNumber,
             parentId: mockcreateCommentDto.parentId,
-            postId: mockcreateCommentDto.postId
+            postId: mockcreateCommentDto.postId,
         }
         const commentDao = (input: Comment) => {
             return {

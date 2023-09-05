@@ -16,11 +16,19 @@ export interface IPostService {
     createPost(dto: CreatePostDTO, files: Express.Multer.File[], userId: UserId): Promise<resPost>
     getPost(postId: PostId): Promise<resPost>
     getAllPosts(userId: UserId): Promise<resPosts>
+    likePost(userId: UserId,postId: PostId): Promise<resPosts>
+    unlikePost(userId: UserId,postId: PostId): Promise<resPosts>
 }
 
 @Service(PostRepository)
 export class PostService implements IPostService {
     constructor(private postRepo: IPostRepository) {}
+    likePost(userId: UserId, postId: PostId): Promise<resPosts> {
+        throw new Error('Method not implemented.')
+    }
+    unlikePost(userId: UserId, postId: PostId): Promise<resPosts> {
+        throw new Error('Method not implemented.')
+    }
 
     async getAllPosts(userId: UserId): Promise<resPosts> {
         const result = (await this.postRepo.findAllByAuthor(userId)).toPostModelList()

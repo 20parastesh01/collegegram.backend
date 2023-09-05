@@ -9,7 +9,7 @@ export const editProfileDto = z.object({
     lastname: z.string().nonempty().optional(),
     password: zodInputPassword.optional(),
     private: z.boolean().optional(),
-    bio: z.string().nonempty().optional()
+    bio: z.string().nonempty().optional(),
 })
 
 export type EditProfileDto = z.infer<typeof editProfileDto>

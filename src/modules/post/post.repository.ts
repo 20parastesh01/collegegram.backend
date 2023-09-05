@@ -18,11 +18,10 @@ export interface CreatePost {
     commentsCount: WholeNumber
 }
 
-
 export interface IPostRepository {
     create(data: CreatePost): Promise<ReturnType<typeof postDao>>
     findAllByAuthor(userId: UserId): Promise<ReturnType<typeof postArrayDao>>
-    findByID(postId: PostId): Promise<ReturnType<typeof postOrNullDao>>;
+    findByID(postId: PostId): Promise<ReturnType<typeof postOrNullDao>>
 }
 
 @Repo()
@@ -33,18 +32,18 @@ export class PostRepository implements IPostRepository {
         this.PostRepo = appDataSource.getRepository(PostEntity)
     }
     async findAllByAuthor(userId: UserId): Promise<ReturnType<typeof postArrayDao>> {
-        const posts : PostEntity[] = await this.PostRepo.find({
+        const posts: PostEntity[] = await this.PostRepo.find({
             where: {
                 author: userId,
             },
             order: {
                 createdAt: 'DESC', // Sort by createdAt in descending order
             },
-        });
+        })
         return postArrayDao(posts)
     }
     async findByID(postId: PostId): Promise<ReturnType<typeof postOrNullDao>> {
-        const postEntity =  await this.PostRepo.findOneBy({ id: postId });
+        const postEntity = await this.PostRepo.findOneBy({ id: postId })
         return postOrNullDao(postEntity)
     }
     async create(data: CreatePost): Promise<ReturnType<typeof postDao>> {

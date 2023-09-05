@@ -16,7 +16,7 @@ export class CommentRouter {
     @RequestBody('CreateCommentDTO')
     createComment(req: Request, res: Response) {
         const data = zodCreateCommentDTO.parse(req.body)
-        handleExpress(res, () => this.commentService.createComment(data , req.user.userId))
+        handleExpress(res, () => this.commentService.createComment(data, req.user.userId))
     }
 
     @Get('/:postId')

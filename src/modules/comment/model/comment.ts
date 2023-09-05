@@ -9,10 +9,10 @@ export interface Comment extends BaseComment {
     id: CommentId
     likesCount: WholeNumber
     authorProfile?: string
-    parentId?: ParentId 
+    parentId?: ParentId
 }
 export interface NewComment extends BaseComment {
-    parentId?: ParentId 
+    parentId?: ParentId
 }
 export interface BaseComment {
     author: UserId

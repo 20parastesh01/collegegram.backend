@@ -19,12 +19,12 @@ export interface CreateUser {
 }
 
 export interface EditUser {
-    email?: Email,
-    name?: string,
-    lastname?: string,
-    password?: Password,
-    private?: boolean,
-    bio?: string,
+    email?: Email
+    name?: string
+    lastname?: string
+    password?: Password
+    private?: boolean
+    bio?: string
     followers?: WholeNumber
     following?: WholeNumber
 }
