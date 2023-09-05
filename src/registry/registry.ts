@@ -7,7 +7,6 @@ import { routes, swaggerObject } from './layer-decorators'
 
 async function importFilesRecursively(dir: string): Promise<void> {
     const files = await fs.readdirSync(dir)
-
     for (const file of files) {
         const filePath = path.join(dir, file)
         const stats = await fs.statSync(filePath)
@@ -16,12 +15,16 @@ async function importFilesRecursively(dir: string): Promise<void> {
             await importFilesRecursively(filePath)
         } else if (stats.isFile() && file.endsWith('.ts') && !file.includes('.spec')) {
             const modulePath = path.relative(process.cwd(), filePath).replace(/\.ts$/, '')
+            const esmModulePath = path.relative(__dirname, filePath).replace(/\.ts$/, '')
             try {
-                let finalPath = `./${modulePath}`
                 if (process.env.ENGINE == 'NODE') {
+                    let finalPath = `./${modulePath}`
                     finalPath = path.join(process.cwd(), 'dist', finalPath).replace(/\.ts$/, '')
+                    const importedModule = await import(finalPath)
+                } else {
+                    let finalPath = `./${esmModulePath}`
+                    const importedModule = await import(finalPath)
                 }
-                const importedModule = await import(finalPath)
             } catch (error) {
                 console.error(`Error importing module from ${modulePath}:`, error)
             }
