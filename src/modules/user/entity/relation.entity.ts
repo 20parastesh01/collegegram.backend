@@ -7,11 +7,9 @@ import { RelationStatus } from '../model/relation'
 @Entity('relations')
 export class RelationEntity {
     @PrimaryColumn()
-    @Column()
     userA!: UserId
 
     @PrimaryColumn()
-    @Column()
     userB!: UserId
 
     @Column()
