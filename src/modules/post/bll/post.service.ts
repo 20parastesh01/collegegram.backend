@@ -1,16 +1,19 @@
 import { BadRequestError, NotFoundError, ServerError } from '../../../utility/http-error'
 import { IPostRepository, PostRepository } from '../post.repository'
 import { CreatePostDTO } from '../dto/createPost.dto'
-import { Post } from '../model/post'
+import { PostWithLikesCount, PostWithoutLikesCount } from '../model/post'
 import { PostId } from '../model/post-id'
 import { newPostModelToRepoInput } from './post.dao'
 import { UserId } from '../../user/model/user-id'
 import { Service } from '../../../registry/layer-decorators'
 import { MinioRepo } from '../../../data-source'
 import { zodWholeNumber } from '../../../data/whole-number'
+import { LikeRepository } from '../like.repository'
+import { UserRepository } from '../../user/user.repository'
+import { likeWithoutIdModelToRepoInput } from './like.dao'
 
-type resPost = Post | BadRequestError | ServerError | NotFoundError
-type resPosts = { result: Post[]; total: number } | BadRequestError | ServerError
+type resPost = PostWithLikesCount | PostWithoutLikesCount | BadRequestError | ServerError | NotFoundError
+type resPosts = { result: PostWithLikesCount[]; total: number } | BadRequestError | ServerError
 
 export interface IPostService {
     createPost(dto: CreatePostDTO, files: Express.Multer.File[], userId: UserId): Promise<resPost>
@@ -22,12 +25,28 @@ export interface IPostService {
 
 @Service(PostRepository)
 export class PostService implements IPostService {
-    constructor(private postRepo: IPostRepository) {}
-    likePost(userId: UserId, postId: PostId): Promise<resPosts> {
-        throw new Error('Method not implemented.')
+    constructor(
+        private postRepo: IPostRepository,
+        private readonly likeRepo: LikeRepository,
+        private readonly userRepo: UserRepository
+        ) {}
+    
+    async likePost(userId: UserId, postId: PostId): Promise<resPosts> {
+        const like = await this.likeRepo.findLikeByUserAndPost(userId, postId);
+        if (like) {
+            const user = await this.userRepo.findById(userId)
+            const post = await this.postRepo.findPostWithoutLikesCountByID(postId)
+            if (user?.toUser() && post.toPostModel()!== null) {
+                const input = likeWithoutIdModelToRepoInput(user.toUser(), post.toPostModel())
+                const createdLike = (await this.likeRepo.create(input)).toLikeModel() 
+            }
+            else return new BadRequestError('not exist.')
+        }
+        else 
+        return new BadRequestError('Already liked.')
     }
     unlikePost(userId: UserId, postId: PostId): Promise<resPosts> {
-        throw new Error('Method not implemented.')
+        throw new BadRequestError('Already liked.')
     }
 
     async getAllPosts(userId: UserId): Promise<resPosts> {
@@ -58,7 +77,7 @@ export class PostService implements IPostService {
     }
 
     async getPost(postId: PostId): Promise<resPost> {
-        const post = (await this.postRepo.findByID(postId)).toPostModel()
+        const post = (await this.postRepo.findPostWithLikesCountByID(postId)).toPostModel()
         if (post) {
             const photos = await MinioRepo.getPostPhotoUrl(post.id, post.photosCount)
             if (photos) {

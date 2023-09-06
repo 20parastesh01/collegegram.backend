@@ -1,9 +1,10 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from 'typeorm'
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from 'typeorm'
 import { Email } from '../../../data/email'
 import { WholeNumber } from '../../../data/whole-number'
 import { Password } from '../model/password'
 import { UserId } from '../model/user-id'
 import { Username } from '../model/username'
+import { LikeEntity } from '../../post/entity/like.entity'
 
 @Entity('users')
 @Unique(['username'])
@@ -41,6 +42,9 @@ export class UserEntity {
 
     @Column('boolean', { default: false })
     private!: boolean
+    
+    @OneToMany(() => LikeEntity, (like) => like.user)
+    likes!: LikeEntity[]
 
     @CreateDateColumn()
     createdAt!: Date

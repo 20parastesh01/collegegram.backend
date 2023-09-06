@@ -7,6 +7,7 @@ import { UserId } from '../user/model/user-id'
 import { WholeNumber } from '../../data/whole-number'
 import { postArrayDao, postDao, postOrNullDao } from './bll/post.dao'
 import { Repo } from '../../registry/layer-decorators'
+import { LikeEntity } from './entity/like.entity'
 
 export interface CreatePost {
     caption: Caption
@@ -17,11 +18,25 @@ export interface CreatePost {
     likesCount: WholeNumber
     commentsCount: WholeNumber
 }
+export interface PostWithLikesCountEntity {
+    id: PostId;
+    caption: Caption;
+    photosCount: WholeNumber;
+    tags?: Tag[];
+    author: UserId;
+    commentsCount: WholeNumber;
+    closeFriend: boolean;
+    likes: LikeEntity[];
+    createdAt: Date;
+    updatedAt: Date;
+    likesCount: WholeNumber;
+}
 
 export interface IPostRepository {
+    findPostWithLikesCountByID(postId: PostId): Promise<ReturnType<typeof postOrNullDao>>
     create(data: CreatePost): Promise<ReturnType<typeof postDao>>
     findAllByAuthor(userId: UserId): Promise<ReturnType<typeof postArrayDao>>
-    findByID(postId: PostId): Promise<ReturnType<typeof postOrNullDao>>
+    findPostWithoutLikesCountByID(postId: PostId): Promise<ReturnType<typeof postOrNullDao>>
 }
 
 @Repo()
@@ -42,12 +57,22 @@ export class PostRepository implements IPostRepository {
         })
         return postArrayDao(posts)
     }
-    async findByID(postId: PostId): Promise<ReturnType<typeof postOrNullDao>> {
-        const postEntity = await this.PostRepo.findOneBy({ id: postId })
+    async findPostWithoutLikesCountByID(postId: PostId): Promise<ReturnType<typeof postOrNullDao>> {
+        const postEntity : PostEntity | null = await this.PostRepo.findOneBy({ id: postId })
         return postOrNullDao(postEntity)
     }
     async create(data: CreatePost): Promise<ReturnType<typeof postDao>> {
-        const postEntity = await this.PostRepo.save(data)
+        const postEntity : PostEntity = await this.PostRepo.save(data)
         return postDao(postEntity)
+    }
+    async findPostWithLikesCountByID(postId: PostId): Promise<ReturnType<typeof postOrNullDao>> {
+        const post : PostWithLikesCountEntity | undefined = await this.PostRepo.createQueryBuilder('post')
+        .leftJoinAndSelect('post.likes', 'like') 
+        .addSelect('COUNT(like.id)', 'likesCount')
+        .where('post.id = :postId', { postId })
+        .groupBy('post.id')
+        .getRawOne();
+      
+        return postOrNullDao(post);
     }
 }

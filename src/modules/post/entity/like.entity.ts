@@ -10,24 +10,22 @@ import { LikeId } from '../model/like-id';
 import { UserEntity } from '../../user/entity/user.entity';
 import { PostEntity } from './post.entity';
   
-@Entity()
-export class Like {
-    @PrimaryGeneratedColumn()
-    id!: LikeId;
+@Entity('likes')
+export class LikeEntity {
+  @PrimaryGeneratedColumn()
+  id!: LikeId;
 
+  @ManyToOne(() => UserEntity)
+  @JoinColumn({ name: 'user_id' })
+  user!: UserEntity;
 
-    @ManyToOne(() => UserEntity)
-    @JoinColumn({ name: 'user_id' })
-    user!: UserEntity;
+  @ManyToOne(() => PostEntity)
+  @JoinColumn({ name: 'post_id' })
+  post!: PostEntity;
 
+  @CreateDateColumn()
+  createdAt!: Date
 
-    @ManyToOne(() => PostEntity)
-    @JoinColumn({ name: 'post_id' })
-    post!: PostEntity;
-
-@CreateDateColumn()
-createdAt!: Date
-
-@UpdateDateColumn()
-updatedAt!: Date
+  @UpdateDateColumn()
+  updatedAt!: Date
 }

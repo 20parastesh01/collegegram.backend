@@ -4,10 +4,12 @@ import { Caption } from './caption'
 import { PostId } from './post-id'
 import { Tag } from './tag'
 
-export interface Post extends BasePost {
+export interface PostWithLikesCount extends PostWithoutLikesCount {
+    likesCount: WholeNumber
+}
+export interface PostWithoutLikesCount extends BasePost {
     id: PostId
     caption: Caption
-    likesCount: WholeNumber
     tags?: Tag[]
     commentsCount: WholeNumber
 }

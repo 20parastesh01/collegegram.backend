@@ -1,47 +1,94 @@
+import { z } from 'zod'
 import { zodWholeNumber } from '../../../data/whole-number'
 import { PostEntity } from '../entity/post.entity'
-import { Post, NewPost, BasePost } from '../model/post'
-import { CreatePost } from '../post.repository'
+import { PostWithLikesCount, PostWithoutLikesCount, NewPost, BasePost } from '../model/post'
+import { PostWithLikesCountEntity, CreatePost } from '../post.repository'
+import { zodTags } from '../model/tag'
+import { zodUserId } from '../../user/model/user-id'
+import { zodCaption } from '../model/caption'
+import { zodPostId } from '../model/post-id'
+import { zodBooleanOrBooleanString } from '../../../data/boolean-stringBoolean'
 
-export const postOrNullDao = (input: PostEntity | null) => {
+const postEntityToPostModel = (input: PostEntity | PostWithLikesCountEntity) => {
+    if (input instanceof  PostEntity) {
+        const { createdAt, updatedAt, likes, ...rest } = input
+        const output: PostWithoutLikesCount = {
+            id: zodPostId.parse(rest.id),
+            caption: zodCaption.parse(rest.caption),
+            photosCount: zodWholeNumber.parse(rest.photosCount),
+            author: zodUserId.parse(rest.author),
+            closeFriend: zodBooleanOrBooleanString.parse(rest.closeFriend),
+            tags: zodTags.optional().parse(rest.tags),
+            commentsCount: zodWholeNumber.parse(rest.commentsCount)
+        }
+        return output
+    }
+    const { createdAt, updatedAt, likes, ...rest } = input
+        const output: PostWithLikesCount = {
+            id: zodPostId.parse(rest.id),
+            caption: zodCaption.parse(rest.caption),
+            photosCount: zodWholeNumber.parse(rest.photosCount),
+            author: zodUserId.parse(rest.author),
+            closeFriend: zodBooleanOrBooleanString.parse(rest.closeFriend),
+            tags: zodTags.optional().parse(rest.tags),
+            commentsCount: zodWholeNumber.parse(rest.commentsCount),
+            likesCount: zodWholeNumber.parse(rest.likesCount)
+        }
+        return output
+}
+const postEntityToPostThumbnailModel = (input: PostEntity | PostWithLikesCountEntity) => {
+    const { createdAt, updatedAt, likes, ...rest } = input
+    const output: BasePost = {
+        photosCount: zodWholeNumber.parse(rest.photosCount),
+        author: zodUserId.parse(rest.author),
+        closeFriend: zodBooleanOrBooleanString.parse(rest.closeFriend),
+    }
+    return output
+}
+
+export const postOrNullDao = (input: PostWithLikesCountEntity | undefined | PostEntity | null) => {
     return {
-        toPostModel(): Post | null {
-            if (input === null) return null
-            else {
-                // Handle the case when input is a single PostEntity
-                const { createdAt, updatedAt, ...rest } = input
-                return rest
+        toPostModel(): PostWithLikesCount | null | PostWithoutLikesCount {
+            if (input === undefined || input === null ) return null
+            if (input instanceof  PostEntity) {
+                return postEntityToPostModel(input)
             }
+            return postEntityToPostModel(input)
+        
         },
         toThumbnailModel(): BasePost | null {
-            if (input === null) return null
-            const { createdAt, updatedAt, caption, likesCount, tags, commentsCount, ...rest } = input
-            return rest
+            if (input === undefined ||input === null ) return null
+            if (input instanceof  PostEntity) {
+                return postEntityToPostThumbnailModel(input)
+            }
+            return postEntityToPostThumbnailModel(input)
         },
     }
 }
 export const postDao = (input: PostEntity) => {
     return {
-        toPostModel(): Post {
+        toPostModel(): PostWithLikesCount {
             // Handle the case when input is a single PostEntity
-            const { createdAt, updatedAt, ...rest } = input
-            return rest
+            const rest  = postEntityToPostModel(input)
+            const output : PostWithLikesCount = { likesCount:zodWholeNumber.parse(0), ...rest}
+            return output
         },
     }
 }
 export const postArrayDao = (input: PostEntity[]) => {
     return {
-        toPostModelList(): Post[] {
+        toPostModelList(): PostWithLikesCount[] {
             // Handle the case when input is an array of PostEntity
             return input.map((entity) => {
-                const { createdAt, updatedAt, ...rest } = entity
-                return rest
+                const rest = postEntityToPostModel(entity)
+                const output : PostWithLikesCount = { likesCount:zodWholeNumber.parse(0), ...rest}
+                return output
             })
         },
         toThumbnailModelList(): BasePost[] {
             // Handle the case when input is an array of PostEntity
             return input.map((entity) => {
-                const { createdAt, updatedAt, caption, likesCount, tags, commentsCount, ...rest } = entity
+                const rest = postEntityToPostThumbnailModel(entity)
                 return rest
             })
         },
