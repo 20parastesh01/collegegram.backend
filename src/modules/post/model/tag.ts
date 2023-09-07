@@ -2,8 +2,6 @@ import { z } from 'zod'
 import { Brand } from '../../../utility/brand'
 import { NonEmptyString } from '../../../data/non-empty-string'
 
-const TagsSchema = z.array(z.string())
-
 export type Tag = Brand<NonEmptyString, 'Tag'>
 
 const spliter = (str: string): string[] => {
