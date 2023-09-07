@@ -90,19 +90,18 @@ export class LikeRepository implements ILikeRepository {
             await entityManager.transaction(async (transactionalEntityManager: EntityManager) => {
                 // const likeRepository = transactionalEntityManager.getCustomRepository(LikeRepository);    
                 // const userRepository = transactionalEntityManager.getCustomRepository(UserRepository);
-                // const postRepository = transactionalEntityManager.getCustomRepository(PostRepository);     
-                const like = entityManager.withRepository(this.LikeRepo).remove(likeToDelete)
-                const user = entityManager.withRepository(this.UserRepo).save(updatedUser)
-                const post = entityManager.withRepository(this.PostRepo).save(updatedPost)
+                // const postRepository = transactionalEntityManager.getCustomRepository(PostRepository);
                 //await likeRepository.remove(LikeEntity, likeToDelete);
                 // await userRepository.save(UserEntity, updatedUser);
-                // await postRepository.save(PostEntity, updatedPost);
+                // await postRepository.save(PostEntity, updatedPost);     
+                const like = transactionalEntityManager.withRepository(this.LikeRepo).remove(likeToDelete)
+                const user = transactionalEntityManager.withRepository(this.UserRepo).save(updatedUser)
+                const post = transactionalEntityManager.withRepository(this.PostRepo).save(updatedPost)
             });
-        
-            console.log('Transaction completed successfully.');
+            
+            return likeOrNullDao(like)
           } catch (error) {
-            console.error('Transaction failed:', error.message);
-            throw error; // Re-throw the error for further handling if needed
+            return likeOrNullDao(null)
           }
         
 
