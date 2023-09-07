@@ -1,4 +1,4 @@
-import { DataSource, Repository } from 'typeorm'
+import { DataSource, Repository, getManager } from 'typeorm'
 import { LikeEntity } from './entity/like.entity'
 import { UserId } from '../user/model/user-id'
 import { likeArrayDao, likeDao, likeOrNullDao } from './bll/like.dao'
@@ -6,10 +6,17 @@ import { Repo } from '../../registry/layer-decorators'
 import { User } from '../user/model/user'
 import { PostWithoutLikesCount } from './model/post'
 import { PostId } from './model/post-id'
+import { LikeId } from './model/like-id'
+import { WholeDate } from '../../data/whole-date'
 
 export interface CreateLike {
     user: User
     post: PostWithoutLikesCount
+}
+export interface CreatedLike extends CreateLike{
+    id: LikeId
+    createdAt: WholeDate
+    updatedAt: WholeDate
 }
 
 export interface ILikeRepository {
@@ -48,4 +55,14 @@ export class LikeRepository implements ILikeRepository {
         const likeEntity = await this.LikeRepo.save(data)
         return likeDao(likeEntity)
     }
+    // async delete(data: CreatedLike): Promise<ReturnType<typeof likeDao>> {
+    //     const likeEntity = await this.LikeRepo.remove(data)
+    //     return likeDao(likeEntity)
+    // }
+    async removeLikeWithTransaction(likeId : LikeId): Promise<ReturnType<typeof likeOrNullDao>> {
+        //const entityManager = getManager();
+        const like = await this.LikeRepo.findOneBy({ id: likeId });
+        return like === null ?  likeOrNullDao(null) : likeOrNullDao(await this.LikeRepo.remove(like));
+      }
+    
 }

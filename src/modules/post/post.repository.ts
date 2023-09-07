@@ -5,9 +5,8 @@ import { PostId } from './model/post-id'
 import { PostEntity } from './entity/post.entity'
 import { UserId } from '../user/model/user-id'
 import { WholeNumber } from '../../data/whole-number'
-import { postArrayDao, postDao, postOrNullDao } from './bll/post.dao'
+import { postArrayDao, postWithLikeOrNullDao, postWithoutLikeDao, postWithoutLikeOrNullDao } from './bll/post.dao'
 import { Repo } from '../../registry/layer-decorators'
-import { LikeEntity } from './entity/like.entity'
 
 export interface CreatePost {
     caption: Caption
@@ -18,25 +17,15 @@ export interface CreatePost {
     likesCount: WholeNumber
     commentsCount: WholeNumber
 }
-export interface PostWithLikesCountEntity {
-    id: PostId;
-    caption: Caption;
-    photosCount: WholeNumber;
-    tags?: Tag[];
-    author: UserId;
-    commentsCount: WholeNumber;
-    closeFriend: boolean;
-    likes: LikeEntity[];
-    createdAt: Date;
-    updatedAt: Date;
+export interface PostWithLikesCountEntity extends PostEntity {
     likesCount: WholeNumber;
 }
 
 export interface IPostRepository {
-    findPostWithLikesCountByID(postId: PostId): Promise<ReturnType<typeof postOrNullDao>>
-    create(data: CreatePost): Promise<ReturnType<typeof postDao>>
+    findPostWithLikesCountByID(postId: PostId): Promise<ReturnType<typeof postWithLikeOrNullDao>>
+    create(data: CreatePost): Promise<ReturnType<typeof postWithoutLikeDao>>
     findAllByAuthor(userId: UserId): Promise<ReturnType<typeof postArrayDao>>
-    findPostWithoutLikesCountByID(postId: PostId): Promise<ReturnType<typeof postOrNullDao>>
+    findPostWithoutLikesCountByID(postId: PostId): Promise<ReturnType<typeof postWithoutLikeOrNullDao>>
 }
 
 @Repo()
@@ -57,15 +46,15 @@ export class PostRepository implements IPostRepository {
         })
         return postArrayDao(posts)
     }
-    async findPostWithoutLikesCountByID(postId: PostId): Promise<ReturnType<typeof postOrNullDao>> {
+    async findPostWithoutLikesCountByID(postId: PostId): Promise<ReturnType<typeof postWithoutLikeOrNullDao>> {
         const postEntity : PostEntity | null = await this.PostRepo.findOneBy({ id: postId })
-        return postOrNullDao(postEntity)
+        return postWithoutLikeOrNullDao(postEntity)
     }
-    async create(data: CreatePost): Promise<ReturnType<typeof postDao>> {
+    async create(data: CreatePost): Promise<ReturnType<typeof postWithoutLikeDao>> {
         const postEntity : PostEntity = await this.PostRepo.save(data)
-        return postDao(postEntity)
+        return postWithoutLikeDao(postEntity)
     }
-    async findPostWithLikesCountByID(postId: PostId): Promise<ReturnType<typeof postOrNullDao>> {
+    async findPostWithLikesCountByID(postId: PostId): Promise<ReturnType<typeof postWithLikeOrNullDao>> {
         const post : PostWithLikesCountEntity | undefined = await this.PostRepo.createQueryBuilder('post')
         .leftJoinAndSelect('post.likes', 'like') 
         .addSelect('COUNT(like.id)', 'likesCount')
@@ -73,6 +62,6 @@ export class PostRepository implements IPostRepository {
         .groupBy('post.id')
         .getRawOne();
       
-        return postOrNullDao(post);
+        return postWithLikeOrNullDao(post);
     }
 }

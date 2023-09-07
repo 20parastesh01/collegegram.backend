@@ -10,17 +10,18 @@ import { MinioRepo } from '../../../data-source'
 import { zodWholeNumber } from '../../../data/whole-number'
 import { LikeRepository } from '../like.repository'
 import { UserRepository } from '../../user/user.repository'
-import { likeWithoutIdModelToRepoInput } from './like.dao'
+import { likeWithoutIdModelToCreateLikeEntity } from './like.dao'
+import { LikeWithId } from '../model/like'
 
-type resPost = PostWithLikesCount | PostWithoutLikesCount | BadRequestError | ServerError | NotFoundError
+type resPost = PostWithLikesCount | PostWithoutLikesCount | LikeWithId | BadRequestError | ServerError | NotFoundError
 type resPosts = { result: PostWithLikesCount[]; total: number } | BadRequestError | ServerError
 
 export interface IPostService {
     createPost(dto: CreatePostDTO, files: Express.Multer.File[], userId: UserId): Promise<resPost>
     getPost(postId: PostId): Promise<resPost>
     getAllPosts(userId: UserId): Promise<resPosts>
-    likePost(userId: UserId,postId: PostId): Promise<resPosts>
-    unlikePost(userId: UserId,postId: PostId): Promise<resPosts>
+    likePost(userId: UserId,postId: PostId): Promise<resPost>
+    unlikePost(userId: UserId,postId: PostId): Promise<resPost>
 }
 
 @Service(PostRepository)
@@ -31,22 +32,28 @@ export class PostService implements IPostService {
         private readonly userRepo: UserRepository
         ) {}
     
-    async likePost(userId: UserId, postId: PostId): Promise<resPosts> {
-        const like = await this.likeRepo.findLikeByUserAndPost(userId, postId);
-        if (like) {
-            const user = await this.userRepo.findById(userId)
-            const post = await this.postRepo.findPostWithoutLikesCountByID(postId)
-            if (user?.toUser() && post.toPostModel()!== null) {
-                const input = likeWithoutIdModelToRepoInput(user.toUser(), post.toPostModel())
-                const createdLike = (await this.likeRepo.create(input)).toLikeModel() 
+    async likePost(userId: UserId, postId: PostId): Promise<resPost> {
+        const like = (await this.likeRepo.findLikeByUserAndPost(userId, postId)).toLikeModel();
+        if (!like) {
+            const user = (await this.userRepo.findById(userId))?.toUser()
+            const post = (await this.postRepo.findPostWithoutLikesCountByID(postId)).toPostModel()
+            if(user && post) {
+                const input = likeWithoutIdModelToCreateLikeEntity(user, post)
+                const createdLike = (await this.likeRepo.create(input)).toLikeModel()
+                return createdLike
             }
-            else return new BadRequestError('not exist.')
+            return new BadRequestError('postId or userId not exist.')
         }
-        else 
-        return new BadRequestError('Already liked.')
+        return new BadRequestError('Post Already liked by current user.')
     }
-    unlikePost(userId: UserId, postId: PostId): Promise<resPosts> {
-        throw new BadRequestError('Already liked.')
+    async unlikePost(userId: UserId, postId: PostId): Promise<resPost> {
+        const like = (await this.likeRepo.findLikeByUserAndPost(userId, postId)).toLikeModel();
+        if (!like) {
+            return new BadRequestError('Post did not like by current user.');
+        }
+          
+        const result = (await this.likeRepo.findAndDeleteLike(like.id)).toLikeModel();
+        return result ?? new ServerError
     }
 
     async getAllPosts(userId: UserId): Promise<resPosts> {

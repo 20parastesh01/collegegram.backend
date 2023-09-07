@@ -1,13 +1,11 @@
 import { Request, Response, Router } from 'express'
 import { handleExpress } from '../utility/handle-express'
 import { PostService } from '../modules/post/bll/post.service'
-import { uploadPostImages } from './middlewares/uploadMultipleImage.middleware'
 import { zodCreatePostDTO } from '../modules/post/dto/createPost.dto'
 import { zodGetPostDTO } from '../modules/post/dto/getPost.dto'
 import { zodGetAllPostsDTO } from '../modules/post/dto/getAllPosts.dto'
 import { Route } from '../registry/layer-decorators'
 import { Auth, Delete, Files, Get, Post, RequestBody } from '../registry/endpoint-decorator'
-import { zodUserId } from '../modules/user/model/user-id'
 import { zodPostId } from '../modules/post/model/post-id'
 
 @Route('/post', PostService)

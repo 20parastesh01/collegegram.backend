@@ -1,26 +1,42 @@
 import { LikeEntity } from '../entity/like.entity'
-import { Like } from '../model/like'
-import { CreateLike } from '../like.repository'
+import { Like, LikeWithDates } from '../model/like'
+import { CreateLike, CreatedLike } from '../like.repository'
 import { zodUserId } from '../../user/model/user-id'
 import { zodPostId } from '../model/post-id'
-import { zodLikeId } from '../model/like-id'
-import { PostWithLikesCount, PostWithoutLikesCount } from '../model/post'
+import { LikeId, zodLikeId } from '../model/like-id'
+import { PostWithoutLikesCount } from '../model/post'
 import { User } from '../../user/model/user'
+import { zodWholeDate } from '../../../data/whole-date'
 const likeEntityToLikeModel = (input: LikeEntity) => {
-    const { id, post, user, ...rest } = input
+    const { id, post, user } = input
     const output: Like = {
         id: zodLikeId.parse(id),
         userId: zodUserId.parse(user.id),
-        postId: zodPostId.parse(post.id)
+        postId: zodPostId.parse(post.id),
+    }
+    return output
+}
+const likeEntityToLikeWithDatesModel = (input: LikeEntity) => {
+    const baseLike = likeEntityToLikeModel(input)
+    const output: LikeWithDates = {
+        ...baseLike,
+        createdAt:zodWholeDate.parse(input.createdAt),
+        updatedAt:zodWholeDate.parse(input.updatedAt),
     }
     return output
 }
 export const likeOrNullDao = (input: LikeEntity | null) => {
     return {
-        toLikeModel(): Like | null {
-            if (input === null) return null
+        toLikeModel(): Like | undefined {
+            if (input === null) return undefined
             else {
                 return likeEntityToLikeModel(input)
+            }
+        },
+        toLikeWithDatesModel(): LikeWithDates | undefined {
+            if (input === null) return undefined
+            else {
+                return likeEntityToLikeWithDatesModel(input)
             }
         }
     }
@@ -41,7 +57,11 @@ export const likeArrayDao = (input: LikeEntity[]) => {
         }
     }
 }
-export const likeWithoutIdModelToRepoInput = (user: User, post: PostWithoutLikesCount | PostWithLikesCount): CreateLike => {
+export const likeWithoutIdModelToCreateLikeEntity = (user: User, post: PostWithoutLikesCount ): CreateLike => {
     const createLikeEntity: CreateLike = { user: user, post: post }
+    return createLikeEntity
+}
+export const likeModelToFullEntity = (id: LikeId,user: User, post: PostWithoutLikesCount ): CreatedLike => {
+    const createLikeEntity: CreatedLike = {id: id, user: user, post: post }
     return createLikeEntity
 }
