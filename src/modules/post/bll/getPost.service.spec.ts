@@ -64,7 +64,6 @@ describe('PostService', () => {
             id: mockGetPostDto.postId,
             caption: "test" as Caption,
             tags: ["a","b"] as Tag[],
-            photosCount: photosCount,
             author: userId,
             closeFriend: false,
             likesCount: 0 as WholeNumber,
