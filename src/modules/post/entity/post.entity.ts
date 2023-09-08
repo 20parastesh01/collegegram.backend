@@ -14,9 +14,6 @@ export class PostEntity {
     @Column()
     caption!: Caption
 
-    @Column('integer', { default: 0 })
-    photosCount!: WholeNumber
-
     @Column({ type: 'text', array: true, default: [], nullable:true })
     tags?: Tag[]
 
