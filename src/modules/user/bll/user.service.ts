@@ -21,7 +21,8 @@ import { userDao } from './user.dao'
 import { Service } from '../../../registry/layer-decorators'
 import { EditProfileDto, editProfileDto } from '../dto/edit-profile.dto'
 import { Token } from '../../../data/token'
-import { PersianErrors } from '../../../utility/persian-errors'
+import { PersianErrors } from '../../../utility/persian-messages'
+import { zodWholeNumber } from '../../../data/whole-number'
 
 export type LoginSignUp = UserWithToken | BadRequestError | ServerError
 

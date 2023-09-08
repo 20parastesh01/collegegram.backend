@@ -7,7 +7,7 @@ import { UserId, isUserId } from '../modules/user/model/user-id'
 import { Username, isUsername } from '../modules/user/model/username'
 import { InputPassword } from '../modules/user/model/inputpassword'
 import { UserBasic, isUserBasic } from '../modules/user/model/user'
-import { PersianErrors } from './persian-errors'
+import { PersianErrors } from './persian-messages'
 
 const SECRET_KEY = process.env.SECRET_KEY!
 

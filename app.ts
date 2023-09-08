@@ -8,7 +8,7 @@ import { sendEmail } from './src/utility/send-email'
 import cors from 'cors'
 const storage = multer.memoryStorage() // You can adjust this storage method as needed
 export const upload = multer({ storage: storage })
-process.env.ENGINE = process.argv.some((arg) => arg.includes('ts-node')) ? 'TS_NODE' : 'NODE'
+process.env.ENGINE = process.argv.some((arg) => arg.includes('ts-node') || arg.includes('jest')) ? 'TS_NODE' : 'NODE'
 
 const PORT = process.env.PORT || 3000
 
@@ -54,4 +54,4 @@ export const initializeProject = async () => {
     })
     return app
 }
-initializeProject()
+if (process.env.NODE_ENV !== 'test') initializeProject()

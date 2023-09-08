@@ -36,10 +36,11 @@ export const Repo = (): ClassDecorator => {
 
 export const Service = (...deps: any[]): ClassDecorator => {
     return (target: any) => {
-        if (deps.map((dep) => dep.name).every((name) => name in repos)) {
+        if (deps.map((dep) => dep.name).every((name) => name in repos || name in services)) {
             const newArgs = []
             for (let dep of deps) {
-                newArgs.push(repos[dep.name])
+                if (repos[dep.name]) newArgs.push(repos[dep.name])
+                if (services[dep.name]) newArgs.push(services[dep.name])
             }
             const instance = new target(...newArgs)
             services[target.name] = instance
