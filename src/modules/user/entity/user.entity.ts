@@ -42,9 +42,6 @@ export class UserEntity {
 
     @Column('boolean', { default: false })
     private!: boolean
-    
-    @OneToMany(() => LikeEntity, (like) => like.user)
-    likes!: LikeEntity[]
 
     @CreateDateColumn()
     createdAt!: Date

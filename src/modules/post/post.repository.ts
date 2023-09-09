@@ -7,6 +7,7 @@ import { UserId } from '../user/model/user-id'
 import { WholeNumber } from '../../data/whole-number'
 import { postArrayDao, postWithLikeOrNullDao, postWithoutLikeDao, postWithoutLikeOrNullDao } from './bll/post.dao'
 import { Repo } from '../../registry/layer-decorators'
+import { LikeEntity } from './entity/like.entity'
 
 export interface CreatePost {
     caption: Caption
@@ -14,18 +15,19 @@ export interface CreatePost {
     author: UserId
     photosCount: WholeNumber
     closeFriend: boolean
-    likesCount: WholeNumber
+    likeCount: WholeNumber
     commentsCount: WholeNumber
 }
-export interface PostWithLikesCountEntity extends PostEntity {
-    likesCount: WholeNumber;
+export type LikeCount = WholeNumber
+export interface PostWithLikeCountEntity extends PostEntity {
+    likeCount: WholeNumber;
 }
 
 export interface IPostRepository {
-    findPostWithLikesCountByID(postId: PostId): Promise<ReturnType<typeof postWithLikeOrNullDao>>
+    findPostWithLikeCountByID(postId: PostId): Promise<ReturnType<typeof postWithLikeOrNullDao>>
     create(data: CreatePost): Promise<ReturnType<typeof postWithoutLikeDao>>
     findAllByAuthor(userId: UserId): Promise<ReturnType<typeof postArrayDao>>
-    findPostWithoutLikesCountByID(postId: PostId): Promise<ReturnType<typeof postWithoutLikeOrNullDao>>
+    findPostWithoutLikeCountByID(postId: PostId): Promise<ReturnType<typeof postWithoutLikeOrNullDao>>
 }
 
 @Repo()
@@ -35,33 +37,40 @@ export class PostRepository implements IPostRepository {
     constructor(appDataSource: DataSource) {
         this.PostRepo = appDataSource.getRepository(PostEntity)
     }
-    async findAllByAuthor(userId: UserId): Promise<ReturnType<typeof postArrayDao>> {
-        const posts: PostEntity[] = await this.PostRepo.find({
-            where: {
-                author: userId,
-            },
-            order: {
-                createdAt: 'DESC', // Sort by createdAt in descending order
-            },
-        })
+    async findAllByAuthor(userId: UserId) {
+        const posts: PostEntity[] = await this.PostRepo.createQueryBuilder('post')
+        .leftJoin("post.author", "author")
+        .leftJoinAndMapOne("post.Likes",'likes','like','like.post_id = post.id')
+        .addSelect('COUNT(like.id)', 'likeCount')
+        .where('post.author = :userId', { userId })
+        .groupBy('post.id')
+        .setLock("pessimistic_read")
+        .getRawMany();
         return postArrayDao(posts)
     }
-    async findPostWithoutLikesCountByID(postId: PostId): Promise<ReturnType<typeof postWithoutLikeOrNullDao>> {
-        const postEntity : PostEntity | null = await this.PostRepo.findOneBy({ id: postId })
+    async findPostWithoutLikeCountByID(postId: PostId) {
+        const postEntity : PostEntity | null = await this.PostRepo.createQueryBuilder('post')
+        .leftJoin("post.author", "author")
+        .where('post.id = :postId', { postId })
+        .groupBy('post.id')
+        .setLock("pessimistic_read")
+        .getOne();
         return postWithoutLikeOrNullDao(postEntity)
     }
-    async create(data: CreatePost): Promise<ReturnType<typeof postWithoutLikeDao>> {
+    async create(data: CreatePost) {
         const postEntity : PostEntity = await this.PostRepo.save(data)
         return postWithoutLikeDao(postEntity)
     }
-    async findPostWithLikesCountByID(postId: PostId): Promise<ReturnType<typeof postWithLikeOrNullDao>> {
-        const post : PostWithLikesCountEntity | undefined = await this.PostRepo.createQueryBuilder('post')
-        .leftJoinAndSelect('post.likes', 'like') 
-        .addSelect('COUNT(like.id)', 'likesCount')
+    async findPostWithLikeCountByID(postId: PostId) {
+        const output : PostWithLikeCountEntity | undefined = await this.PostRepo.createQueryBuilder('post')
+        .leftJoin("post.author", "author")
+        .leftJoinAndMapOne("post.Likes",'likes','like','like.post_id = post.id')
+        .addSelect('COUNT(like.id)', 'likeCount')
         .where('post.id = :postId', { postId })
         .groupBy('post.id')
+        .setLock("pessimistic_read")
         .getRawOne();
       
-        return postWithLikeOrNullDao(post);
+        return postWithLikeOrNullDao(output);
     }
 }

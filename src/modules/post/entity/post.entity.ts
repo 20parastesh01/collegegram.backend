@@ -5,7 +5,6 @@ import { Caption } from '../model/caption'
 import { Tag } from '../model/tag'
 import { UserId } from '../../user/model/user-id'
 import { UserEntity } from '../../user/entity/user.entity'
-import { LikeEntity } from './like.entity'
 
 @Entity('posts')
 export class PostEntity {
@@ -21,7 +20,7 @@ export class PostEntity {
     @Column({ type: 'text', array: true, default: [], nullable: true })
     tags?: Tag[]
 
-    @ManyToOne(() => UserEntity)
+    @ManyToOne(() => UserEntity , { eager: true})
     @JoinColumn()
     author!: UserId
 
@@ -30,9 +29,6 @@ export class PostEntity {
 
     @Column('boolean', { default: false })
     closeFriend!: boolean
-    
-    @OneToMany(() => LikeEntity, (like) => like.post)
-    likes!: LikeEntity[];
 
     @CreateDateColumn()
     createdAt!: Date

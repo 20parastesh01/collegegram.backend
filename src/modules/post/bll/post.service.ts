@@ -1,20 +1,20 @@
 import { BadRequestError, NotFoundError, ServerError } from '../../../utility/http-error'
 import { IPostRepository, PostRepository } from '../post.repository'
 import { CreatePostDTO } from '../dto/createPost.dto'
-import { PostWithLikesCount, PostWithoutLikesCount } from '../model/post'
+import { PostWithLikeCount, PostWithoutLikeCount } from '../model/post'
 import { PostId } from '../model/post-id'
 import { newPostModelToRepoInput } from './post.dao'
 import { UserId } from '../../user/model/user-id'
 import { Service } from '../../../registry/layer-decorators'
 import { MinioRepo } from '../../../data-source'
 import { zodWholeNumber } from '../../../data/whole-number'
-import { LikeRepository } from '../like.repository'
-import { UserRepository } from '../../user/user.repository'
+import { ILikeRepository, LikeRepository } from '../like.repository'
+import { IUserRepository, UserRepository } from '../../user/user.repository'
 import { likeWithoutIdModelToCreateLikeEntity } from './like.dao'
 import { LikeWithId } from '../model/like'
 
-type resPost = PostWithLikesCount | PostWithoutLikesCount | LikeWithId | BadRequestError | ServerError | NotFoundError
-type resPosts = { result: PostWithLikesCount[]; total: number } | BadRequestError | ServerError
+type resPost = PostWithLikeCount | PostWithoutLikeCount | LikeWithId | BadRequestError | ServerError | NotFoundError
+type resPosts = { result: PostWithLikeCount[]; total: number } | BadRequestError | ServerError
 
 export interface IPostService {
     createPost(dto: CreatePostDTO, files: Express.Multer.File[], userId: UserId): Promise<resPost>
@@ -28,15 +28,15 @@ export interface IPostService {
 export class PostService implements IPostService {
     constructor(
         private postRepo: IPostRepository,
-        private readonly likeRepo: LikeRepository,
-        private readonly userRepo: UserRepository
+        private likeRepo: ILikeRepository,
+        private readonly userRepo: IUserRepository
         ) {}
     
     async likePost(userId: UserId, postId: PostId): Promise<resPost> {
         const like = (await this.likeRepo.findLikeByUserAndPost(userId, postId)).toLikeModel();
         if (!like) {
             const user = (await this.userRepo.findById(userId))?.toUser()
-            const post = (await this.postRepo.findPostWithoutLikesCountByID(postId)).toPostModel()
+            const post = (await this.postRepo.findPostWithoutLikeCountByID(postId)).toPostModel()
             if(user && post) {
                 const input = likeWithoutIdModelToCreateLikeEntity(user, post)
                 const createdLike = (await this.likeRepo.create(input)).toLikeModel()
@@ -52,7 +52,7 @@ export class PostService implements IPostService {
             return new BadRequestError('Post did not like by current user.');
         }
           
-        const result = (await this.likeRepo.findAndDeleteLike(like.id)).toLikeModel();
+        const result = (await this.likeRepo.removeLike(like.id)).toLikeModel();
         return result ?? new ServerError
     }
 
@@ -84,7 +84,7 @@ export class PostService implements IPostService {
     }
 
     async getPost(postId: PostId): Promise<resPost> {
-        const post = (await this.postRepo.findPostWithLikesCountByID(postId)).toPostModel()
+        const post = (await this.postRepo.findPostWithLikeCountByID(postId)).toPostModel()
         if (post) {
             const photos = await MinioRepo.getPostPhotoUrl(post.id, post.photosCount)
             if (photos) {
