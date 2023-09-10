@@ -1,5 +1,5 @@
 import { LikeEntity } from '../entity/like.entity'
-import { CreateLike, CreatedLike } from '../like.repository'
+import { CreateLike } from '../like.repository'
 import { zodUserId } from '../../user/model/user-id'
 import { zodPostId } from '../model/post-id'
 import { LikeId, zodLikeId } from '../model/like-id'

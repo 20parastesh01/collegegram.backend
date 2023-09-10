@@ -55,6 +55,7 @@ class MockUserRepository implements IUserRepository {
             following: 0 as WholeNumber,
             postsCount: 0 as WholeNumber,
             private: false,
+            likes:[],
             createdAt: new Date(),
             updatedAt: new Date(),
         })
@@ -65,7 +66,7 @@ class MockUserRepository implements IUserRepository {
     ): Promise<{
         toUser(): User
         toUserBasic(): { userId: UserId; username: Username; name: string; lastname: string; photo: string }
-        toUserWithPassword(): { id: UserId; username: Username; password: Password; email: Email; name: string; lastname: string; photo: string; followers: WholeNumber; following: WholeNumber; bio: string; postsCount: WholeNumber; private: boolean }
+        toUserWithPassword(): { id: UserId; username: Username; password: Password; email: Email; name: string; lastname: string; photo: string; followers: WholeNumber; following: WholeNumber; bio: string; postsCount: WholeNumber; private: boolean; likes:[] }
     } | null> {
         throw new Error('Method not implemented.')
     }
@@ -98,6 +99,7 @@ class MockUserRepository implements IUserRepository {
             following: 0 as WholeNumber,
             postsCount: 0 as WholeNumber,
             private: false,
+            likes:[],
             createdAt: new Date(),
             updatedAt: new Date(),
         })
@@ -111,6 +113,7 @@ class MockUserRepository implements IUserRepository {
             following: 0 as WholeNumber,
             postsCount: 0 as WholeNumber,
             private: false,
+            likes:[],
             createdAt: new Date(),
             updatedAt: new Date(),
         })

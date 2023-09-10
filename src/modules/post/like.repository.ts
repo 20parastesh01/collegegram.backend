@@ -8,19 +8,10 @@ import { PostWithoutLikeCount } from './model/post'
 import { PostId } from './model/post-id'
 import { LikeId } from './model/like-id'
 import { WholeDate } from '../../data/whole-date'
-import { UserEntity } from '../user/entity/user.entity'
-import { PostEntity } from './entity/post.entity'
-import { UserRepository } from '../user/user.repository'
-import { PostRepository } from './post.repository'
 
 export interface CreateLike {
     user: User
     post: PostWithoutLikeCount
-}
-export interface CreatedLike extends CreateLike{
-    id: LikeId
-    createdAt: WholeDate
-    updatedAt: WholeDate
 }
 
 export interface ILikeRepository {
