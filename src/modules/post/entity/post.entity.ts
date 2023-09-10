@@ -5,6 +5,7 @@ import { Caption } from '../model/caption'
 import { Tag } from '../model/tag'
 import { UserId } from '../../user/model/user-id'
 import { UserEntity } from '../../user/entity/user.entity'
+import { LikeEntity } from './like.entity'
 
 @Entity('posts')
 export class PostEntity {
@@ -16,6 +17,10 @@ export class PostEntity {
 
     @Column('integer', { default: 0 })
     photosCount!: WholeNumber
+
+    @OneToMany(() => LikeEntity, (like)=>like.post , { lazy: true })
+    @JoinColumn({ name: 'like_id' })
+    likes: LikeEntity[]
 
     @Column({ type: 'text', array: true, default: [], nullable: true })
     tags?: Tag[]

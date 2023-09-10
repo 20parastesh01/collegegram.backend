@@ -1,4 +1,4 @@
-import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from 'typeorm'
+import { Column, CreateDateColumn, Entity, JoinColumn, OneToMany, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from 'typeorm'
 import { Email } from '../../../data/email'
 import { WholeNumber } from '../../../data/whole-number'
 import { Password } from '../model/password'
@@ -42,6 +42,10 @@ export class UserEntity {
 
     @Column('boolean', { default: false })
     private!: boolean
+    
+    @OneToMany((type) => LikeEntity, (like)=>like.post , { lazy: true ,onDelete: 'CASCADE'})
+    @JoinColumn({ name: 'like_id' })
+    likes: LikeEntity[] | undefined
 
     @CreateDateColumn()
     createdAt!: Date

@@ -40,12 +40,18 @@ export class PostRepository implements IPostRepository {
     async findAllByAuthor(userId: UserId) {
         const posts: PostEntity[] = await this.PostRepo.createQueryBuilder('post')
         .leftJoin("post.author", "author")
-        .leftJoinAndMapOne("post.Likes",'likes','like','like.post_id = post.id')
-        .addSelect('COUNT(like.id)', 'likeCount')
+        .loadRelationCountAndMap('post.likes', 'post.likeCount')
         .where('post.author = :userId', { userId })
         .groupBy('post.id')
-        .setLock("pessimistic_read")
         .getRawMany();
+        // const posts: PostEntity[] = await this.PostRepo.createQueryBuilder('post')
+        // .leftJoin("post.author", "author")
+        // .leftJoinAndMapOne("post.Likes",'likes','like','like.post_id = post.id')
+        // .addSelect('COUNT(like.id)', 'likeCount')
+        // .where('post.author = :userId', { userId })
+        // .groupBy('post.id')
+        // .setLock("pessimistic_read")
+        // .getRawMany();
         return postArrayDao(posts)
     }
     async findPostWithoutLikeCountByID(postId: PostId) {
@@ -63,13 +69,18 @@ export class PostRepository implements IPostRepository {
     }
     async findPostWithLikeCountByID(postId: PostId) {
         const output : PostWithLikeCountEntity | undefined = await this.PostRepo.createQueryBuilder('post')
-        .leftJoin("post.author", "author")
-        .leftJoinAndMapOne("post.Likes",'likes','like','like.post_id = post.id')
-        .addSelect('COUNT(like.id)', 'likeCount')
+        .loadRelationCountAndMap('post.likes', 'post.likeCount')
         .where('post.id = :postId', { postId })
         .groupBy('post.id')
-        .setLock("pessimistic_read")
         .getRawOne();
+        // const output : PostWithLikeCountEntity | undefined = await this.PostRepo.createQueryBuilder('post')
+        // .leftJoin("post.author", "author")
+        // .leftJoinAndMapOne("post.Likes",'likes','like','like.post_id = post.id')
+        // .addSelect('COUNT(like.id)', 'likeCount')
+        // .where('post.id = :postId', { postId })
+        // .groupBy('post.id')
+        // .setLock("pessimistic_read")
+        // .getRawOne();
       
         return postWithLikeOrNullDao(output);
     }

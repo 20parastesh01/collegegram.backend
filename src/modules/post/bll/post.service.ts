@@ -8,8 +8,8 @@ import { UserId } from '../../user/model/user-id'
 import { Service } from '../../../registry/layer-decorators'
 import { MinioRepo } from '../../../data-source'
 import { zodWholeNumber } from '../../../data/whole-number'
-import { ILikeRepository, LikeRepository } from '../like.repository'
-import { IUserRepository, UserRepository } from '../../user/user.repository'
+import { ILikeRepository } from '../like.repository'
+import { IUserRepository } from '../../user/user.repository'
 import { likeWithoutIdModelToCreateLikeEntity } from './like.dao'
 import { LikeWithId } from '../model/like'
 
@@ -33,7 +33,7 @@ export class PostService implements IPostService {
         ) {}
     
     async likePost(userId: UserId, postId: PostId): Promise<resPost> {
-        const like = (await this.likeRepo.findLikeByUserAndPost(userId, postId)).toLikeModel();
+        const like = (await this.likeRepo.findByUserAndPost(userId, postId)).toLikeModel();
         if (!like) {
             const user = (await this.userRepo.findById(userId))?.toUser()
             const post = (await this.postRepo.findPostWithoutLikeCountByID(postId)).toPostModel()
@@ -47,7 +47,7 @@ export class PostService implements IPostService {
         return new BadRequestError('Post Already liked by current user.')
     }
     async unlikePost(userId: UserId, postId: PostId): Promise<resPost> {
-        const like = (await this.likeRepo.findLikeByUserAndPost(userId, postId)).toLikeModel();
+        const like = (await this.likeRepo.findByUserAndPost(userId, postId)).toLikeModel();
         if (!like) {
             return new BadRequestError('Post did not like by current user.');
         }
