@@ -1,17 +1,19 @@
 import { z } from 'zod';
 
-const transformValidStringToBoolean = (value: unknown): any => {
+const transformValidStringToBoolean = (value: unknown): boolean => {
   if ((typeof value === 'string' && value === 'true')) {
     return true 
   }
   else if (typeof value === 'string' && value === 'false')
     return false;
+  else if (typeof value === 'boolean')
+    return value;
   else
-    return value
+    return false
 };
 export const isBooleanOrBooleanString = (value: unknown): boolean => {
     if (typeof value === 'string') {
-      return value === 'true' || value === 'false';
+      return (value === 'true' || value === 'false');
     }
     else if (typeof value === 'boolean')
       return true;
@@ -19,4 +21,4 @@ export const isBooleanOrBooleanString = (value: unknown): boolean => {
       return false
   };
 
-export const zodBooleanOrBooleanString = z.any().transform((value) => transformValidStringToBoolean(value)).refine(isBooleanOrBooleanString);
+export const zodBooleanOrBooleanString = z.union([z.boolean(),z.string().nonempty()]).transform((value) => transformValidStringToBoolean(value)).refine(isBooleanOrBooleanString);
