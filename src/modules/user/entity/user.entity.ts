@@ -43,7 +43,7 @@ export class UserEntity {
     @Column('boolean', { default: false })
     private!: boolean
     
-    @OneToMany((type) => LikeEntity, (like)=>like.post , { lazy: true ,onDelete: 'CASCADE'})
+    @OneToMany(() => LikeEntity, (like)=>like.post , { lazy: true ,onDelete: 'CASCADE'})
     @JoinColumn({ name: 'like_id' })
     likes: LikeEntity[] | undefined
 

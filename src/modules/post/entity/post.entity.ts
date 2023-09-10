@@ -18,10 +18,6 @@ export class PostEntity {
     @Column('integer', { default: 0 })
     photosCount!: WholeNumber
 
-    @OneToMany(() => LikeEntity, (like)=>like.post , { lazy: true })
-    @JoinColumn({ name: 'like_id' })
-    likes: LikeEntity[]
-
     @Column({ type: 'text', array: true, default: [], nullable: true })
     tags?: Tag[]
 
@@ -34,6 +30,10 @@ export class PostEntity {
 
     @Column('boolean', { default: false })
     closeFriend!: boolean
+
+    @OneToMany((type) => LikeEntity, (like)=>like.post , { lazy: true ,onDelete: 'CASCADE'})
+    @JoinColumn({ name: 'like_id' })
+    likes: LikeEntity[] | undefined
 
     @CreateDateColumn()
     createdAt!: Date
