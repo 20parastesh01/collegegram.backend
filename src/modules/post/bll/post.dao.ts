@@ -1,6 +1,6 @@
 import { zodWholeNumber } from '../../../data/whole-number'
 import { PostEntity } from '../entity/post.entity'
-import { PostWithLikeCount, PostWithoutLikeCount, NewPost, BasePost } from '../model/post'
+import { PostWithLikeCount, PostWithoutLikeCount, NewPost, BasicPost } from '../model/post'
 import { PostWithLikeCountEntity, CreatePost } from '../post.repository'
 import { zodTags } from '../model/tag'
 import { zodUserId } from '../../user/model/user-id'
@@ -8,38 +8,39 @@ import { zodCaption } from '../model/caption'
 import { zodPostId } from '../model/post-id'
 import { zodBooleanOrBooleanString } from '../../../data/boolean-stringBoolean'
 
-const postEntityWithLikeToPostModel = (input: PostWithLikeCountEntity) => {
+const postEntityWithLikeToPost = (input: PostWithLikeCountEntity) => {
 
     const { createdAt, updatedAt, ...rest } = input
         const output: PostWithLikeCount = {
             id: zodPostId.parse(rest.id),
             caption: zodCaption.parse(rest.caption),
-            photosCount: zodWholeNumber.parse(rest.photosCount),
+            photoCount: zodWholeNumber.parse(rest.photoCount),
             author: zodUserId.parse(rest.author),
             closeFriend: zodBooleanOrBooleanString.parse(rest.closeFriend),
             tags: zodTags.optional().parse(rest.tags),
-            commentsCount: zodWholeNumber.parse(rest.commentsCount),
+            commentCount: zodWholeNumber.parse(rest.commentCount),
             likeCount: zodWholeNumber.parse(rest.likeCount)
         }
         return output
 }
-const postEntityWithoutLikeToPostModel = (input: PostEntity ) => {
+const postEntityWithoutLikeToPost = (input: PostEntity ) => {
         const { createdAt, updatedAt, ...rest } = input
         const output: PostWithoutLikeCount = {
             id: zodPostId.parse(rest.id),
             caption: zodCaption.parse(rest.caption),
-            photosCount: zodWholeNumber.parse(rest.photosCount),
+            photoCount: zodWholeNumber.parse(rest.photoCount),
             author: zodUserId.parse(rest.author),
             closeFriend: zodBooleanOrBooleanString.parse(rest.closeFriend),
             tags: zodTags.optional().parse(rest.tags),
-            commentsCount: zodWholeNumber.parse(rest.commentsCount)
+            commentCount: zodWholeNumber.parse(rest.commentCount)
         }
         return output
 }
-const postEntityToPostThumbnailModel = (input: PostEntity | PostWithLikeCountEntity) => {
+const postEntityToPostThumbnail = (input: PostEntity | PostWithLikeCountEntity) => {
     const { createdAt, updatedAt, ...rest } = input
-    const output: BasePost = {
-        photosCount: zodWholeNumber.parse(rest.photosCount),
+    const output: BasicPost = {
+        id: zodPostId.parse(rest.id),
+        photoCount: zodWholeNumber.parse(rest.photoCount),
         author: zodUserId.parse(rest.author),
         closeFriend: zodBooleanOrBooleanString.parse(rest.closeFriend),
     }
@@ -47,35 +48,35 @@ const postEntityToPostThumbnailModel = (input: PostEntity | PostWithLikeCountEnt
 }
 export const postWithoutLikeOrNullDao = (input: PostEntity | null) => {
     return {
-        toPostModel():  undefined | PostWithoutLikeCount {
+        toPost():  undefined | PostWithoutLikeCount {
             if (input === null ) return undefined
 
-            return postEntityWithoutLikeToPostModel(input)
+            return postEntityWithoutLikeToPost(input)
         
         },
-        toThumbnailModel(): BasePost | undefined {
+        toThumbnail(): BasicPost | undefined {
             if (input === null) return undefined
-            return postEntityToPostThumbnailModel(input)
+            return postEntityToPostThumbnail(input)
         },
     }
 }
 export const postWithLikeOrNullDao = (input: PostWithLikeCountEntity | undefined) => {
     return {
-        toPostModel(): PostWithLikeCount | undefined  {
+        toPost(): PostWithLikeCount | undefined  {
             if (input === undefined ) return undefined
-            return postEntityWithLikeToPostModel(input)
+            return postEntityWithLikeToPost(input)
         
         },
-        toThumbnailModel(): BasePost | undefined {
+        toThumbnail(): BasicPost | undefined {
             if (input === undefined ) return undefined
-            return postEntityToPostThumbnailModel(input)
+            return postEntityToPostThumbnail(input)
         },
     }
 }
 export const postWithoutLikeDao = (input: PostEntity) => {
     return {
-        toPostModel(): PostWithLikeCount {
-            const rest  = postEntityWithoutLikeToPostModel(input)
+        toPost(): PostWithLikeCount {
+            const rest  = postEntityWithoutLikeToPost(input)
             const output : PostWithLikeCount = { likeCount:zodWholeNumber.parse(0), ...rest}
             return output
         },
@@ -83,25 +84,25 @@ export const postWithoutLikeDao = (input: PostEntity) => {
 }
 export const postArrayDao = (input: PostEntity[]) => {
     return {
-        toPostModelList(): PostWithLikeCount[] {
+        toPostList(): PostWithLikeCount[] {
             return input.map((entity) => {
-                const rest = postEntityWithoutLikeToPostModel(entity)
+                const rest = postEntityWithoutLikeToPost(entity)
                 const output : PostWithLikeCount = { likeCount:zodWholeNumber.parse(0), ...rest}
                 return output
             })
         },
-        toThumbnailModelList(): BasePost[] {
+        toThumbnailList(): BasicPost[] {
             return input.map((entity) => {
-                const rest = postEntityToPostThumbnailModel(entity)
+                const rest = postEntityToPostThumbnail(entity)
                 return rest
             })
         },
     }
 }
-export const newPostModelToRepoInput = (post: NewPost): CreatePost => {
+export const newPostToRepoInput = (post: NewPost): CreatePost => {
     const createPostEntity: CreatePost = {
         likeCount: zodWholeNumber.parse(0), //will not provided in create stage
-        commentsCount: zodWholeNumber.parse(0), //will not provided in create stage
+        commentCount: zodWholeNumber.parse(0), //will not provided in create stage
         ...post,
     }
 

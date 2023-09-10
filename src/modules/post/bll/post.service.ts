@@ -2,26 +2,35 @@ import { BadRequestError, NotFoundError, ServerError } from '../../../utility/ht
 import { IPostRepository, PostRepository } from '../post.repository'
 import { CreatePostDTO } from '../dto/createPost.dto'
 import { PostWithLikeCount, PostWithoutLikeCount } from '../model/post'
-import { PostId } from '../model/post-id'
-import { newPostModelToRepoInput } from './post.dao'
+import { zodPostId } from '../model/post-id'
+import { newPostToRepoInput } from './post.dao'
 import { UserId } from '../../user/model/user-id'
 import { Service } from '../../../registry/layer-decorators'
 import { MinioRepo } from '../../../data-source'
-import { zodWholeNumber } from '../../../data/whole-number'
+import { WholeNumber, zodWholeNumber } from '../../../data/whole-number'
 import { ILikeRepository } from '../like.repository'
 import { IUserRepository } from '../../user/user.repository'
-import { likeWithoutIdModelToCreateLikeEntity } from './like.dao'
-import { LikeWithId } from '../model/like'
+import { likeWithoutIdToCreateLikeEntity } from './like.dao'
+import { LikeWithPost } from '../model/like'
+import { Msg, PersianErrors, messages } from '../../../utility/persian-messages'
+import { JustId } from '../../../data/just-id'
+  
+type arrayResult = { result: PostWithLikeCount[], total: number }
+export type requestedPostId = { requestedPostId: JustId }
 
-type resPost = PostWithLikeCount | PostWithoutLikeCount | LikeWithId | BadRequestError | ServerError | NotFoundError
-type resPosts = { result: PostWithLikeCount[]; total: number } | BadRequestError | ServerError
+export type resMessage = {
+    msg: Msg,
+    err: BadRequestError[] | ServerError[] | NotFoundError[],
+    data: PostWithLikeCount[] | PostWithoutLikeCount[] | LikeWithPost[]| arrayResult[]| requestedPostId[],
+    errCode?: WholeNumber,
+}
 
 export interface IPostService {
-    createPost(dto: CreatePostDTO, files: Express.Multer.File[], userId: UserId): Promise<resPost>
-    getPost(postId: PostId): Promise<resPost>
-    getAllPosts(userId: UserId): Promise<resPosts>
-    likePost(userId: UserId,postId: PostId): Promise<resPost>
-    unlikePost(userId: UserId,postId: PostId): Promise<resPost>
+    createPost(dto: CreatePostDTO, files: Express.Multer.File[], userId: UserId): Promise<resMessage>
+    getPost(id: JustId): Promise<resMessage>
+    getAllPosts(userId: UserId): Promise<resMessage>
+    likePost(userId: UserId,id: JustId): Promise<resMessage>
+    unlikePost(userId: UserId,id: JustId): Promise<resMessage>
 }
 
 @Service(PostRepository)
@@ -32,65 +41,74 @@ export class PostService implements IPostService {
         private readonly userRepo: IUserRepository
         ) {}
     
-    async likePost(userId: UserId, postId: PostId): Promise<resPost> {
-        const like = (await this.likeRepo.findByUserAndPost(userId, postId)).toLikeModel();
+    async likePost(userId: UserId, id: JustId) {
+        const postId = zodPostId.parse(id)
+        const like = (await this.likeRepo.findByUserAndPost(userId, postId)).toLike();
         if (!like) {
             const user = (await this.userRepo.findById(userId))?.toUser()
-            const post = (await this.postRepo.findPostWithoutLikeCountByID(postId)).toPostModel()
+            const post = (await this.postRepo.findPostWithoutLikeCountByID(postId)).toPost()
             if(user && post) {
-                const input = likeWithoutIdModelToCreateLikeEntity(user, post)
-                const createdLike = (await this.likeRepo.create(input)).toLikeModel()
-                return createdLike
+                const input = likeWithoutIdToCreateLikeEntity(user, post)
+                const createdLike = (await this.likeRepo.create(input)).toLike()
+                const updatedPost = createdLike.post;
+                if(createdLike !== undefined) return { msg: messages.liked.persian , err : [] , data:[updatedPost] }
+                return { msg: messages.failed.persian , err : [new ServerError(PersianErrors.ServerError)] , data:[] }
             }
-            return new BadRequestError('postId or userId not exist.')
+            return { msg: messages.postNotFound.persian , err : [] , data:[{requestedPostId:id}] }
         }
-        return new BadRequestError('Post Already liked by current user.')
+        return { msg: messages.notLikedYet.persian , err : [] , data:[{requestedPostId:id}] }
     }
-    async unlikePost(userId: UserId, postId: PostId): Promise<resPost> {
-        const like = (await this.likeRepo.findByUserAndPost(userId, postId)).toLikeModel();
+    async unlikePost(userId: UserId, id: JustId) {
+        const postId = zodPostId.parse(id)
+        const like = (await this.likeRepo.findByUserAndPost(userId, postId)).toLike();
         if (!like) {
-            return new BadRequestError('Post did not like by current user.');
+            return { msg: messages.notLikedYet.persian , err : [] , data:[{requestedPostId:id}] }
         }
-          
-        const result = (await this.likeRepo.removeLike(like.id)).toLikeModel();
-        return result ?? new ServerError
+        const createdLike = (await this.likeRepo.removeLike(like.id)).toLike()
+        if( createdLike !== undefined){
+            const updatedPost = createdLike.post; 
+            return  { msg: messages.unliked.persian , err : [] , data:[updatedPost] }
+        }
+        return { msg: messages.failed.persian , err : [new ServerError(PersianErrors.ServerError)] , data:[] }
     }
 
-    async getAllPosts(userId: UserId): Promise<resPosts> {
-        const result = (await this.postRepo.findAllByAuthor(userId)).toPostModelList()
+    async getAllPosts(userId: UserId) {
+        const result = (await this.postRepo.findAllByAuthor(userId)).toPostList()
         for (let post of result) {
-            const photos = await MinioRepo.getPostPhotoUrl(post.id, post.photosCount)
+            const photos = await MinioRepo.getPostPhotoUrl(post.id, post.photoCount)
             if (photos) {
-                post.photos = await MinioRepo.getPostPhotoUrl(post.id, post.photosCount)
+                post.photos = await MinioRepo.getPostPhotoUrl(post.id, post.photoCount)
             }
         }
-        return { result, total: result.length }
+        return { msg: messages.succeeded.persian , err : [] , data:[ {result, total: result.length} ] }
     }
 
-    async createPost(dto: CreatePostDTO, files: Express.Multer.File[], userId: UserId): Promise<resPost> {
-        //const { tags, caption, photosCount , author, closeFriend } = dto
-        const photosCount = zodWholeNumber.parse(files.length)
-        const createPostRepoInput = newPostModelToRepoInput({ ...dto, photosCount, author: userId })
-        const createdPost = (await this.postRepo.create(createPostRepoInput)).toPostModel()
+    async createPost(dto: CreatePostDTO, files: Express.Multer.File[], userId: UserId) {
+        const photoCount = zodWholeNumber.parse(files.length)
+        const createPostRepoInput = newPostToRepoInput({ ...dto, photoCount, author: userId })
+        const createdPost = (await this.postRepo.create(createPostRepoInput)).toPost()
         if (createdPost) {
-            const photos = await MinioRepo.getPostPhotoUrl(createdPost.id, createdPost.photosCount)
+            const photos = await MinioRepo.getPostPhotoUrl(createdPost.id, createdPost.photoCount)
             if (photos) {
-                createdPost.photos = await MinioRepo.getPostPhotoUrl(createdPost.id, createdPost.photosCount)
+                createdPost.photos = await MinioRepo.getPostPhotoUrl(createdPost.id, createdPost.photoCount)
             }
             await MinioRepo.uploadPostPhoto(createdPost.id, files)
         }
 
-        return createdPost ?? new ServerError()
+        return { msg: messages.succeeded.persian , err : [] , data:[ createdPost ] } 
     }
 
-    async getPost(postId: PostId): Promise<resPost> {
-        const post = (await this.postRepo.findPostWithLikeCountByID(postId)).toPostModel()
+    async getPost(id: JustId) {
+        const postId = zodPostId.parse(id)
+        const post = (await this.postRepo.findPostWithLikeCountByID(postId)).toPost()
         if (post) {
-            const photos = await MinioRepo.getPostPhotoUrl(post.id, post.photosCount)
+            const photos = await MinioRepo.getPostPhotoUrl(post.id, post.photoCount)
             if (photos) {
-                post.photos = await MinioRepo.getPostPhotoUrl(post.id, post.photosCount)
+                post.photos = await MinioRepo.getPostPhotoUrl(post.id, post.photoCount)
             }
         }
-        return post ?? new NotFoundError()
+        if (post !== undefined)
+            return { msg: messages.succeeded.persian , err : [] , data:[post] }
+        return { msg: messages.postNotFound.persian , err : [] , data:[{requestedPostId:id}] }
     }
 }

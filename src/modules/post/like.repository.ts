@@ -1,4 +1,4 @@
-import { DataSource, EntityManager, Repository, getManager } from 'typeorm'
+import { DataSource, Repository } from 'typeorm'
 import { LikeEntity } from './entity/like.entity'
 import { UserId } from '../user/model/user-id'
 import { likeArrayDao, likeDao, likeOrNullDao } from './bll/like.dao'
@@ -7,7 +7,6 @@ import { User } from '../user/model/user'
 import { PostWithoutLikeCount } from './model/post'
 import { PostId } from './model/post-id'
 import { LikeId } from './model/like-id'
-import { WholeDate } from '../../data/whole-date'
 
 export interface CreateLike {
     user: User
@@ -32,7 +31,7 @@ export class LikeRepository implements ILikeRepository {
         const like: LikeEntity[] = await this.LikeRepo.createQueryBuilder("like")
         .leftJoinAndSelect("like.user", "user")
         .leftJoinAndSelect("like.post", "post")
-        .where('like.user = :userId', { userId })
+        .where('like.user.id = :userId', { userId })
         .getMany()
         return likeArrayDao(like)
     }
@@ -40,8 +39,8 @@ export class LikeRepository implements ILikeRepository {
         const output = await this.LikeRepo.createQueryBuilder("like")
         .leftJoinAndSelect("like.user", "user")
         .leftJoinAndSelect("like.post", "post")
-        .where('like.user = :userId', { userId })
-        .andWhere('like.post = :postId', { postId })
+        .where('like.user.id = :userId', { userId })
+        .andWhere('like.post.id = :postId', { postId })
         .getOne()
         return likeOrNullDao(output)
     }

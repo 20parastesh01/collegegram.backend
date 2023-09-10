@@ -7,16 +7,15 @@ import { UserId } from '../user/model/user-id'
 import { WholeNumber } from '../../data/whole-number'
 import { postArrayDao, postWithLikeOrNullDao, postWithoutLikeDao, postWithoutLikeOrNullDao } from './bll/post.dao'
 import { Repo } from '../../registry/layer-decorators'
-import { LikeEntity } from './entity/like.entity'
 
 export interface CreatePost {
     caption: Caption
     tags?: Tag[]
     author: UserId
-    photosCount: WholeNumber
+    photoCount: WholeNumber
     closeFriend: boolean
     likeCount: WholeNumber
-    commentsCount: WholeNumber
+    commentCount: WholeNumber
 }
 export type LikeCount = WholeNumber
 export interface PostWithLikeCountEntity extends PostEntity {

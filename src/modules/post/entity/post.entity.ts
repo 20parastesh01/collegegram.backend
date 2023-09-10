@@ -16,7 +16,7 @@ export class PostEntity {
     caption!: Caption
 
     @Column('integer', { default: 0 })
-    photosCount!: WholeNumber
+    photoCount!: WholeNumber
 
     @Column({ type: 'text', array: true, default: [], nullable: true })
     tags?: Tag[]
@@ -26,7 +26,7 @@ export class PostEntity {
     author!: UserId
 
     @Column('integer', { default: 0 })
-    commentsCount!: WholeNumber
+    commentCount!: WholeNumber
 
     @Column('boolean', { default: false })
     closeFriend!: boolean
