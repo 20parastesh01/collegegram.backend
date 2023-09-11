@@ -41,11 +41,11 @@ describe('PostService', () => {
         mockPostRepository.create.mockResolvedValue(postWithoutLikeDao(mockCreatedPost[0]))
 
         const result = await postService.createPost(mockcreatePostDto, mockFiles, mockUserId)
-        if ('photos' in result) {
-            delete result.photos
+        if ('photos' in result.data[0]) {
+            delete result.data[0].photos
         }
         const {id,...rest} = mockCreatedPost[0]
-        expect(result).toEqual(mockCreatedPost[0])
+        expect(result.data[0]).toEqual(mockCreatedPost[0])
         expect(mockPostRepository.create).toHaveBeenCalledWith(expect.objectContaining(rest))
     })
 
@@ -53,24 +53,24 @@ describe('PostService', () => {
         
         mockPostRepository.findPostWithLikeCountByID.mockResolvedValue(postWithLikeOrNullDao(mockCreatedPost[0]))
         const result = await postService.getPost(mockJustId.id1)
-        if ('photos' in result) {
-            delete result.photos
+        if ('photos' in result.data[0]) {
+            delete result.data[0].photos
         }
-        expect(result).toEqual(mockCreatedPost[0])
-        expect(mockPostRepository.findPostWithLikeCountByID).toHaveBeenCalledWith(expect(mockPostId.postId1))
+        expect(result.data[0]).toEqual(mockCreatedPost[0])
+        expect(mockPostRepository.findPostWithLikeCountByID).toHaveBeenCalledWith(mockPostId.postId1)
     })
 
     it('should get all post of user', async () => {
         
         mockPostRepository.findAllByAuthor.mockResolvedValue(postArrayDao(mockCreatedPost))
         const result = await postService.getAllPosts(mockUserId)
-        if (Array.isArray(result)) {
-            delete result[0].photos
-            delete result[1].photos
+        if (Array.isArray(result.data)) {
+            delete result.data[0].result[0].photos
+            delete result.data[0].result[1].photos
         }
         
-        expect(result).toEqual({result:mockCreatedPost,total:2})
-        expect(mockPostRepository.findPostWithLikeCountByID).toHaveBeenCalledWith(expect(mockUserId))
+        expect(result.data[0]).toEqual({result:mockCreatedPost,total:2})
+        expect(mockPostRepository.findAllByAuthor).toHaveBeenCalledWith(mockUserId)
     })
 
     it('should like a post', async () => {
@@ -81,7 +81,8 @@ describe('PostService', () => {
         mockUserRepository.findById.mockResolvedValue(userDao(mockUser))
         const result = await postService.likePost(mockLikeDto.user.id,mockJustId.id1)
 
-        expect(result).toEqual({ msg: messages.liked.persian })
+        expect(result.msg).toEqual(messages.liked.persian)
+        expect(result.data[0]).toEqual(mockCreatedPost[1])
         expect(mockLikeRepository.create).toHaveBeenCalledWith(expect.objectContaining({post:mockPostWithoutLikeCount,user:mockUser}))
     })
     it('should unlike a post', async () => {
@@ -92,8 +93,9 @@ describe('PostService', () => {
         mockUserRepository.findById.mockResolvedValue(userDao(mockUser))
         const result = await postService.unlikePost(mockLikeDto.user.id,mockJustId.id1)
 
-        expect(result).toEqual({ msg: messages.unliked.persian })
-        expect(mockLikeRepository.removeLike).toHaveBeenCalledWith(expect(mockCreatedLike.id))
+        expect(result.msg).toEqual(messages.unliked.persian)
+        expect(result.data[0]).toEqual(mockCreatedPost[1])
+        expect(mockLikeRepository.removeLike).toHaveBeenCalledWith(mockCreatedLike.id)
     })
 
 

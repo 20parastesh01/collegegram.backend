@@ -12,6 +12,7 @@ const mockcreateCommentDto = {
     postId: 123 as PostId,
     parentId: 1 as ParentId,
 }
+
 const userId = 123 as UserId
 
 const mockCreatedComment: Comment = {
@@ -49,6 +50,6 @@ describe('CommentService', () => {
         const result = await commentService.createComment(mockcreateCommentDto, userId)
 
         expect(result).toEqual(mockCreatedComment)
-        expect(mockCommentRepository.create).toHaveBeenCalledWith(expect.objectContaining(mockcreateCommentDto))
+        expect(mockCommentRepository.create).toHaveBeenCalledWith({...mockcreateCommentDto,likesCount:0 as WholeNumber,author:123 as UserId})
     })
 })

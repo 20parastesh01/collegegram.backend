@@ -82,7 +82,8 @@ export const mockCreatedPost: PostWithLikeCount[] = [{
     closeFriend: false,
     likeCount: 0 as WholeNumber,
     commentCount: 0 as WholeNumber,
-},{
+},
+{
     id: mockPostId.postId2,
     caption: 'test2' as Caption,
     tags: ['a', 'b'] as Tag[],
@@ -92,6 +93,16 @@ export const mockCreatedPost: PostWithLikeCount[] = [{
     likeCount: 2 as WholeNumber,
     commentCount: 2 as WholeNumber,
 }]
+export const mockCreatedPostWithLike: PostWithLikeCount ={
+    id: mockPostId.postId2,
+    caption: 'test2' as Caption,
+    tags: ['a', 'b'] as Tag[],
+    photoCount: photoCount,
+    author: mockUserId,
+    closeFriend: false,
+    likeCount: 1 as WholeNumber,
+    commentCount: 2 as WholeNumber,
+}
 export const CreatedPost: PostWithLikeCount[] = [{
     ...mockCreatedPost[0],
     photos: ["/file/post/1-1?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=minioadmin%2F20230910%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20230910T115835Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=c519d693cbd8d45e465aed61469dd12095ee92dbf4ae6ba905607bbed83d3a3f", "/file/post/1-2?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=minioadmin%2F20230910%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20230910T115835Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=fe14ba3ad4990f8b5813586215cc17b3bbfe479b46460335a2509120758a6fbc"]
@@ -108,13 +119,13 @@ export const CreatedPost: PostWithLikeCount[] = [{
 ]
 
 export const mockPostWithoutLikeCount : PostWithoutLikeCount = {
-    id: mockPostId.postId3,
-    caption: 'test' as Caption,
+    id: mockPostId.postId2,
+    caption: 'test2' as Caption,
     tags: ['a', 'b'] as Tag[],
     photoCount: photoCount,
     author: mockUserId,
     closeFriend: false,
-    commentCount: 0 as WholeNumber,
+    commentCount: 2 as WholeNumber,
 }
 export const mockLikeDto : CreateLike = {
     user:{id: 2 as UserId} as User,
@@ -123,8 +134,8 @@ export const mockLikeDto : CreateLike = {
 export const mockCreatedLike = {
     id: 1 as LikeId,
     userId :  2 as UserId,
-    postId : mockPostId.postId1,
-    post: mockCreatedPost[0]
+    postId : mockPostId.postId2,
+    post: mockCreatedPost[1]
 }
 export const mockUser : User = {
     id: 2 as UserId,
