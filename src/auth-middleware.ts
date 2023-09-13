@@ -12,7 +12,7 @@ export const authMiddleware = (userService: UserService) => async (req: Request,
     const accessToken = req.header('Authorization')?.replace('Bearer ', '')
     const refreshToken = req.header('refresh')?.replace('Bearer ', '')
     if (isHashed(refreshToken)) RedisRepo.setNewExpire(refreshToken)
-    if (!isToken(accessToken)) return res.status(401).send({ error: 'Unauthorized' })
+    if (!isToken(accessToken)) return res.status(401).send({ error: 'شما اجازه دسترسی ندارید.' })
     const authedUser = verifyToken(accessToken)
 
     if (authedUser instanceof HttpError) {
@@ -21,11 +21,11 @@ export const authMiddleware = (userService: UserService) => async (req: Request,
     }
 
     if (authedUser instanceof TokenExpiredError) {
-        if (!isHashed(refreshToken)) return res.status(401).send({ error: 'Unauthorized' })
+        if (!isHashed(refreshToken)) return res.status(401).send({ error: 'شما اجازه دسترسی ندارید.' })
         const userId = await RedisRepo.getUserId(refreshToken)
-        if (!userId) return res.status(401).send({ error: 'Unauthorized' })
+        if (!userId) return res.status(401).send({ error: 'شما اجازه دسترسی ندارید.' })
         const userBasic = await userService.getUserBasicById(userId)
-        if (!userBasic) return res.status(401).send({ error: 'Unauthorized' })
+        if (!userBasic) return res.status(401).send({ error: 'شما اجازه دسترسی ندارید.' })
         const newToken = generateToken(userBasic)
         if (newToken instanceof ServerError) return res.status(newToken.status).send({ error: newToken.message })
         res.header('Authorization', newToken)

@@ -21,6 +21,8 @@ import { userDao } from './user.dao'
 import { Service } from '../../../registry/layer-decorators'
 import { EditProfileDto, editProfileDto } from '../dto/edit-profile.dto'
 import { Token } from '../../../data/token'
+import { PersianErrors } from '../../../utility/persian-messages'
+import { zodWholeNumber } from '../../../data/whole-number'
 
 export type LoginSignUp = UserWithToken | BadRequestError | ServerError
 
@@ -38,7 +40,7 @@ export const hash = async (input: string): Promise<Password> => {
     if (isPassword(hashed)) {
         return hashed
     }
-    throw new ServerError('Hashing Went Wrong')
+    throw new ServerError()
 }
 
 @Service(UserRepository)
@@ -55,11 +57,11 @@ export class UserService implements IUserService {
         if (isEmail(usernameOrEmail)) {
             dao = await this.userRepo.findByEmail(usernameOrEmail)
         }
-        if (!dao) return new UnauthorizedError('Username or Email is Invalid')
+        if (!dao) return new UnauthorizedError(PersianErrors.EmailOrUsernameNotFound)
         const userWithPassword = dao.toUserWithPassword()
         const isMatchPassword = await compareHash(password, userWithPassword.password)
         if (!isMatchPassword) {
-            return new UnauthorizedError('Invalid Password')
+            return new UnauthorizedError(PersianErrors.InvalidPassword)
         }
         const accessToken = generateToken(dao.toUserBasic())
         if (accessToken instanceof ServerError) return accessToken
@@ -105,9 +107,9 @@ export class UserService implements IUserService {
             return result
         } catch (e) {
             if (e instanceof QueryFailedError) {
-                return new BadRequestError(e.driverError)
+                return new BadRequestError(PersianErrors.EmailOrUsernameExists)
             }
-            return new ServerError('signup')
+            return new ServerError()
         }
     }
 
@@ -134,7 +136,7 @@ export class UserService implements IUserService {
         if (isEmail(usernameOrEmail)) {
             dao = await this.userRepo.findByEmail(usernameOrEmail)
         }
-        if (!dao) return new BadRequestError('Username or Email is Invalid')
+        if (!dao) return new BadRequestError(PersianErrors.EmailOrUsernameNotFound)
         const user = dao.toUser()
         const resetPasswordToken = v4()
         await RedisRepo.setResetPasswordToken(resetPasswordToken, user.id)
@@ -146,7 +148,7 @@ export class UserService implements IUserService {
         const newPassword = await hash(data.newPassword)
         const token = data.token
         const userId = await RedisRepo.getResetPasswordUserId(token)
-        if (!userId) return new BadRequestError('Invalid token')
+        if (!userId) return new BadRequestError(PersianErrors.InvalidToken)
         const dao = (await this.userRepo.changePassword(userId, newPassword))!
         const user = dao.toUser()!
         const accessToken = generateToken(dao.toUserBasic())

@@ -6,13 +6,20 @@ import { loginDto } from '../modules/user/dto/login.dto'
 import { authMiddleware } from '../auth-middleware'
 import { sendEmailDto } from '../modules/user/dto/send-email.dto'
 import { SetPasswordDto, setPasswordDto } from '../modules/user/dto/set-pass.dto'
-import { Auth, File, Files, Get, Patch, Post, RequestBody } from '../registry/endpoint-decorator'
+import { Auth, Delete, File, Files, Get, Patch, Post, RequestBody } from '../registry/endpoint-decorator'
 import { Route } from '../registry/layer-decorators'
 import { editProfileDto } from '../modules/user/dto/edit-profile.dto'
+import { RelationService } from '../modules/user/bll/relation.service'
+import { zodUserId } from '../modules/user/model/user-id'
+import { NotificationService } from '../modules/notification/bll/notification.service'
 
-@Route('/user', UserService)
+@Route('/user', UserService, RelationService, NotificationService)
 export class UserRouter {
-    constructor(private userService: UserService) {}
+    constructor(
+        private userService: UserService,
+        private relationService: RelationService,
+        private notificationService: NotificationService
+    ) {}
     @Post('/signup')
     @RequestBody('SignUpDto')
     signup(req: Request, res: Response) {
@@ -31,6 +38,12 @@ export class UserRouter {
     @Auth()
     getCurrentUser(req: Request, res: Response) {
         handleExpress(res, () => this.userService.getCurrentUser(req.user.userId))
+    }
+
+    @Get('/me/notification')
+    @Auth()
+    getCurrentUserNotifs(req: Request, res: Response) {
+        handleExpress(res, () => this.notificationService.getUserNotificationsWithRelation(req.user.userId))
     }
 
     @Post('/forgetpassword')
@@ -59,5 +72,35 @@ export class UserRouter {
     @Auth()
     getProfilePhoto(req: Request, res: Response) {
         handleExpress(res, () => this.userService.getProfilePhoto(req.user))
+    }
+
+    @Post('/:id/follow')
+    @Auth()
+    followOrRequestForFollow(req: Request, res: Response) {
+        handleExpress(res, () => this.relationService.follow(req.user.userId, zodUserId.parse(req.params.id)))
+    }
+
+    @Delete('/:id/unfollow')
+    @Auth()
+    unfollowOrDeleteRequestForFollow(req: Request, res: Response) {
+        handleExpress(res, () => this.relationService.unfollow(req.user.userId, zodUserId.parse(req.params.id)))
+    }
+
+    @Post('/:id/accept')
+    @Auth()
+    acceptRequest(req: Request, res: Response) {
+        handleExpress(res, () => this.relationService.acceptRequest(req.user.userId, zodUserId.parse(req.params.id)))
+    }
+
+    @Delete('/:id/reject')
+    @Auth()
+    rejectRequest(req: Request, res: Response) {
+        handleExpress(res, () => this.relationService.rejectRequest(req.user.userId, zodUserId.parse(req.params.id)))
+    }
+
+    @Post('/:id/block')
+    @Auth()
+    block(req: Request, res: Response) {
+        handleExpress(res, () => this.relationService.block(req.user.userId, zodUserId.parse(req.params.id)))
     }
 }

@@ -64,7 +64,6 @@ describe('PostService', () => {
             id: zodPostId.parse(1),
             caption: mockcreatePostDto.caption,
             tags: mockcreatePostDto.tags,
-            photosCount: photosCount,
             author: userId,
             closeFriend: mockcreatePostDto.closeFriend,
             likesCount: 1 as WholeNumber,

@@ -18,7 +18,7 @@ import { isSimpleMessage } from '../../../data/simple-message'
 import { RedisRepo } from '../../../data-source'
 import { userDao } from '../bll/user.dao'
 import * as emailUtils from '../../../utility/send-email'
-import { User } from '../model/user'
+import { User, UserShort } from '../model/user'
 
 class MockRedis implements IRedis {
     repo: any = {}
@@ -50,7 +50,6 @@ class MockUserRepository implements IUserRepository {
             email: 'test1@example.com' as Email,
             name: '',
             lastname: '',
-            photo: '',
             bio: '',
             followers: 0 as WholeNumber,
             following: 0 as WholeNumber,
@@ -60,12 +59,10 @@ class MockUserRepository implements IUserRepository {
             updatedAt: new Date(),
         })
     }
-    edit(
-        userId: UserId,
-        data: EditUser
-    ): Promise<ReturnType<typeof userDao>> {
+    edit(userId: UserId, data: EditUser): Promise<{ toUser(): User; toUserBasic(): { userId: UserId; username: Username; name: string; lastname: string }; toUserWithPassword(): { id: UserId; username: Username; password: Password; email: Email; name: string; lastname: string; followers: WholeNumber; following: WholeNumber; bio: string; postsCount: WholeNumber; private: boolean }; toUserShort(): UserShort } | null> {
         throw new Error('Method not implemented.')
     }
+   
 
     async changePassword(userId: UserId, newPassword: Password): Promise<ReturnType<typeof userDao>> {
         let userEntity = this.users.find((a) => a.id == userId)
@@ -90,7 +87,6 @@ class MockUserRepository implements IUserRepository {
             id: 2 as UserId,
             name: '',
             lastname: '',
-            photo: '',
             bio: '',
             followers: 0 as WholeNumber,
             following: 0 as WholeNumber,
@@ -104,7 +100,6 @@ class MockUserRepository implements IUserRepository {
             id: 2 as UserId,
             name: '',
             lastname: '',
-            photo: '',
             bio: '',
             followers: 0 as WholeNumber,
             following: 0 as WholeNumber,
