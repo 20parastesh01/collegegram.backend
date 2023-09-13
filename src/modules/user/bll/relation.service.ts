@@ -1,17 +1,25 @@
 import { Service } from '../../../registry/layer-decorators'
 import { ForbiddenError, NotFoundError } from '../../../utility/http-error'
 import { messages } from '../../../utility/persian-messages'
+import { NotificationService } from '../../notification/bll/notification.service'
 import { UserId } from '../model/user-id'
 import { CreateRelation, IRelationRepository, RelationRepository } from '../relation.repository'
 import { IUserRepository, UserRepository } from '../user.repository'
 import { UserService } from './user.service'
 
-@Service(RelationRepository, UserService)
+@Service(RelationRepository, UserService, NotificationService)
 export class RelationService {
     constructor(
         private relationRepo: IRelationRepository,
-        private userService: UserService
+        private userService: UserService,
+        private notifService: NotificationService
     ) {}
+
+    async getRelations(userId: UserId, targetId: UserId) {
+        const relationDao = await this.relationRepo.getRelation(userId, targetId)
+        const reverseRelationDao = await this.relationRepo.getRelation(targetId, userId)
+        return { relation: relationDao?.toRelation(), reverseRelation: reverseRelationDao?.toRelation() }
+    }
 
     async follow(userId: UserId, targetId: UserId) {
         const target = await this.userService.getUserById(targetId)
@@ -39,8 +47,10 @@ export class RelationService {
         }
         await this.relationRepo.createRelation(payload)
         if (payload.status === 'Following') {
+            this.notifService.createFollowNotification(target.id, userId)
             return { msg: messages.followSuccess.persian }
         }
+        this.notifService.createRequestNotification(target.id, userId)
         return { msg: messages.requested.persian }
     }
 
@@ -76,6 +86,7 @@ export class RelationService {
         const status = dao.toRelation().status
         if (status !== 'Pending') return { msg: messages.requestNotFound.persian }
         await this.relationRepo.deleteRelation({ userA: target.id, userB: userId })
+        await this.notifService.deleteNotification(userId, targetId, 'Request')
         return { msg: messages.rejected.persian }
     }
 

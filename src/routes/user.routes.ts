@@ -11,12 +11,14 @@ import { Route } from '../registry/layer-decorators'
 import { editProfileDto } from '../modules/user/dto/edit-profile.dto'
 import { RelationService } from '../modules/user/bll/relation.service'
 import { zodUserId } from '../modules/user/model/user-id'
+import { NotificationService } from '../modules/notification/bll/notification.service'
 
-@Route('/user', UserService, RelationService)
+@Route('/user', UserService, RelationService, NotificationService)
 export class UserRouter {
     constructor(
         private userService: UserService,
-        private relationService: RelationService
+        private relationService: RelationService,
+        private notificationService: NotificationService
     ) {}
     @Post('/signup')
     @RequestBody('SignUpDto')
@@ -36,6 +38,12 @@ export class UserRouter {
     @Auth()
     getCurrentUser(req: Request, res: Response) {
         handleExpress(res, () => this.userService.getCurrentUser(req.user.userId))
+    }
+
+    @Get('/me/notification')
+    @Auth()
+    getCurrentUserNotifs(req: Request, res: Response) {
+        handleExpress(res, () => this.notificationService.getUserNotificationsWithRelation(req.user.userId))
     }
 
     @Post('/forgetpassword')
