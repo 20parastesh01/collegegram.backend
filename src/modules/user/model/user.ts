@@ -4,6 +4,7 @@ import { NonEmptyString } from '../../../data/non-empty-string'
 import { Token } from '../../../data/token'
 import { WholeNumber } from '../../../data/whole-number'
 import { Password } from './password'
+import { RelationStatus } from './relation'
 import { UserId, isUserId } from './user-id'
 import { Username, isUsername } from './username'
 
@@ -39,4 +40,10 @@ export interface UserBasic {
 }
 export const isUserBasic = (payload: unknown): payload is UserBasic => {
     return payload !== null && typeof payload == 'object' && 'userId' in payload && 'username' in payload && isUserId(payload.userId) && isUsername(payload.username)
+}
+
+export interface UserWithStatus {
+    user: User
+    status: RelationStatus | null
+    reverseStatus: RelationStatus | null
 }

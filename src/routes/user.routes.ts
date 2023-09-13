@@ -95,4 +95,10 @@ export class UserRouter {
     block(req: Request, res: Response) {
         handleExpress(res, () => this.relationService.block(req.user.userId, zodUserId.parse(req.params.id)))
     }
+
+    @Delete('/:id/profile')
+    @Auth()
+    getTargetUser(req: Request, res: Response) {
+        handleExpress(res, () => this.relationService.getTargetUser(req.user.userId, zodUserId.parse(req.params.id)))
+    }
 }

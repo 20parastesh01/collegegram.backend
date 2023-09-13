@@ -1,6 +1,7 @@
 import { Service } from '../../../registry/layer-decorators'
 import { ForbiddenError, NotFoundError } from '../../../utility/http-error'
 import { messages } from '../../../utility/persian-messages'
+import { UserWithStatus } from '../model/user'
 import { UserId } from '../model/user-id'
 import { CreateRelation, IRelationRepository, RelationRepository } from '../relation.repository'
 import { IUserRepository, UserRepository } from '../user.repository'
@@ -89,5 +90,20 @@ export class RelationService {
         }
         await this.relationRepo.updateRelation({ userA: userId, userB: targetId, status: 'Blocked' })
         return { msg: messages.blocked.persian }
+    }
+
+    async getTargetUser(userId: UserId, targetUserId: UserId): Promise<UserWithStatus | NotFoundError> {
+        const target = await this.userService.getUserById(targetUserId)
+        if (!target) return new NotFoundError(messages.userNotFound.persian)
+        const dao = await this.relationRepo.getRelation(target.id, userId)
+        let status = null
+        const status1 = dao ? dao.toRelation().status : null
+        if (dao) {
+            status = dao.toRelation().status
+        }
+        const reverseRelationDao = await this.relationRepo.getRelation(userId, target.id)
+        let reverseStatus = null
+        if (reverseRelationDao) reverseStatus = reverseRelationDao.toRelation().status
+        return { user: target, status, reverseStatus }
     }
 }
