@@ -1,6 +1,7 @@
 import { SimpleMessage } from '../../../data/simple-message'
 import { ForbiddenError, NotFoundError } from '../../../utility/http-error'
 import { messages } from '../../../utility/persian-messages'
+import { NotificationService } from '../../notification/bll/notification.service'
 import { relationDao } from '../bll/relation.dao'
 import { RelationService } from '../bll/relation.service'
 import { UserService } from '../bll/user.service'
@@ -33,7 +34,7 @@ const mockRelationRepo: Partial<RelationRepository> = {
 const mockUserService: Partial<UserService> = {
     getUserById: jest.fn().mockImplementation(() => resolvesHandler[0]()),
 }
-const relationService = new RelationService(mockRelationRepo as RelationRepository, mockUserService as UserService)
+const relationService = new RelationService(mockRelationRepo as RelationRepository, mockUserService as UserService, {} as NotificationService)
 
 describe('Relation Service', () => {
     describe('Follow', () => {

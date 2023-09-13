@@ -1,6 +1,6 @@
 import { Brand } from '../../../utility/brand'
 import { UserEntity } from '../entity/user.entity'
-import { User, UserBasic, UserWithPassword } from '../model/user'
+import { User, UserBasic, UserShort, UserWithPassword } from '../model/user'
 
 export const userDao = (input: UserEntity | null) => {
     if (!input) return null
@@ -16,6 +16,10 @@ export const userDao = (input: UserEntity | null) => {
         toUserWithPassword() {
             const { createdAt, updatedAt, ...rest } = input
             return rest
+        },
+        toUserShort(): UserShort {
+            const { id, username, name, lastname } = input
+            return { id, username, name, lastname, photo: '' }
         },
     }
 }
