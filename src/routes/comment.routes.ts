@@ -1,7 +1,6 @@
 import { Request, Response, Router } from 'express'
 import { handleExpress } from '../utility/handle-express'
 import { CommentService } from '../modules/comment/bll/comment.service'
-//import { zodGetCommentDTO } from '../modules/comment/dto/getComment.dto'
 import { zodGetAllCommentsDTO } from '../modules/comment/dto/getAllComments.dto'
 import { zodCreateCommentDTO } from '../modules/comment/dto/createComment.dto'
 import { Route } from '../registry/layer-decorators'
@@ -16,7 +15,7 @@ export class CommentRouter {
     @RequestBody('CreateCommentDTO')
     createComment(req: Request, res: Response) {
         const data = zodCreateCommentDTO.parse(req.body)
-        handleExpress(res, () => this.commentService.createComment(data , req.user.userId))
+        handleExpress(res, () => this.commentService.createComment(data, req.user.userId))
     }
 
     @Get('/:postId')

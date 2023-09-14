@@ -34,16 +34,7 @@ export class CommentRepository implements ICommentRepository {
             .where('comment.postId = :postId', { postId })
             .orderBy('comment.createdAt', 'DESC')
             .leftJoinAndSelect('comment.author', 'author')
-            .select([
-                'comment.id',
-                'comment.content',
-                'comment.postId',
-                'comment.likesCount',
-                'author.id',
-                'author.username',
-                'author.name',
-                'author.lastname'
-            ])
+            .select(['comment.id', 'comment.content', 'comment.postId', 'comment.likesCount', 'author.id', 'author.username', 'author.name', 'author.lastname'])
             .getMany()
         return commentListDao(comments)
     }

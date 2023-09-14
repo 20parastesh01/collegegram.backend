@@ -1,6 +1,5 @@
 import { Email } from '../../../data/email'
 import { Hashed } from '../../../data/hashed'
-import { NonEmptyString } from '../../../data/non-empty-string'
 import { Token } from '../../../data/token'
 import { WholeNumber } from '../../../data/whole-number'
 import { Password } from './password'

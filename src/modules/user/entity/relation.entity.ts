@@ -2,8 +2,6 @@ import { Column, CreateDateColumn, Entity, PrimaryColumn, UpdateDateColumn } fro
 import { UserId } from '../model/user-id'
 import { RelationStatus } from '../model/relation'
 
-
-
 @Entity('relations')
 export class RelationEntity {
     @PrimaryColumn()

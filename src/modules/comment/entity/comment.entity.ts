@@ -1,12 +1,4 @@
-import {
-    Column,
-    CreateDateColumn,
-    Entity,
-    JoinColumn,
-    ManyToOne,
-    PrimaryGeneratedColumn,
-    UpdateDateColumn,
-} from 'typeorm'
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
 import { WholeNumber } from '../../../data/whole-number'
 import { CommentId } from '../model/comment-id'
 import { Content } from '../model/content'
@@ -28,10 +20,10 @@ export class CommentEntity {
     @JoinColumn()
     postId!: PostId
 
-    @ManyToOne(() => CommentEntity,{ nullable: true })
+    @ManyToOne(() => CommentEntity, { nullable: true })
     @JoinColumn()
     parentId?: ParentId
-    
+
     @ManyToOne(() => UserEntity)
     @JoinColumn()
     author!: UserId

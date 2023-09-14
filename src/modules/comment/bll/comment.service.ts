@@ -9,6 +9,7 @@ import { UserId } from '../../user/model/user-id'
 import { PostId } from '../../post/model/post-id'
 import { Service } from '../../../registry/layer-decorators'
 import { MinioRepo } from '../../../data-source'
+import { DataSource } from 'typeorm'
 
 type resComment = Comment | BadRequestError | ServerError | NotFoundError
 type resComments = { result: Comment[]; total: number } | BadRequestError | ServerError
@@ -33,11 +34,8 @@ export class CommentService implements ICommentService {
     }
 
     async createComment(dto: CreateCommentDTO, userId: UserId): Promise<resComment> {
-        const { parentId, content, postId } = dto
         const commentEntity = newCommentModelToRepoInput({
-            parentId,
-            content,
-            postId,
+            ...dto,
             author: userId,
         })
         const createdComment = (await this.commentRepo.create(commentEntity)).toCommentModel()
