@@ -3,7 +3,7 @@ import { Readable } from "typeorm/platform/PlatformTools"
 import { CreateLike } from "../modules/post/like.repository"
 import { Caption } from "../modules/post/model/caption"
 import { LikeId } from "../modules/post/model/like-id"
-import { BasicPost, PostWithLikeCount, PostWithoutLikeCount } from "../modules/post/model/post"
+import { BasicPost, PostWithDetail, PostWithoutDetail } from "../modules/post/model/post"
 import { PostId } from "../modules/post/model/post-id"
 import { Password } from "../modules/user/model/password"
 import { User } from "../modules/user/model/user"
@@ -74,63 +74,61 @@ export const mockCreatePost : CreatePost = {
     likeCount: 0 as WholeNumber,
     commentCount: 0 as WholeNumber,
 }
-export const mockCreatedPost: PostWithLikeCount[] = [{
+export const mockCreatedPost: PostWithDetail[] = [{
     id: mockPostId.postId1,
     caption: 'test' as Caption,
     tags: ['a', 'b'] as Tag[],
-    
     author: mockUserId,
     closeFriend: false,
     likeCount: 0 as WholeNumber,
+    bookmarkCount: 0 as WholeNumber,
     commentCount: 0 as WholeNumber,
 },
 {
     id: mockPostId.postId2,
     caption: 'test2' as Caption,
     tags: ['a', 'b'] as Tag[],
-    
     author: mockUserId,
     closeFriend: false,
     likeCount: 2 as WholeNumber,
+    bookmarkCount: 0 as WholeNumber,
     commentCount: 2 as WholeNumber,
 }]
-export const mockCreatedPostWithLike: PostWithLikeCount ={
+export const mockCreatedPostWithLike: PostWithDetail ={
     id: mockPostId.postId2,
     caption: 'test2' as Caption,
     tags: ['a', 'b'] as Tag[],
-    
     author: mockUserId,
     closeFriend: false,
     likeCount: 1 as WholeNumber,
+    bookmarkCount: 0 as WholeNumber,
     commentCount: 2 as WholeNumber,
 }
-export const CreatedPost: PostWithLikeCount[] = [{
+export const CreatedPost: PostWithDetail[] = [{
     ...mockCreatedPost[0],
     photos: ["/file/post/1-1?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=minioadmin%2F20230910%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20230910T115835Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=c519d693cbd8d45e465aed61469dd12095ee92dbf4ae6ba905607bbed83d3a3f", "/file/post/1-2?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=minioadmin%2F20230910%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20230910T115835Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=fe14ba3ad4990f8b5813586215cc17b3bbfe479b46460335a2509120758a6fbc"]
 },{
     id: mockPostId.postId2,
     caption: 'test2' as Caption,
     tags: ['a', 'b'] as Tag[],
-    
     author: mockUserId,
     closeFriend: false,
     likeCount: 2 as WholeNumber,
+    bookmarkCount: 0 as WholeNumber,
     commentCount: 2 as WholeNumber,
 }
 ]
 
-export const mockPostWithoutLikeCount : PostWithoutLikeCount = {
+export const mockPostWithoutDetail : PostWithoutDetail = {
     id: mockPostId.postId2,
     caption: 'test2' as Caption,
     tags: ['a', 'b'] as Tag[],
-    
     author: mockUserId,
     closeFriend: false,
-    commentCount: 2 as WholeNumber,
 }
 export const mockLikeDto : CreateLike = {
     user:{id: 2 as UserId} as User,
-    post:{...mockPostWithoutLikeCount} as PostWithoutLikeCount,
+    post:{...mockPostWithoutDetail} as PostWithoutDetail,
 }
 export const mockCreatedLike = {
     id: 1 as LikeId,
@@ -150,9 +148,9 @@ export const mockUser : UserEntity = {
     postsCount: 0 as  WholeNumber,
     private: false as boolean,
 } as UserEntity
-export const postWithLikeOrNullDao = (input: PostWithLikeCount) => {
+export const postWithLikeOrNullDao = (input: PostWithDetail) => {
     return {
-        toPost(): PostWithLikeCount |undefined
+        toPost(): PostWithDetail |undefined
         {
             return input
         },
@@ -161,9 +159,9 @@ export const postWithLikeOrNullDao = (input: PostWithLikeCount) => {
         }
     }
 }
-export const postWithoutLikeOrNullDao = (input: PostWithoutLikeCount) =>{
+export const postWithoutLikeOrNullDao = (input: PostWithoutDetail) =>{
     return{
-        toPost():  undefined | PostWithoutLikeCount {
+        toPost():  undefined | PostWithoutDetail {
             return input
         },
         toThumbnail(): BasicPost | undefined {
@@ -171,16 +169,16 @@ export const postWithoutLikeOrNullDao = (input: PostWithoutLikeCount) =>{
         },
     }
 }
-export const postWithoutLikeDao = (input: PostWithLikeCount) => {
+export const postWithoutLikeDao = (input: PostWithDetail) => {
     return {
-        toPost():PostWithLikeCount{
+        toPost():PostWithDetail{
             return input
         },
     }
 }
-export const postArrayDao = (input: PostWithLikeCount[]) => {
+export const postArrayDao = (input: PostWithDetail[]) => {
     return {
-        toPostList(): PostWithLikeCount[] {
+        toPostList(): PostWithDetail[] {
             return input
         },
         toThumbnailList(): BasicPost[] {

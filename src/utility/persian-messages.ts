@@ -37,4 +37,8 @@ export const messages = {
     notLikedYet: { persian: 'شما پست مورد نظر را قبلا لایک کرده‌اید' as Msg},
     alreadyLiked: { persian: 'شما پست مورد نظر را قبلا لایک کرده‌اید' as Msg},
     postNotFound: { persian: 'پست مورد نظر یافت نشد' as Msg},
+    bookmarked: { persian: 'پست مورد نظر لایک شد' as Msg},
+    unbookmarked: { persian: 'پست مورد نظر آنلایک شد' as Msg},
+    notBookmarkedYet: { persian: 'شما پست مورد نظر را قبلا لایک کرده‌اید' as Msg},
+    alreadyBookmarked: { persian: 'شما پست مورد نظر را قبلا لایک کرده‌اید' as Msg},
 }

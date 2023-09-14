@@ -1,14 +1,14 @@
 
 import { UserId } from '../../user/model/user-id'
-import { LikeId } from './like-id'
+import { BookmarkId } from './bookmark-id'
 import { PostWithDetail } from './post'
 import { PostId } from './post-id'
 
-export interface LikeWithPost extends BasicLike {
+export interface BookmarkWithPost extends BasicBookmark {
     post: PostWithDetail
 }
-export interface BasicLike {
-    id:LikeId
+export interface BasicBookmark {
+    id:BookmarkId
     postId: PostId
     userId: UserId
 }

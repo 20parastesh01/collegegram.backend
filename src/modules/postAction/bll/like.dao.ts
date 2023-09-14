@@ -1,11 +1,11 @@
 import { LikeEntity } from '../entity/like.entity'
 import { CreateLike } from '../like.repository'
 import { zodUserId } from '../../user/model/user-id'
-import { zodPostId } from '../model/post-id'
 import { zodLikeId } from '../model/like-id'
-import { PostWithoutDetail, zodStrictPost } from '../model/post'
 import { User } from '../../user/model/user'
 import { BasicLike , LikeWithPost } from '../model/like'
+import { zodStrictPost, PostWithoutDetail } from '../../post/model/post'
+import { zodPostId } from '../../post/model/post-id'
 
 const likeEntityToLike = (input: LikeEntity) => {
     const { id, post, user } = input

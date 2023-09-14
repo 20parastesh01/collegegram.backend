@@ -37,14 +37,24 @@ export class PostRouter {
     }
     @Post('/:id/like')
     @Auth()
-    followOrRequestForFollow(req: Request, res: Response) {
+    likeAPost(req: Request, res: Response) {
         handleExpress(res, () => this.postService.likePost(req.user.userId, zodJustId.parse(req.params.id)))
     }
 
     @Delete('/:id/unlike')
     @Auth()
-    unfollowOrDeleteRequestForFollow(req: Request, res: Response) {
+    unlikeAPost(req: Request, res: Response) {
         handleExpress(res, () => this.postService.unlikePost(req.user.userId, zodJustId.parse(req.params.id)))
     }
-    
+    @Post('/:id/bookmark')
+    @Auth()
+    bookmarkAPost(req: Request, res: Response) {
+        handleExpress(res, () => this.postService.likePost(req.user.userId, zodJustId.parse(req.params.id)))
+    }
+
+    @Delete('/:id/unbookmark')
+    @Auth()
+    unbookmarkAPost(req: Request, res: Response) {
+        handleExpress(res, () => this.postService.unlikePost(req.user.userId, zodJustId.parse(req.params.id)))
+    }
 }

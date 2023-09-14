@@ -56,6 +56,7 @@ class MockUserRepository implements IUserRepository {
             postsCount: 0 as WholeNumber,
             private: false,
             likes:[],
+            bookmarks:[],
             createdAt: new Date(),
             updatedAt: new Date(),
         })
@@ -94,6 +95,7 @@ class MockUserRepository implements IUserRepository {
             postsCount: 0 as WholeNumber,
             private: false,
             likes:[],
+            bookmarks:[],
             createdAt: new Date(),
             updatedAt: new Date(),
         })
@@ -108,6 +110,7 @@ class MockUserRepository implements IUserRepository {
             postsCount: 0 as WholeNumber,
             private: false,
             likes:[],
+            bookmarks:[],
             createdAt: new Date(),
             updatedAt: new Date(),
         })

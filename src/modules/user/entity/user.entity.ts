@@ -5,6 +5,7 @@ import { Password } from '../model/password'
 import { UserId } from '../model/user-id'
 import { Username } from '../model/username'
 import { LikeEntity } from '../../post/entity/like.entity'
+import { BookmarkEntity } from '../../post/entity/bookmark.entity'
 
 @Entity('users')
 @Unique(['username'])
@@ -46,6 +47,10 @@ export class UserEntity {
     @OneToMany(() => LikeEntity, (like)=>like.post , { lazy: true ,onDelete: 'CASCADE'})
     @JoinColumn({ name: 'like_id' })
     likes: LikeEntity[] | undefined
+
+    @OneToMany(() => BookmarkEntity, (bookmark)=>bookmark.post , { lazy: true ,onDelete: 'CASCADE'})
+    @JoinColumn({ name: 'bookmark_id' })
+    bookmarks: BookmarkEntity[] | undefined
 
     @CreateDateColumn()
     createdAt!: Date

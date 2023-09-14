@@ -1,7 +1,7 @@
 import { BadRequestError, NotFoundError, ServerError } from '../../../utility/http-error'
 import { IPostRepository, PostRepository } from '../post.repository'
 import { CreatePostDTO } from '../dto/createPost.dto'
-import { PostWithLikeCount, PostWithoutLikeCount } from '../model/post'
+import { PostWithDetail, PostWithoutDetail } from '../model/post'
 import { zodPostId } from '../model/post-id'
 import { newPostToRepoInput } from './post.dao'
 import { UserId } from '../../user/model/user-id'
@@ -14,14 +14,16 @@ import { likeWithoutIdToCreateLikeEntity } from './like.dao'
 import { LikeWithPost } from '../model/like'
 import { Msg, PersianErrors, messages } from '../../../utility/persian-messages'
 import { JustId } from '../../../data/just-id'
+import { IBookmarkRepository } from '../bookmark.repository'
+import { bookmarkWithoutIdToCreateBookmarkEntity } from './bookmark.dao'
   
-type arrayResult = { result: PostWithLikeCount[], total: number }
+type arrayResult = { result: PostWithDetail[], total: number }
 export type requestedPostId = { requestedPostId: JustId }
 
 export type resMessage = {
     msg: Msg,
     err: BadRequestError[] | ServerError[] | NotFoundError[],
-    data: PostWithLikeCount[] | PostWithoutLikeCount[] | LikeWithPost[]| arrayResult[]| requestedPostId[],
+    data: PostWithDetail[] | PostWithoutDetail[] | LikeWithPost[]| arrayResult[]| requestedPostId[],
     errCode?: WholeNumber,
 }
 
@@ -31,6 +33,8 @@ export interface IPostService {
     getAllPosts(userId: UserId): Promise<resMessage>
     likePost(userId: UserId,id: JustId): Promise<resMessage>
     unlikePost(userId: UserId,id: JustId): Promise<resMessage>
+    bookmarkPost(userId: UserId,id: JustId): Promise<resMessage>
+    unbookmarkPost(userId: UserId,id: JustId): Promise<resMessage>
 }
 
 @Service(PostRepository)
@@ -38,6 +42,7 @@ export class PostService implements IPostService {
     constructor(
         private postRepo: IPostRepository,
         private likeRepo: ILikeRepository,
+        private bookmarkRepo: IBookmarkRepository,
         private readonly userRepo: IUserRepository
         ) {}
     
@@ -46,7 +51,7 @@ export class PostService implements IPostService {
         const like = (await this.likeRepo.findByUserAndPost(userId, postId)).toLike();
         if (!like) {
             const user = (await this.userRepo.findById(userId))?.toUser()
-            const post = (await this.postRepo.findPostWithoutLikeCountByID(postId)).toPost()
+            const post = (await this.postRepo.findWithoutDetailByID(postId)).toPost()
             if(user && post) {
                 const input = likeWithoutIdToCreateLikeEntity(user, post)
                 const createdLike = (await this.likeRepo.create(input)).toLike()
@@ -64,10 +69,40 @@ export class PostService implements IPostService {
         if (!like) {
             return { msg: messages.notLikedYet.persian , err : [] , data:[{requestedPostId:id}] }
         }
-        const createdLike = (await this.likeRepo.removeLike(like.id)).toLike()
+        const createdLike = (await this.likeRepo.remove(like.id)).toLike()
         if( createdLike !== undefined){
             const updatedPost = createdLike.post; 
             return  { msg: messages.unliked.persian , err : [] , data:[updatedPost] }
+        }
+        return { msg: messages.failed.persian , err : [new ServerError(PersianErrors.ServerError)] , data:[] }
+    }
+    async bookmarkPost(userId: UserId, id: JustId) {
+        const postId = zodPostId.parse(id)
+        const bookmark = (await this.bookmarkRepo.findByUserAndPost(userId, postId)).toBookmark();
+        if (!bookmark) {
+            const user = (await this.userRepo.findById(userId))?.toUser()
+            const post = (await this.postRepo.findWithoutDetailByID(postId)).toPost()
+            if(user && post) {
+                const input = bookmarkWithoutIdToCreateBookmarkEntity(user, post)
+                const createdBookmark = (await this.bookmarkRepo.create(input)).toBookmark()
+                const updatedPost = createdBookmark.post;
+                if(createdBookmark !== undefined) return { msg: messages.bookmarked.persian , err : [] , data:[updatedPost] }
+                return { msg: messages.failed.persian , err : [new ServerError(PersianErrors.ServerError)] , data:[] }
+            }
+            return { msg: messages.postNotFound.persian , err : [] , data:[{requestedPostId:id}] }
+        }
+        return { msg: messages.notBookmarkedYet.persian , err : [] , data:[{requestedPostId:id}] }
+    }
+    async unbookmarkPost(userId: UserId, id: JustId) {
+        const postId = zodPostId.parse(id)
+        const bookmark = (await this.bookmarkRepo.findByUserAndPost(userId, postId)).toBookmark();
+        if (!bookmark) {
+            return { msg: messages.notBookmarkedYet.persian , err : [] , data:[{requestedPostId:id}] }
+        }
+        const createdBookmark = (await this.bookmarkRepo.remove(bookmark.id)).toBookmark()
+        if( createdBookmark !== undefined){
+            const updatedPost = createdBookmark.post; 
+            return  { msg: messages.unbookmarked.persian , err : [] , data:[updatedPost] }
         }
         return { msg: messages.failed.persian , err : [new ServerError(PersianErrors.ServerError)] , data:[] }
     }
@@ -99,7 +134,7 @@ export class PostService implements IPostService {
 
     async getPost(id: JustId) {
         const postId = zodPostId.parse(id)
-        const post = (await this.postRepo.findPostWithLikeCountByID(postId)).toPost()
+        const post = (await this.postRepo.findWithDetailByID(postId)).toPost()
         if (post) {
             const photos = await MinioRepo.getPostPhotoUrl(post.id)
             if (photos) {

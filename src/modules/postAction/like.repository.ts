@@ -4,9 +4,9 @@ import { UserId } from '../user/model/user-id'
 import { likeArrayDao, likeDao, likeOrNullDao } from './bll/like.dao'
 import { Repo } from '../../registry/layer-decorators'
 import { User } from '../user/model/user'
-import { PostWithoutDetail } from './model/post'
-import { PostId } from './model/post-id'
 import { LikeId } from './model/like-id'
+import { PostWithoutDetail } from '../post/model/post'
+import { PostId } from '../post/model/post-id'
 
 export interface CreateLike {
     user: User

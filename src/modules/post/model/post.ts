@@ -16,6 +16,7 @@ export const zodPost = z.object({
     photos: zodPaths.optional(),
     tags: zodTags.optional(),
     likeCount: zodWholeNumber.optional(),
+    bookmarkCount: zodWholeNumber.optional(),
     caption: zodCaption.optional(),
     commentCount: zodWholeNumber.optional(),
 
@@ -27,6 +28,7 @@ export const zodStrictPost = z.object({
     photos: zodPaths.optional(),
     tags: zodTags.optional(),
     likeCount: zodWholeNumber,
+    bookmarkCount: zodWholeNumber,
     caption: zodCaption,
     commentCount: zodWholeNumber,
 
@@ -35,14 +37,14 @@ export const zodStrictPost = z.object({
 export type Post = z.infer<typeof zodPost>
 
 
-export interface PostWithLikeCount extends PostWithoutLikeCount {
+export interface PostWithDetail extends PostWithoutDetail {
     likeCount: WholeNumber
+    bookmarkCount: WholeNumber
+    commentCount: WholeNumber
 }
-export interface PostWithoutLikeCount extends BasicPost {
-    
+export interface PostWithoutDetail extends BasicPost {
     caption: Caption
     tags?: Tag[]
-    commentCount: WholeNumber
 }
 export interface NewPost {
     author: UserId
