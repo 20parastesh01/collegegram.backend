@@ -1,5 +1,4 @@
-import { ZodType, z } from 'zod';
-import { PostId, isPostId, zodPostId } from '../model/post-id';
+import { z } from 'zod'
+import { isJustId } from '../../../data/just-id'
 
-
-export const zodGetPostDTO = z.coerce.number().refine(isPostId)
+export const zodGetPostDTO = z.coerce.number().refine(isJustId)

@@ -15,7 +15,7 @@ export interface Notification {
 
     type: NotificationType
 
-    post: Post | null
+    post?: Post
 
     comment?: Comment
 }

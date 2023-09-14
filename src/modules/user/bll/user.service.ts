@@ -195,4 +195,36 @@ export class UserService implements IUserService {
         user.photo = profile || ''
         return user
     }
+
+    async increaseFollower(id: UserId): Promise<User | null> {
+        const userDao = await this.userRepo.findById(id)
+        if (!userDao) return null
+        const followers = userDao.toUser().followers
+        const editedDao = (await this.userRepo.edit(id, { followers: zodWholeNumber.parse(followers + 1) }))!
+        return editedDao.toUser()
+    }
+
+    async decreaseFollower(id: UserId): Promise<User | null> {
+        const userDao = await this.userRepo.findById(id)
+        if (!userDao) return null
+        const followers = userDao.toUser().followers
+        const editedDao = (await this.userRepo.edit(id, { followers: zodWholeNumber.parse(followers - 1) }))!
+        return editedDao.toUser()
+    }
+
+    async increaseFollowing(id: UserId): Promise<User | null> {
+        const userDao = await this.userRepo.findById(id)
+        if (!userDao) return null
+        const following = userDao.toUser().following
+        const editedDao = (await this.userRepo.edit(id, { following: zodWholeNumber.parse(following + 1) }))!
+        return editedDao.toUser()
+    }
+
+    async decreaseFollowing(id: UserId): Promise<User | null> {
+        const userDao = await this.userRepo.findById(id)
+        if (!userDao) return null
+        const following = userDao.toUser().following
+        const editedDao = (await this.userRepo.edit(id, { following: zodWholeNumber.parse(following - 1) }))!
+        return editedDao.toUser()
+    }
 }

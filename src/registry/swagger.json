@@ -1,1 +1,110 @@
+<<<<<<< HEAD
+{
+    "openapi": "3.0.1",
+    "info": { "title": "CollegeGram API", "version": "1.0.0" },
+    "components": { "securitySchemes": { "jwt": { "type": "http", "scheme": "bearer", "bearerFormat": "JWT" } } },
+    "paths": {
+        "/comment/": {
+            "post": {
+                "security": [{ "jwt": [] }],
+                "summary": "",
+                "description": "",
+                "tags": ["Comment"],
+                "responses": { "200": { "description": "ok", "content": { "application/json": {} } } },
+                "requestBody": { "content": { "application/json": { "schema": { "type": "object", "properties": { "content": { "type": "string" }, "postId": { "type": "number" }, "parentId": { "type": "number" } } } } } }
+            }
+        },
+        "/comment/{postId}": {
+            "get": { "parameters": [{ "name": "postId", "in": "path", "required": true, "schema": { "type": "string" } }], "security": [{ "jwt": [] }], "summary": "", "description": "", "tags": ["Comment"], "responses": { "200": { "description": "ok", "content": { "application/json": {} } } } }
+        },
+        "/post": {
+            "post": {
+                "security": [{ "jwt": [] }],
+                "summary": "",
+                "description": "",
+                "tags": ["Post"],
+                "responses": { "200": { "description": "ok", "content": { "application/json": {} } } },
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "caption": { "type": "string" },
+                                    "closeFriend": { "type": "boolean" },
+                                    "tags": { "type": "array", "items": { "allOf": [{ "type": "object", "properties": {} }, { "type": "object", "properties": {} }, { "type": "string" }] } },
+                                    "photos": { "type": "array", "items": { "type": "string", "format": "binary" } }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/post/{postId}": {
+            "get": { "parameters": [{ "name": "postId", "in": "path", "required": true, "schema": { "type": "string" } }], "security": [{ "jwt": [] }], "summary": "", "description": "", "tags": ["Post"], "responses": { "200": { "description": "ok", "content": { "application/json": {} } } } }
+        },
+        "/post/user/{userId}": {
+            "get": { "parameters": [{ "name": "userId", "in": "path", "required": true, "schema": { "type": "string" } }], "security": [{ "jwt": [] }], "summary": "", "description": "", "tags": ["Post"], "responses": { "200": { "description": "ok", "content": { "application/json": {} } } } }
+        },
+        "/user/signup": {
+            "post": {
+                "summary": "",
+                "description": "",
+                "tags": ["User"],
+                "responses": { "200": { "description": "ok", "content": { "application/json": {} } } },
+                "requestBody": { "content": { "application/json": { "schema": { "type": "object", "properties": { "email": { "type": "string" }, "password": { "type": "string" }, "username": { "type": "string" } } } } } }
+            }
+        },
+        "/user/login": {
+            "post": {
+                "summary": "",
+                "description": "",
+                "tags": ["User"],
+                "responses": { "200": { "description": "ok", "content": { "application/json": {} } } },
+                "requestBody": { "content": { "application/json": { "schema": { "type": "object", "properties": { "password": { "type": "string" }, "usernameOrEmail": { "type": "string" }, "rememberMe": { "type": "boolean" } } } } } }
+            }
+        },
+        "/user/me": {
+            "get": { "security": [{ "jwt": [] }], "summary": "", "description": "", "tags": ["User"], "responses": { "200": { "description": "ok", "content": { "application/json": {} } } } },
+            "patch": {
+                "security": [{ "jwt": [] }],
+                "summary": "",
+                "description": "",
+                "tags": ["User"],
+                "responses": { "200": { "description": "ok", "content": { "application/json": {} } } },
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": { "email": { "type": "string" }, "name": { "type": "string" }, "lastname": { "type": "string" }, "password": { "type": "string" }, "private": { "type": "boolean" }, "bio": { "type": "string" }, "profile": { "type": "string", "format": "binary" } }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/user/forgetpassword": { "post": { "summary": "", "description": "", "tags": ["User"], "responses": { "200": { "description": "ok", "content": { "application/json": {} } } } } },
+        "/user/setnewpassword": { "post": { "summary": "", "description": "", "tags": ["User"], "responses": { "200": { "description": "ok", "content": { "application/json": {} } } } } },
+        "/user/me/profile": { "get": { "security": [{ "jwt": [] }], "summary": "", "description": "", "tags": ["User"], "responses": { "200": { "description": "ok", "content": { "application/json": {} } } } } },
+        "/user/{id}/follow": {
+            "post": { "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }], "security": [{ "jwt": [] }], "summary": "", "description": "", "tags": ["User"], "responses": { "200": { "description": "ok", "content": { "application/json": {} } } } }
+        },
+        "/user/{id}/unfollow": {
+            "delete": { "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }], "security": [{ "jwt": [] }], "summary": "", "description": "", "tags": ["User"], "responses": { "200": { "description": "ok", "content": { "application/json": {} } } } }
+        },
+        "/user/{id}/accept": {
+            "post": { "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }], "security": [{ "jwt": [] }], "summary": "", "description": "", "tags": ["User"], "responses": { "200": { "description": "ok", "content": { "application/json": {} } } } }
+        },
+        "/user/{id}/reject": {
+            "delete": { "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }], "security": [{ "jwt": [] }], "summary": "", "description": "", "tags": ["User"], "responses": { "200": { "description": "ok", "content": { "application/json": {} } } } }
+        },
+        "/user/{id}/block": {
+            "post": { "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }], "security": [{ "jwt": [] }], "summary": "", "description": "", "tags": ["User"], "responses": { "200": { "description": "ok", "content": { "application/json": {} } } } }
+        }
+    }
+}
+=======
 {"openapi":"3.0.1","info":{"title":"CollegeGram API","version":"1.0.0"},"components":{"securitySchemes":{"jwt":{"type":"http","scheme":"bearer","bearerFormat":"JWT"}}},"paths":{"/comment/":{"post":{"security":[{"jwt":[]}],"summary":"","description":"","tags":["Comment"],"responses":{"200":{"description":"ok","content":{"application/json":{}}}},"requestBody":{"content":{"application/json":{"schema":{"type":"object","properties":{"content":{"type":"string"},"postId":{"type":"number"},"parentId":{"type":"number"}}}}}}}},"/comment/{postId}":{"get":{"parameters":[{"name":"postId","in":"path","required":true,"schema":{"type":"string"}}],"security":[{"jwt":[]}],"summary":"","description":"","tags":["Comment"],"responses":{"200":{"description":"ok","content":{"application/json":{}}}}}},"/post":{"post":{"security":[{"jwt":[]}],"summary":"","description":"","tags":["Post"],"responses":{"200":{"description":"ok","content":{"application/json":{}}}},"requestBody":{"content":{"multipart/form-data":{"schema":{"type":"object","properties":{"caption":{"type":"string"},"closeFriend":{"type":"boolean"},"tags":{"type":"array","items":{"allOf":[{"type":"object","properties":{}},{"type":"object","properties":{}},{"type":"string"}]}},"photos":{"type":"array","items":{"type":"string","format":"binary"}}}}}}}}},"/post/{postId}":{"get":{"parameters":[{"name":"postId","in":"path","required":true,"schema":{"type":"string"}}],"security":[{"jwt":[]}],"summary":"","description":"","tags":["Post"],"responses":{"200":{"description":"ok","content":{"application/json":{}}}}}},"/post/user/{userId}":{"get":{"parameters":[{"name":"userId","in":"path","required":true,"schema":{"type":"string"}}],"security":[{"jwt":[]}],"summary":"","description":"","tags":["Post"],"responses":{"200":{"description":"ok","content":{"application/json":{}}}}}},"/user/signup":{"post":{"summary":"","description":"","tags":["User"],"responses":{"200":{"description":"ok","content":{"application/json":{}}}},"requestBody":{"content":{"application/json":{"schema":{"type":"object","properties":{"email":{"type":"string"},"username":{"type":"string"},"password":{"type":"string"}}}}}}}},"/user/login":{"post":{"summary":"","description":"","tags":["User"],"responses":{"200":{"description":"ok","content":{"application/json":{}}}},"requestBody":{"content":{"application/json":{"schema":{"type":"object","properties":{"password":{"type":"string"},"usernameOrEmail":{"type":"string"},"rememberMe":{"type":"boolean"}}}}}}}},"/user/me":{"get":{"security":[{"jwt":[]}],"summary":"","description":"","tags":["User"],"responses":{"200":{"description":"ok","content":{"application/json":{}}}}},"patch":{"security":[{"jwt":[]}],"summary":"","description":"","tags":["User"],"responses":{"200":{"description":"ok","content":{"application/json":{}}}},"requestBody":{"content":{"multipart/form-data":{"schema":{"type":"object","properties":{"email":{"type":"string"},"name":{"type":"string"},"lastname":{"type":"string"},"password":{"type":"string"},"private":{"type":"boolean"},"bio":{"type":"string"},"profile":{"type":"string","format":"binary"}}}}}}}},"/user/me/notification":{"get":{"security":[{"jwt":[]}],"summary":"","description":"","tags":["User"],"responses":{"200":{"description":"ok","content":{"application/json":{}}}}}},"/user/forgetpassword":{"post":{"summary":"","description":"","tags":["User"],"responses":{"200":{"description":"ok","content":{"application/json":{}}}}}},"/user/setnewpassword":{"post":{"summary":"","description":"","tags":["User"],"responses":{"200":{"description":"ok","content":{"application/json":{}}}}}},"/user/me/profile":{"get":{"security":[{"jwt":[]}],"summary":"","description":"","tags":["User"],"responses":{"200":{"description":"ok","content":{"application/json":{}}}}}},"/user/{id}/follow":{"post":{"parameters":[{"name":"id","in":"path","required":true,"schema":{"type":"string"}}],"security":[{"jwt":[]}],"summary":"","description":"","tags":["User"],"responses":{"200":{"description":"ok","content":{"application/json":{}}}}}},"/user/{id}/unfollow":{"delete":{"parameters":[{"name":"id","in":"path","required":true,"schema":{"type":"string"}}],"security":[{"jwt":[]}],"summary":"","description":"","tags":["User"],"responses":{"200":{"description":"ok","content":{"application/json":{}}}}}},"/user/{id}/accept":{"post":{"parameters":[{"name":"id","in":"path","required":true,"schema":{"type":"string"}}],"security":[{"jwt":[]}],"summary":"","description":"","tags":["User"],"responses":{"200":{"description":"ok","content":{"application/json":{}}}}}},"/user/{id}/reject":{"delete":{"parameters":[{"name":"id","in":"path","required":true,"schema":{"type":"string"}}],"security":[{"jwt":[]}],"summary":"","description":"","tags":["User"],"responses":{"200":{"description":"ok","content":{"application/json":{}}}}}},"/user/{id}/block":{"post":{"parameters":[{"name":"id","in":"path","required":true,"schema":{"type":"string"}}],"security":[{"jwt":[]}],"summary":"","description":"","tags":["User"],"responses":{"200":{"description":"ok","content":{"application/json":{}}}}}}}}
+>>>>>>> main
