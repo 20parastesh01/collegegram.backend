@@ -15,8 +15,8 @@ export interface CreateBookmark {
 
 export interface IBookmarkRepository {
     create(data: CreateBookmark): Promise<ReturnType<typeof bookmarkDao>>
-    findByUser(userId: UserId): Promise<ReturnType<typeof bookmarkArrayDao>>
-    findByPost(postId: PostId): Promise<ReturnType<typeof bookmarkArrayDao>>
+    findAllByUser(userId: UserId): Promise<ReturnType<typeof bookmarkArrayDao>>
+    findAllByPost(postId: PostId): Promise<ReturnType<typeof bookmarkArrayDao>>
     remove(bookmarkId : BookmarkId): Promise<ReturnType<typeof bookmarkOrNullDao>>
     findByUserAndPost(userId: UserId, postId: PostId): Promise<ReturnType<typeof bookmarkOrNullDao>>
 }
@@ -28,7 +28,7 @@ export class BookmarkRepository implements IBookmarkRepository {
     constructor(appDataSource: DataSource) {
         this.BookmarkRepo = appDataSource.getRepository(BookmarkEntity)
     }
-    async findByUser(userId: UserId) {
+    async findAllByUser(userId: UserId) {
         const bookmark: BookmarkEntity[] = await this.BookmarkRepo.createQueryBuilder("bookmark")
         .leftJoinAndSelect("bookmark.user", "user")
         .leftJoinAndSelect("bookmark.post", "post")
@@ -36,7 +36,7 @@ export class BookmarkRepository implements IBookmarkRepository {
         .getMany()
         return bookmarkArrayDao(bookmark)
     }
-    async findByPost(postId: PostId) {
+    async findAllByPost(postId: PostId) {
         const bookmark: BookmarkEntity[] = await this.BookmarkRepo.createQueryBuilder("bookmark")
         .leftJoinAndSelect("bookmark.user", "user")
         .leftJoinAndSelect("bookmark.post", "post")

@@ -11,12 +11,14 @@ import { editProfileDto } from '../modules/user/dto/edit-profile.dto'
 import { RelationService } from '../modules/user/bll/relation.service'
 import { zodUserId } from '../modules/user/model/user-id'
 import { NotificationService } from '../modules/notification/bll/notification.service'
+import { BookmarkService } from '../modules/postAction/bll/bookmark.service'
 
 @Route('/user', UserService, RelationService, NotificationService)
 export class UserRouter {
     constructor(
         private userService: UserService,
         private relationService: RelationService,
+        private bookmarkService: BookmarkService,
         private notificationService: NotificationService
     ) {}
     @Post('/signup')
@@ -77,6 +79,12 @@ export class UserRouter {
     @Auth()
     followOrRequestForFollow(req: Request, res: Response) {
         handleExpress(res, () => this.relationService.follow(req.user.userId, zodUserId.parse(req.params.id)))
+    }
+
+    @Get('myBookmarkeds')
+    @Auth()
+    getMyBookmarkeds(req: Request, res: Response) {
+        handleExpress(res, () => this.bookmarkService.getMyBookmarkeds(req.user.userId))
     }
 
     @Delete('/:id/unfollow')

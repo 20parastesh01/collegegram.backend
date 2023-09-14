@@ -1,20 +1,19 @@
 import { Tag } from "../modules/post/model/tag"
 import { Readable } from "typeorm/platform/PlatformTools"
-import { CreateLike } from "../modules/post/like.repository"
 import { Caption } from "../modules/post/model/caption"
-import { LikeId } from "../modules/post/model/like-id"
 import { BasicPost, PostWithDetail, PostWithoutDetail } from "../modules/post/model/post"
 import { PostId } from "../modules/post/model/post-id"
-import { Password } from "../modules/user/model/password"
 import { User } from "../modules/user/model/user"
 import { UserId } from "../modules/user/model/user-id"
 import { Username } from "../modules/user/model/username"
 import { Email } from "./email"
 import { WholeNumber } from "./whole-number"
-import { LikeWithPost } from "../modules/post/model/like"
 import { CreatePost } from "../modules/post/post.repository"
 import { JustId } from "./just-id"
 import { UserEntity } from "../modules/user/entity/user.entity"
+import { CreateLike } from "../modules/postAction/like.repository"
+import { LikeWithPost } from "../modules/postAction/model/like"
+import { LikeId } from "../modules/postAction/model/like-id"
 
 export const mockcreatePostDto = {
     tags: ['a', 'b'] as Tag[],

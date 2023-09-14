@@ -4,8 +4,8 @@ import { WholeNumber } from '../../../data/whole-number'
 import { Password } from '../model/password'
 import { UserId } from '../model/user-id'
 import { Username } from '../model/username'
-import { LikeEntity } from '../../post/entity/like.entity'
-import { BookmarkEntity } from '../../post/entity/bookmark.entity'
+import { BookmarkEntity } from '../../postAction/entity/bookmark.entity'
+import { LikeEntity } from '../../postAction/entity/like.entity'
 
 @Entity('users')
 @Unique(['username'])

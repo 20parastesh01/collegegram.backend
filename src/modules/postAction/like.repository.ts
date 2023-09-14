@@ -15,9 +15,9 @@ export interface CreateLike {
 
 export interface ILikeRepository {
     create(data: CreateLike): Promise<ReturnType<typeof likeDao>>
-    findByUser(userId: UserId): Promise<ReturnType<typeof likeArrayDao>>
+    findAllByUser(userId: UserId): Promise<ReturnType<typeof likeArrayDao>>
     remove(likeId : LikeId): Promise<ReturnType<typeof likeOrNullDao>>
-    findByPost(postId: PostId): Promise<ReturnType<typeof likeArrayDao>>
+    findAllByPost(postId: PostId): Promise<ReturnType<typeof likeArrayDao>>
     findByUserAndPost(userId: UserId, postId: PostId): Promise<ReturnType<typeof likeOrNullDao>>
 }
 
@@ -28,7 +28,7 @@ export class LikeRepository implements ILikeRepository {
     constructor(appDataSource: DataSource) {
         this.LikeRepo = appDataSource.getRepository(LikeEntity)
     }
-    async findByUser(userId: UserId) {
+    async findAllByUser(userId: UserId) {
         const like: LikeEntity[] = await this.LikeRepo.createQueryBuilder("like")
         .leftJoinAndSelect("like.user", "user")
         .leftJoinAndSelect("like.post", "post")
@@ -36,7 +36,7 @@ export class LikeRepository implements ILikeRepository {
         .getMany()
         return likeArrayDao(like)
     }
-    async findByPost(postId: PostId) {
+    async findAllByPost(postId: PostId) {
         const like: LikeEntity[] = await this.LikeRepo.createQueryBuilder("like")
         .leftJoinAndSelect("like.user", "user")
         .leftJoinAndSelect("like.post", "post")

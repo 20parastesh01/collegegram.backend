@@ -5,9 +5,9 @@ import { Caption } from '../model/caption'
 import { Tag } from '../model/tag'
 import { UserId } from '../../user/model/user-id'
 import { UserEntity } from '../../user/entity/user.entity'
-import { LikeEntity } from './like.entity'
-import { BookmarkEntity } from './bookmark.entity'
 import { CommentEntity } from '../../comment/entity/comment.entity'
+import { BookmarkEntity } from '../../postAction/entity/bookmark.entity'
+import { LikeEntity } from '../../postAction/entity/like.entity'
 
 @Entity('posts')
 export class PostEntity {

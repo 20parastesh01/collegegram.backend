@@ -2,10 +2,8 @@ import { BadRequestError, NotFoundError, ServerError } from '../../../utility/ht
 import { UserId } from '../../user/model/user-id'
 import { Service } from '../../../registry/layer-decorators'
 import { MinioRepo } from '../../../data-source'
-import { WholeNumber, zodWholeNumber } from '../../../data/whole-number'
-import { ILikeRepository } from '../like.repository'
+import { WholeNumber } from '../../../data/whole-number'
 import { IUserRepository } from '../../user/user.repository'
-import { likeWithoutIdToCreateLikeEntity } from './like.dao'
 import { LikeWithPost } from '../model/like'
 import { Msg, PersianErrors, messages } from '../../../utility/persian-messages'
 import { JustId } from '../../../data/just-id'
@@ -15,6 +13,7 @@ import { BookmarkRepository } from '../bookmark.repository'
 import { IPostRepository } from '../../post/post.repository'
 import { PostWithDetail, PostWithoutDetail } from '../../post/model/post'
 import { zodPostId } from '../../post/model/post-id'
+import { BookmarkWithPost } from '../model/bookmark'
   
 type arrayResult = { result: PostWithDetail[], total: number }
 export type requestedPostId = { requestedPostId: JustId }
@@ -26,18 +25,30 @@ export type resMessage = {
     errCode?: WholeNumber,
 }
 
-export interface IPostService {
+export interface IBookmarkService {
     bookmarkPost(userId: UserId,id: JustId): Promise<resMessage>
     unbookmarkPost(userId: UserId,id: JustId): Promise<resMessage>
+    getMyBookmarkeds(userId: UserId): Promise<resMessage>
 }
 
 @Service(BookmarkRepository)
-export class PostService implements IPostService {
+export class BookmarkService implements IBookmarkService {
     constructor(
         private postRepo: IPostRepository,
         private bookmarkRepo: IBookmarkRepository,
         private readonly userRepo: IUserRepository
         ) {}
+    async getMyBookmarkeds(userId: UserId): Promise<resMessage> {
+        const result = (await this.bookmarkRepo.findAllByUser(userId)).toBookmarkList()
+        const posts = result.map((bookmark) => { return bookmark.post })
+        for (let post of posts) {
+            const photos = await MinioRepo.getPostPhotoUrl(post.id)
+            if (photos) {
+                post.photos = await MinioRepo.getPostPhotoUrl(post.id)
+            }
+        }
+        return { msg: messages.succeeded.persian , err : [] , data:[ {result: posts, total: result.length} ] }
+    }
     
     async bookmarkPost(userId: UserId, id: JustId) {
         const postId = zodPostId.parse(id)

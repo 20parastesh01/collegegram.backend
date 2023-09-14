@@ -7,12 +7,16 @@ import { userDao } from '../../user/bll/user.dao'
 import { IBookmarkRepository } from '../bookmark.repository'
 import { PostService } from '../../post/bll/post.service'
 import { IPostRepository } from '../../post/post.repository'
+import { LikeService } from '../bll/like.service'
+import { BookmarkService } from '../bll/bookmark.service'
 
 
 
 
 describe('PostService', () => {
     let postService: PostService
+    let likeService: LikeService
+    let bookmarkService: BookmarkService
     let mockPostRepository: jest.Mocked<IPostRepository>
     let mockLikeRepository: jest.Mocked<ILikeRepository>
     let mockBookmarkRepository: jest.Mocked<IBookmarkRepository>
@@ -39,7 +43,9 @@ describe('PostService', () => {
         mockUserRepository = {
             findById: jest.fn()
         } as any
-        postService = new PostService(mockPostRepository, mockLikeRepository, mockBookmarkRepository, mockUserRepository)
+        bookmarkService = new BookmarkService(mockPostRepository, mockBookmarkRepository, mockUserRepository)
+        likeService = new LikeService(mockPostRepository, mockLikeRepository, mockUserRepository)
+        postService = new PostService(mockPostRepository, mockUserRepository)
     })
     
     it('should like a post', async () => {
@@ -48,7 +54,7 @@ describe('PostService', () => {
         mockLikeRepository.findByUserAndPost.mockResolvedValue(likeOrNullDao(null))
         mockPostRepository.findWithoutDetailByID.mockResolvedValue(postWithoutLikeOrNullDao(mockPostWithoutDetail))
         mockUserRepository.findById.mockResolvedValue(userDao(mockUser))
-        const result = await postService.likePost(mockLikeDto.user.id,mockJustId.id1)
+        const result = await likeService.likePost(mockLikeDto.user.id,mockJustId.id1)
 
         expect(result.msg).toEqual(messages.liked.persian)
         expect(result.data[0]).toEqual(mockCreatedPost[1])
@@ -61,12 +67,10 @@ describe('PostService', () => {
         mockPostRepository.findWithoutDetailByID.mockResolvedValue(postWithoutLikeOrNullDao(mockPostWithoutDetail))
         const dao = userDao(mockUser)
         mockUserRepository.findById.mockResolvedValue(dao)
-        const result = await postService.unlikePost(mockLikeDto.user.id,mockJustId.id1)
+        const result = await likeService.unlikePost(mockLikeDto.user.id,mockJustId.id1)
 
         expect(result.msg).toEqual(messages.unliked.persian)
         expect(result.data[0]).toEqual(mockCreatedPost[1])
         expect(mockLikeRepository.remove).toHaveBeenCalledWith(mockCreatedLike.id)
     })
-
-
 })
