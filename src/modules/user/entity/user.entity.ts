@@ -44,11 +44,11 @@ export class UserEntity {
     @Column('boolean', { default: false })
     private!: boolean
     
-    @OneToMany(() => LikeEntity, (like)=>like.post , { lazy: true ,onDelete: 'CASCADE'})
+    @OneToMany(() => LikeEntity, (like)=>like.post , { lazy: true })
     @JoinColumn({ name: 'like_id' })
     likes: LikeEntity[] | undefined
 
-    @OneToMany(() => BookmarkEntity, (bookmark)=>bookmark.post , { lazy: true ,onDelete: 'CASCADE'})
+    @OneToMany(() => BookmarkEntity, (bookmark)=>bookmark.post , { lazy: true })
     @JoinColumn({ name: 'bookmark_id' })
     bookmarks: BookmarkEntity[] | undefined
 

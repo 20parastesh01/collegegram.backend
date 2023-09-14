@@ -30,15 +30,15 @@ export class PostEntity {
     @Column('boolean', { default: false })
     closeFriend!: boolean
 
-    @OneToMany((type) => LikeEntity, (like)=>like.post , { lazy: true ,onDelete: 'CASCADE'})
+    @OneToMany((type) => LikeEntity, (like)=>like.post , { lazy: true })
     @JoinColumn({ name: 'like_id' })
     likes: LikeEntity[] | undefined
 
-    @OneToMany((type) => BookmarkEntity, (bookmark)=>bookmark.post , { lazy: true ,onDelete: 'CASCADE'})
+    @OneToMany((type) => BookmarkEntity, (bookmark)=>bookmark.post , { lazy: true })
     @JoinColumn({ name: 'bookmark_id' })
     bookmarks: BookmarkEntity[] | undefined
     
-    @OneToMany((type) => CommentEntity, (comment)=>comment.postId , { lazy: true ,onDelete: 'CASCADE'})
+    @OneToMany((type) => CommentEntity, (comment)=>comment.postId , { lazy: true })
     @JoinColumn({ name: 'like_id' })
     comments: CommentEntity[] | undefined
 

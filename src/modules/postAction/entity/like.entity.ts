@@ -21,14 +21,14 @@ export class LikeEntity {
   @Column()
   user_id!: UserId
 
-  @ManyToOne(() => UserEntity, { eager: true, onDelete: 'CASCADE' })
+  @ManyToOne(() => UserEntity, { eager: true, cascade : true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user!: UserEntity;
   
   @Column()
   post_id!: PostId
 
-  @ManyToOne(() => PostEntity, { onDelete: 'CASCADE' })
+  @ManyToOne(() => PostEntity, { eager: true,cascade : true ,onDelete: 'CASCADE' })
   @JoinColumn({ name: 'post_id' })
   post!: PostEntity;
 
