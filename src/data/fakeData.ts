@@ -14,6 +14,7 @@ import { WholeNumber } from "./whole-number"
 import { LikeWithPost } from "../modules/post/model/like"
 import { CreatePost } from "../modules/post/post.repository"
 import { JustId } from "./just-id"
+import { UserEntity } from "../modules/user/entity/user.entity"
 
 export const mockcreatePostDto = {
     tags: ['a', 'b'] as Tag[],
@@ -67,7 +68,7 @@ export const mockFiles: Express.Multer.File[] = [
 export const mockCreatePost : CreatePost = {
     caption: 'test' as Caption,
     tags: ['a', 'b'] as Tag[],
-    photoCount: photoCount,
+    
     author: mockUserId,
     closeFriend: false,
     likeCount: 0 as WholeNumber,
@@ -77,7 +78,7 @@ export const mockCreatedPost: PostWithLikeCount[] = [{
     id: mockPostId.postId1,
     caption: 'test' as Caption,
     tags: ['a', 'b'] as Tag[],
-    photoCount: photoCount,
+    
     author: mockUserId,
     closeFriend: false,
     likeCount: 0 as WholeNumber,
@@ -87,7 +88,7 @@ export const mockCreatedPost: PostWithLikeCount[] = [{
     id: mockPostId.postId2,
     caption: 'test2' as Caption,
     tags: ['a', 'b'] as Tag[],
-    photoCount: photoCount,
+    
     author: mockUserId,
     closeFriend: false,
     likeCount: 2 as WholeNumber,
@@ -97,7 +98,7 @@ export const mockCreatedPostWithLike: PostWithLikeCount ={
     id: mockPostId.postId2,
     caption: 'test2' as Caption,
     tags: ['a', 'b'] as Tag[],
-    photoCount: photoCount,
+    
     author: mockUserId,
     closeFriend: false,
     likeCount: 1 as WholeNumber,
@@ -110,7 +111,7 @@ export const CreatedPost: PostWithLikeCount[] = [{
     id: mockPostId.postId2,
     caption: 'test2' as Caption,
     tags: ['a', 'b'] as Tag[],
-    photoCount: photoCount,
+    
     author: mockUserId,
     closeFriend: false,
     likeCount: 2 as WholeNumber,
@@ -122,7 +123,7 @@ export const mockPostWithoutLikeCount : PostWithoutLikeCount = {
     id: mockPostId.postId2,
     caption: 'test2' as Caption,
     tags: ['a', 'b'] as Tag[],
-    photoCount: photoCount,
+    
     author: mockUserId,
     closeFriend: false,
     commentCount: 2 as WholeNumber,
@@ -137,19 +138,18 @@ export const mockCreatedLike = {
     postId : mockPostId.postId2,
     post: mockCreatedPost[1]
 }
-export const mockUser : User = {
+export const mockUser : UserEntity = {
     id: 2 as UserId,
     username:"" as Username,
     email: "" as Email,
     name: "" as string,
     lastname: "" as string,
-    photo: "" as string,
     followers: 0 as WholeNumber,
     following: 0 as WholeNumber,
     bio: "" as string,
     postsCount: 0 as  WholeNumber,
     private: false as boolean,
-}
+} as UserEntity
 export const postWithLikeOrNullDao = (input: PostWithLikeCount) => {
     return {
         toPost(): PostWithLikeCount |undefined
@@ -211,19 +211,19 @@ export const likeOrNullDao = (input: LikeWithPost | null) => {
         }
     }
 }
-export const userDao = (input: User) => {
-    if (!input) return null
-    return {
-        toUser(): User {
-            return { ...input, photo: '' }
-        },
-        toUserBasic() {
-            const { id: userId, username, name, lastname } = input
-            return { userId, username, name, lastname }
-        },
-        toUserWithPassword() {
-            const { ...rest } = input
-            return {...rest, password : "" as Password}
-        },
-    }
-}
+// export const userDao = (input: UserEntity) => {
+//     if (!input) return null
+//     return {
+//         toUser(): User {
+//             return { ...input, photo: '' }
+//         },
+//         toUserBasic() {
+//             const { id: userId, username, name, lastname } = input
+//             return { userId, username, name, lastname }
+//         },
+//         toUserWithPassword() {
+//             const { ...rest } = input
+//             return {...rest, password : "" as Password}
+//         },
+//     }
+// }

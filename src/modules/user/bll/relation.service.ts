@@ -1,17 +1,26 @@
 import { Service } from '../../../registry/layer-decorators'
 import { ForbiddenError, NotFoundError } from '../../../utility/http-error'
 import { messages } from '../../../utility/persian-messages'
+import { NotificationService } from '../../notification/bll/notification.service'
+import { UserWithStatus } from '../model/user'
 import { UserId } from '../model/user-id'
 import { CreateRelation, IRelationRepository, RelationRepository } from '../relation.repository'
 import { IUserRepository, UserRepository } from '../user.repository'
 import { UserService } from './user.service'
 
-@Service(RelationRepository, UserService)
+@Service(RelationRepository, UserService, NotificationService)
 export class RelationService {
     constructor(
         private relationRepo: IRelationRepository,
-        private userService: UserService
+        private userService: UserService,
+        private notifService: NotificationService
     ) {}
+
+    async getRelations(userId: UserId, targetId: UserId) {
+        const relationDao = await this.relationRepo.getRelation(userId, targetId)
+        const reverseRelationDao = await this.relationRepo.getRelation(targetId, userId)
+        return { relation: relationDao?.toRelation(), reverseRelation: reverseRelationDao?.toRelation() }
+    }
 
     async follow(userId: UserId, targetId: UserId) {
         const target = await this.userService.getUserById(targetId)
@@ -39,10 +48,10 @@ export class RelationService {
         }
         await this.relationRepo.createRelation(payload)
         if (payload.status === 'Following') {
-            await this.userService.increaseFollower(targetId)
-            await this.userService.increaseFollowing(userId)
+            this.notifService.createFollowNotification(target.id, userId)
             return { msg: messages.followSuccess.persian }
         }
+        this.notifService.createRequestNotification(target.id, userId)
         return { msg: messages.requested.persian }
     }
 
@@ -54,8 +63,6 @@ export class RelationService {
         const status = dao.toRelation().status
         await this.relationRepo.deleteRelation({ userA: userId, userB: target.id })
         if (status == 'Following') {
-            await this.userService.decreaseFollower(targetId)
-            await this.userService.decreaseFollowing(userId)
             return { msg: messages.unfollowSuccess.persian }
         }
         return { msg: messages.requestDeleted.persian }
@@ -69,8 +76,6 @@ export class RelationService {
         const status = dao.toRelation().status
         if (status !== 'Pending') return { msg: messages.requestNotFound.persian }
         await this.relationRepo.updateRelation({ userA: target.id, userB: userId, status: 'Following' })
-        await this.userService.increaseFollower(userId)
-        await this.userService.increaseFollowing(targetId)
         return { msg: messages.accepted.persian }
     }
 
@@ -82,6 +87,7 @@ export class RelationService {
         const status = dao.toRelation().status
         if (status !== 'Pending') return { msg: messages.requestNotFound.persian }
         await this.relationRepo.deleteRelation({ userA: target.id, userB: userId })
+        await this.notifService.deleteNotification(userId, targetId, 'Request')
         return { msg: messages.rejected.persian }
     }
 
@@ -91,13 +97,24 @@ export class RelationService {
         const dao = await this.relationRepo.getRelation(target.id, userId)
         if (dao) {
             const status = dao.toRelation().status
-            if (status === 'Following') {
-                await this.userService.decreaseFollowing(targetId)
-                await this.userService.decreaseFollower(userId)
-                this.relationRepo.deleteRelation({ userA: target.id, userB: userId })
-            }
+            await this.relationRepo.deleteRelation({ userA: target.id, userB: userId })
         }
         await this.relationRepo.updateRelation({ userA: userId, userB: targetId, status: 'Blocked' })
         return { msg: messages.blocked.persian }
+    }
+
+    async getTargetUser(userId: UserId, targetUserId: UserId): Promise<UserWithStatus | NotFoundError> {
+        const target = await this.userService.getUserById(targetUserId)
+        if (!target) return new NotFoundError(messages.userNotFound.persian)
+        const dao = await this.relationRepo.getRelation(target.id, userId)
+        let status = null
+        const status1 = dao ? dao.toRelation().status : null
+        if (dao) {
+            status = dao.toRelation().status
+        }
+        const reverseRelationDao = await this.relationRepo.getRelation(userId, target.id)
+        let reverseStatus = null
+        if (reverseRelationDao) reverseStatus = reverseRelationDao.toRelation().status
+        return { user: target, status, reverseStatus }
     }
 }

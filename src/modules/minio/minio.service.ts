@@ -73,23 +73,41 @@ export class Minio {
         return files.length
     }
 
-    async getPostPhotoUrl(postId: PostId, count: number) {
+    getObjectListByPrefix(prefix: string): Promise<string[]> {
+        return new Promise((resolve, reject) => {
+            if (!this.client || !this.config) {
+                console.log('Minio Is Not Running')
+                return reject()
+            }
+            const objectListStream = this.client.listObjectsV2(postPhotoBucket, prefix)
+            const objectList: string[] = []
+            objectListStream.on('data', function (obj) {
+                objectList.push((obj as any).name)
+            })
+            objectListStream.on('end', () => {
+                resolve(objectList)
+            })
+        })
+    }
+
+    async getPostPhotoUrl(postId: PostId) {
         if (!this.client || !this.config) {
             console.log('Minio Is Not Running')
             return undefined
         }
-        const result = []
-        for (let i = 1; i <= count; i++) {
-            const minioUrl = await this.client.presignedUrl('GET', postPhotoBucket, postId + '-' + i)
+        const result: any = []
+        const objectList: string[] = await this.getObjectListByPrefix(postId + '-')
+        for (let i = 1; i <= objectList.length; i++) {
+            const minioUrl = await this.client.presignedUrl('GET', postPhotoBucket, postId + '')
             result.push('/file' + minioUrl.split(this.config.endPoint + ':' + this.config.port)[1])
         }
-
         return result
     }
 
-    async deletePostPhoto(postId: PostId, count: number) {
+    async deletePostPhoto(postId: PostId) {
         if (!this.client) return console.log('Minio Is Not Running')
-        for (let i = 1; i <= count; i++) {
+        const objectList: string[] = await this.getObjectListByPrefix(postId + '-')
+        for (let i = 1; i <= objectList.length; i++) {
             await this.client.removeObject(postPhotoBucket, postId + '-' + i)
         }
     }

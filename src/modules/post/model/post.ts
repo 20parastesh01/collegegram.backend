@@ -11,7 +11,6 @@ import { zodPaths } from '../../../data/path-string'
 
 export const zodPost = z.object({
     id: zodPostId,
-    photoCount: zodWholeNumber,
     author: zodUserId,
     closeFriend: zodBooleanOrBooleanString,
     photos: zodPaths.optional(),
@@ -23,7 +22,6 @@ export const zodPost = z.object({
 })
 export const zodStrictPost = z.object({
     id: zodPostId,
-    photoCount: zodWholeNumber,
     author: zodUserId,
     closeFriend: zodBooleanOrBooleanString.default(false),
     photos: zodPaths.optional(),
@@ -49,7 +47,6 @@ export interface PostWithoutLikeCount extends BasicPost {
 export interface NewPost {
     author: UserId
     photos?: string[]
-    photoCount: WholeNumber
     closeFriend: boolean
     caption: Caption
     tags?: Tag[]
@@ -58,6 +55,5 @@ export interface BasicPost {
     id: PostId
     author: UserId
     photos?: string[]
-    photoCount: WholeNumber
     closeFriend: boolean
 }

@@ -3,6 +3,7 @@ import { Hashed } from '../../../data/hashed'
 import { Token } from '../../../data/token'
 import { WholeNumber } from '../../../data/whole-number'
 import { Password } from './password'
+import { RelationStatus } from './relation'
 import { UserId, isUserId } from './user-id'
 import { Username, isUsername } from './username'
 
@@ -36,6 +37,21 @@ export interface UserBasic {
     name: string
     lastname: string
 }
+
+export interface UserShort {
+    id: UserId
+    username: Username
+    name: string
+    lastname: string
+    photo: string
+}
+
 export const isUserBasic = (payload: unknown): payload is UserBasic => {
     return payload !== null && typeof payload == 'object' && 'userId' in payload && 'username' in payload && isUserId(payload.userId) && isUsername(payload.username)
+}
+
+export interface UserWithStatus {
+    user: User
+    status: RelationStatus | null
+    reverseStatus: RelationStatus | null
 }

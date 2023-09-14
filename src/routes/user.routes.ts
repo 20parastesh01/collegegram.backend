@@ -4,18 +4,20 @@ import { signupDto } from '../modules/user/dto/signup.dto'
 import { handleExpress } from '../utility/handle-express'
 import { loginDto } from '../modules/user/dto/login.dto'
 import { sendEmailDto } from '../modules/user/dto/send-email.dto'
-import { setPasswordDto } from '../modules/user/dto/set-pass.dto'
-import { Auth, Delete, File, Get, Patch, Post, RequestBody } from '../registry/endpoint-decorator'
+import { SetPasswordDto, setPasswordDto } from '../modules/user/dto/set-pass.dto'
+import { Auth, Delete, File, Files, Get, Patch, Post, RequestBody } from '../registry/endpoint-decorator'
 import { Route } from '../registry/layer-decorators'
 import { editProfileDto } from '../modules/user/dto/edit-profile.dto'
 import { RelationService } from '../modules/user/bll/relation.service'
 import { zodUserId } from '../modules/user/model/user-id'
+import { NotificationService } from '../modules/notification/bll/notification.service'
 
-@Route('/user', UserService, RelationService)
+@Route('/user', UserService, RelationService, NotificationService)
 export class UserRouter {
     constructor(
         private userService: UserService,
-        private relationService: RelationService
+        private relationService: RelationService,
+        private notificationService: NotificationService
     ) {}
     @Post('/signup')
     @RequestBody('SignUpDto')
@@ -35,6 +37,12 @@ export class UserRouter {
     @Auth()
     getCurrentUser(req: Request, res: Response) {
         handleExpress(res, () => this.userService.getCurrentUser(req.user.userId))
+    }
+
+    @Get('/me/notification')
+    @Auth()
+    getCurrentUserNotifs(req: Request, res: Response) {
+        handleExpress(res, () => this.notificationService.getUserNotificationsWithRelation(req.user.userId))
     }
 
     @Post('/forgetpassword')
@@ -93,5 +101,11 @@ export class UserRouter {
     @Auth()
     block(req: Request, res: Response) {
         handleExpress(res, () => this.relationService.block(req.user.userId, zodUserId.parse(req.params.id)))
+    }
+
+    @Delete('/:id/profile')
+    @Auth()
+    getTargetUser(req: Request, res: Response) {
+        handleExpress(res, () => this.relationService.getTargetUser(req.user.userId, zodUserId.parse(req.params.id)))
     }
 }

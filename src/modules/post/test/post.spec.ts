@@ -4,7 +4,8 @@ import { ILikeRepository } from '../like.repository'
 import { IUserRepository } from '../../user/user.repository'
 import { PostService } from '../bll/post.service'
 import { messages } from '../../../utility/persian-messages'
-import { likeDao, likeOrNullDao, mockCreatedLike, mockCreatedPost, mockFiles, mockJustId, mockLikeDto, mockPostId, mockPostWithoutLikeCount, mockUser, mockUserId, mockcreatePostDto, postArrayDao, postWithLikeOrNullDao, postWithoutLikeDao, postWithoutLikeOrNullDao, userDao } from '../../../data/fakeData'
+import { likeDao, likeOrNullDao, mockCreatedLike, mockCreatedPost, mockFiles, mockJustId, mockLikeDto, mockPostId, mockPostWithoutLikeCount, mockUser, mockUserId, mockcreatePostDto, postArrayDao, postWithLikeOrNullDao, postWithoutLikeDao, postWithoutLikeOrNullDao } from '../../../data/fakeData'
+import { userDao } from '../../user/bll/user.dao'
 
 
 
@@ -90,7 +91,8 @@ describe('PostService', () => {
         mockLikeRepository.removeLike.mockResolvedValue(likeOrNullDao(mockCreatedLike))
         mockLikeRepository.findByUserAndPost.mockResolvedValue(likeOrNullDao(mockCreatedLike))
         mockPostRepository.findPostWithoutLikeCountByID.mockResolvedValue(postWithoutLikeOrNullDao(mockPostWithoutLikeCount))
-        mockUserRepository.findById.mockResolvedValue(userDao(mockUser))
+        const dao = userDao(mockUser)
+        mockUserRepository.findById.mockResolvedValue(dao)
         const result = await postService.unlikePost(mockLikeDto.user.id,mockJustId.id1)
 
         expect(result.msg).toEqual(messages.unliked.persian)

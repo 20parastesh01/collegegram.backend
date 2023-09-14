@@ -75,22 +75,21 @@ export class PostService implements IPostService {
     async getAllPosts(userId: UserId) {
         const result = (await this.postRepo.findAllByAuthor(userId)).toPostList()
         for (let post of result) {
-            const photos = await MinioRepo.getPostPhotoUrl(post.id, post.photoCount)
+            const photos = await MinioRepo.getPostPhotoUrl(post.id)
             if (photos) {
-                post.photos = await MinioRepo.getPostPhotoUrl(post.id, post.photoCount)
+                post.photos = await MinioRepo.getPostPhotoUrl(post.id)
             }
         }
         return { msg: messages.succeeded.persian , err : [] , data:[ {result, total: result.length} ] }
     }
 
     async createPost(dto: CreatePostDTO, files: Express.Multer.File[], userId: UserId) {
-        const photoCount = zodWholeNumber.parse(files.length)
-        const createPostRepoInput = newPostToRepoInput({ ...dto, photoCount, author: userId })
+        const createPostRepoInput = newPostToRepoInput({ ...dto, author: userId })
         const createdPost = (await this.postRepo.create(createPostRepoInput)).toPost()
         if (createdPost) {
-            const photos = await MinioRepo.getPostPhotoUrl(createdPost.id, createdPost.photoCount)
+            const photos = await MinioRepo.getPostPhotoUrl(createdPost.id)
             if (photos) {
-                createdPost.photos = await MinioRepo.getPostPhotoUrl(createdPost.id, createdPost.photoCount)
+                createdPost.photos = await MinioRepo.getPostPhotoUrl(createdPost.id)
             }
             await MinioRepo.uploadPostPhoto(createdPost.id, files)
         }
@@ -102,9 +101,9 @@ export class PostService implements IPostService {
         const postId = zodPostId.parse(id)
         const post = (await this.postRepo.findPostWithLikeCountByID(postId)).toPost()
         if (post) {
-            const photos = await MinioRepo.getPostPhotoUrl(post.id, post.photoCount)
+            const photos = await MinioRepo.getPostPhotoUrl(post.id)
             if (photos) {
-                post.photos = await MinioRepo.getPostPhotoUrl(post.id, post.photoCount)
+                post.photos = await MinioRepo.getPostPhotoUrl(post.id)
             }
         }
         if (post !== undefined)

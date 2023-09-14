@@ -12,7 +12,6 @@ export interface CreatePost {
     caption: Caption
     tags?: Tag[]
     author: UserId
-    photoCount: WholeNumber
     closeFriend: boolean
     likeCount: WholeNumber
     commentCount: WholeNumber

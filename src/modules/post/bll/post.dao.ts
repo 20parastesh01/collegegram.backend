@@ -14,7 +14,6 @@ const postEntityWithLikeToPost = (input: PostWithLikeCountEntity) => {
         const output: PostWithLikeCount = {
             id: zodPostId.parse(rest.id),
             caption: zodCaption.parse(rest.caption),
-            photoCount: zodWholeNumber.parse(rest.photoCount),
             author: zodUserId.parse(rest.author),
             closeFriend: zodBooleanOrBooleanString.parse(rest.closeFriend),
             tags: zodTags.optional().parse(rest.tags),
@@ -28,7 +27,6 @@ const postEntityWithoutLikeToPost = (input: PostEntity ) => {
         const output: PostWithoutLikeCount = {
             id: zodPostId.parse(rest.id),
             caption: zodCaption.parse(rest.caption),
-            photoCount: zodWholeNumber.parse(rest.photoCount),
             author: zodUserId.parse(rest.author),
             closeFriend: zodBooleanOrBooleanString.parse(rest.closeFriend),
             tags: zodTags.optional().parse(rest.tags),
@@ -40,7 +38,6 @@ const postEntityToPostThumbnail = (input: PostEntity | PostWithLikeCountEntity) 
     const { createdAt, updatedAt, ...rest } = input
     const output: BasicPost = {
         id: zodPostId.parse(rest.id),
-        photoCount: zodWholeNumber.parse(rest.photoCount),
         author: zodUserId.parse(rest.author),
         closeFriend: zodBooleanOrBooleanString.parse(rest.closeFriend),
     }

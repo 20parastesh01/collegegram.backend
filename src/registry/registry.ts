@@ -13,7 +13,7 @@ async function importFilesRecursively(dir: string): Promise<void> {
 
         if (stats.isDirectory()) {
             await importFilesRecursively(filePath)
-        } else if (stats.isFile() && file.endsWith('.ts') && !file.includes('.spec')) {
+        } else if (stats.isFile() && file.endsWith('.ts') && !file.includes('spec')) {
             const modulePath = path.relative(process.cwd(), filePath).replace(/\.ts$/, '')
             const esmModulePath = path.relative(__dirname, filePath).replace(/\.ts$/, '')
             try {
