@@ -2,8 +2,7 @@
 import { ILikeRepository } from '../like.repository'
 import { IUserRepository } from '../../user/user.repository'
 import { messages } from '../../../utility/persian-messages'
-import { likeDao, likeOrNullDao, mockCreatedLike, mockCreatedPost, mockFiles, mockJustId, mockLikeDto, mockPostId, mockPostWithoutDetail, mockUser, mockUserId, mockcreatePostDto, postArrayDao, postWithLikeOrNullDao, postWithoutLikeDao, postWithoutLikeOrNullDao } from '../../../data/fakeData'
-import { userDao } from '../../user/bll/user.dao'
+import { bookmarkArrayDao, bookmarkDao, bookmarkOrNullDao, likeDao, likeOrNullDao, mockCreatedBookmark, mockCreatedLike, mockCreatedPost, mockJustId, mockLikeDto, mockPostWithoutDetail, mockUser, postWithoutDetailOrNullDao, userDao } from '../../../data/fakeData'
 import { IBookmarkRepository } from '../bookmark.repository'
 import { PostService } from '../../post/bll/post.service'
 import { IPostRepository } from '../../post/post.repository'
@@ -39,63 +38,72 @@ describe('PostService', () => {
             create : jest.fn(),
             findByUserAndPost: jest.fn(),
             remove : jest.fn(),
+            findAllByUser : jest.fn(),
         } as any
         mockUserRepository = {
             findById: jest.fn()
         } as any
         bookmarkService = new BookmarkService(mockPostRepository, mockBookmarkRepository, mockUserRepository)
         likeService = new LikeService(mockPostRepository, mockLikeRepository, mockUserRepository)
-        postService = new PostService(mockPostRepository, mockUserRepository)
     })
     
     it('should like a post', async () => {
         
         mockLikeRepository.create.mockResolvedValue(likeDao(mockCreatedLike))
         mockLikeRepository.findByUserAndPost.mockResolvedValue(likeOrNullDao(null))
-        mockPostRepository.findWithoutDetailByID.mockResolvedValue(postWithoutLikeOrNullDao(mockPostWithoutDetail))
-        mockUserRepository.findById.mockResolvedValue(userDao(mockUser))
-        const result = await likeService.likePost(mockLikeDto.user.id,mockJustId.id1)
+        mockPostRepository.findWithoutDetailByID.mockResolvedValue(postWithoutDetailOrNullDao(mockPostWithoutDetail))
+        mockUserRepository.findById.mockResolvedValue(userDao(mockUser[1]))
+        const result = await likeService.likePost(mockLikeDto.user.id,mockJustId.id2)
 
         expect(result.msg).toEqual(messages.liked.persian)
         expect(result.data[0]).toEqual(mockCreatedPost[1])
-        expect(mockLikeRepository.create).toHaveBeenCalledWith(expect.objectContaining({post:mockPostWithoutDetail,user:mockUser}))
+        expect(mockLikeRepository.create).toHaveBeenCalledWith(expect.objectContaining({post:mockPostWithoutDetail,user:mockUser[1]}))
     })
     it('should unlike a post', async () => {
         
         mockLikeRepository.remove.mockResolvedValue(likeOrNullDao(mockCreatedLike))
         mockLikeRepository.findByUserAndPost.mockResolvedValue(likeOrNullDao(mockCreatedLike))
-        mockPostRepository.findWithoutDetailByID.mockResolvedValue(postWithoutLikeOrNullDao(mockPostWithoutDetail))
-        const dao = userDao(mockUser)
-        mockUserRepository.findById.mockResolvedValue(dao)
-        const result = await likeService.unlikePost(mockLikeDto.user.id,mockJustId.id1)
+        mockPostRepository.findWithoutDetailByID.mockResolvedValue(postWithoutDetailOrNullDao(mockPostWithoutDetail))
+        mockUserRepository.findById.mockResolvedValue(userDao(mockUser[1]))
+        const result = await likeService.unlikePost(mockLikeDto.user.id, mockJustId.id2)
 
         expect(result.msg).toEqual(messages.unliked.persian)
         expect(result.data[0]).toEqual(mockCreatedPost[1])
         expect(mockLikeRepository.remove).toHaveBeenCalledWith(mockCreatedLike.id)
     })
-    it('should like a post', async () => {
-        
-        mockLikeRepository.create.mockResolvedValue(likeDao(mockCreatedLike))
-        mockLikeRepository.findByUserAndPost.mockResolvedValue(likeOrNullDao(null))
-        mockPostRepository.findWithoutDetailByID.mockResolvedValue(postWithoutLikeOrNullDao(mockPostWithoutDetail))
-        mockUserRepository.findById.mockResolvedValue(userDao(mockUser))
-        const result = await likeService.likePost(mockLikeDto.user.id,mockJustId.id1)
 
-        expect(result.msg).toEqual(messages.liked.persian)
-        expect(result.data[0]).toEqual(mockCreatedPost[1])
-        expect(mockLikeRepository.create).toHaveBeenCalledWith(expect.objectContaining({post:mockPostWithoutDetail,user:mockUser}))
-    })
-    it('should unlike a post', async () => {
+    it('should bookmark a post', async () => {
         
-        mockLikeRepository.remove.mockResolvedValue(likeOrNullDao(mockCreatedLike))
-        mockLikeRepository.findByUserAndPost.mockResolvedValue(likeOrNullDao(mockCreatedLike))
-        mockPostRepository.findWithoutDetailByID.mockResolvedValue(postWithoutLikeOrNullDao(mockPostWithoutDetail))
-        const dao = userDao(mockUser)
-        mockUserRepository.findById.mockResolvedValue(dao)
-        const result = await likeService.unlikePost(mockLikeDto.user.id,mockJustId.id1)
+        mockBookmarkRepository.create.mockResolvedValue(bookmarkDao(mockCreatedBookmark))
+        mockBookmarkRepository.findByUserAndPost.mockResolvedValue(bookmarkOrNullDao(null))
+        mockPostRepository.findWithoutDetailByID.mockResolvedValue(postWithoutDetailOrNullDao(mockPostWithoutDetail))
+        mockUserRepository.findById.mockResolvedValue(userDao(mockUser[1]))
+        const result = await bookmarkService.bookmarkPost(mockLikeDto.user.id,mockJustId.id1)
+
+        expect(result.msg).toEqual(messages.bookmarked.persian)
+        expect(result.data[0]).toEqual(mockCreatedPost[1])
+        expect(mockBookmarkRepository.create).toHaveBeenCalledWith(expect.objectContaining({post:mockPostWithoutDetail,user:mockUser[1]}))
+    })
+
+    it('should unbookmark a post', async () => {
+        
+        mockBookmarkRepository.remove.mockResolvedValue(bookmarkDao(mockCreatedBookmark))
+        mockBookmarkRepository.findByUserAndPost.mockResolvedValue(bookmarkOrNullDao(mockCreatedBookmark))
+        mockPostRepository.findWithoutDetailByID.mockResolvedValue(postWithoutDetailOrNullDao(mockPostWithoutDetail))
+        mockUserRepository.findById.mockResolvedValue(userDao(mockUser[1]))
+        const result = await bookmarkService.unbookmarkPost(mockLikeDto.user.id,mockJustId.id1)
+
+        expect(result.msg).toEqual(messages.unbookmarked.persian)
+        expect(result.data[0]).toEqual(mockCreatedPost[1])
+        expect(mockBookmarkRepository.remove).toHaveBeenCalledWith(mockCreatedLike.id)
+    })
+    it('should get myBookmarkeds list of post', async () => {
+        
+        mockBookmarkRepository.findAllByUser.mockResolvedValue(bookmarkArrayDao([mockCreatedBookmark]))
+        const result = await bookmarkService.getMyBookmarkeds(mockLikeDto.user.id)
 
         expect(result.msg).toEqual(messages.unliked.persian)
         expect(result.data[0]).toEqual(mockCreatedPost[1])
-        expect(mockLikeRepository.remove).toHaveBeenCalledWith(mockCreatedLike.id)
+        expect(mockBookmarkRepository.findAllByUser).toHaveBeenCalledWith(mockCreatedLike.id)
     })
 })

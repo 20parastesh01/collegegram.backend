@@ -5,7 +5,7 @@ import { PostId } from './model/post-id'
 import { PostEntity } from './entity/post.entity'
 import { UserId } from '../user/model/user-id'
 import { WholeNumber } from '../../data/whole-number'
-import { postArrayDao, postWithLikeOrNullDao, postWithoutLikeDao, postWithoutLikeOrNullDao } from './bll/post.dao'
+import { postArrayDao, postWithDetailOrNullDao, postWithoutDetailDao, postWithoutDetailOrNullDao } from './bll/post.dao'
 import { Repo } from '../../registry/layer-decorators'
 
 export interface CreatePost {
@@ -23,10 +23,10 @@ export interface PostWithDetailEntity extends PostEntity {
 }
 
 export interface IPostRepository {
-    findWithDetailByID(postId: PostId): Promise<ReturnType<typeof postWithLikeOrNullDao>>
-    create(data: CreatePost): Promise<ReturnType<typeof postWithoutLikeDao>>
+    findWithDetailByID(postId: PostId): Promise<ReturnType<typeof postWithDetailOrNullDao>>
+    create(data: CreatePost): Promise<ReturnType<typeof postWithoutDetailDao>>
     findAllByAuthor(userId: UserId): Promise<ReturnType<typeof postArrayDao>>
-    findWithoutDetailByID(postId: PostId): Promise<ReturnType<typeof postWithoutLikeOrNullDao>>
+    findWithoutDetailByID(postId: PostId): Promise<ReturnType<typeof postWithoutDetailOrNullDao>>
 }
 
 @Repo()
@@ -60,11 +60,11 @@ export class PostRepository implements IPostRepository {
         .groupBy('post.id')
         .setLock("pessimistic_read")
         .getOne();
-        return postWithoutLikeOrNullDao(postEntity)
+        return postWithoutDetailOrNullDao(postEntity)
     }
     async create(data: CreatePost) {
         const postEntity : PostEntity = await this.PostRepo.save(data)
-        return postWithoutLikeDao(postEntity)
+        return postWithoutDetailDao(postEntity)
     }
     async findWithDetailByID(postId: PostId) {
         const output : PostWithDetailEntity | undefined = await this.PostRepo.createQueryBuilder('post')
@@ -83,6 +83,6 @@ export class PostRepository implements IPostRepository {
         // .setLock("pessimistic_read")
         // .getRawOne();
       
-        return postWithLikeOrNullDao(output);
+        return postWithDetailOrNullDao(output);
     }
 }

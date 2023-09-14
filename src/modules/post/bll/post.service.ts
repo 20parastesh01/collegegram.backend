@@ -3,23 +3,24 @@ import { IPostRepository, PostRepository } from '../post.repository'
 import { CreatePostDTO } from '../dto/createPost.dto'
 import { PostWithDetail, PostWithoutDetail } from '../model/post'
 import { zodPostId } from '../model/post-id'
-import { newPostToRepoInput } from './post.dao'
+import { toCreatePost } from './post.dao'
 import { UserId } from '../../user/model/user-id'
 import { Service } from '../../../registry/layer-decorators'
 import { MinioRepo } from '../../../data-source'
-import { WholeNumber, zodWholeNumber } from '../../../data/whole-number'
+import { WholeNumber } from '../../../data/whole-number'
 import { IUserRepository } from '../../user/user.repository'
-import { Msg, PersianErrors, messages } from '../../../utility/persian-messages'
+import { Msg, messages } from '../../../utility/persian-messages'
 import { JustId } from '../../../data/just-id'
 import { LikeWithPost } from '../../postAction/model/like'
 
-type arrayResult = { result: PostWithDetail[], total: number }
+export type arrayResult = { result: PostWithDetail[], total: number }
 export type requestedPostId = { requestedPostId: JustId }
+export type requestedUserId = { requestedUserId: UserId}
 
 export type resMessage = {
     msg: Msg,
     err: BadRequestError[] | ServerError[] | NotFoundError[],
-    data: PostWithDetail[] | PostWithoutDetail[] | LikeWithPost[]| arrayResult[]| requestedPostId[],
+    data: PostWithDetail[] | PostWithoutDetail[] | LikeWithPost[]| arrayResult[]| requestedPostId[] | requestedUserId[],
     errCode?: WholeNumber,
 }
 
@@ -38,22 +39,24 @@ export class PostService implements IPostService {
 
     async getAllPosts(userId: UserId) {
         const result = (await this.postRepo.findAllByAuthor(userId)).toPostList()
-        for (let post of result) {
-            const photos = await MinioRepo.getPostPhotoUrl(post.id)
-            if (photos) {
-                post.photos = await MinioRepo.getPostPhotoUrl(post.id)///WHY???
+        if (result.length >= 1){
+            for (let post of result) {
+                const photos = await MinioRepo.getPostPhotoUrl(post.id)
+                if (photos) {
+                    post.photos = photos
+                }
             }
-        }
-        return { msg: messages.succeeded.persian , err : [] , data:[ {result, total: result.length} ] }
+            return { msg: messages.succeeded.persian , err : [] , data:[ {result, total: result.length} ] }
+        } return { msg: messages.postNotFound.persian , err : [] , data:[{requestedUserId:userId}] }
     }
 
     async createPost(dto: CreatePostDTO, files: Express.Multer.File[], userId: UserId) {
-        const createPostRepoInput = newPostToRepoInput({ ...dto, author: userId })
+        const createPostRepoInput = toCreatePost({ ...dto, author: userId })
         const createdPost = (await this.postRepo.create(createPostRepoInput)).toPost()
         if (createdPost) {
             const photos = await MinioRepo.getPostPhotoUrl(createdPost.id)
             if (photos) {
-                createdPost.photos = await MinioRepo.getPostPhotoUrl(createdPost.id)
+                createdPost.photos = photos
             }
             await MinioRepo.uploadPostPhoto(createdPost.id, files)
         }
@@ -67,7 +70,7 @@ export class PostService implements IPostService {
         if (post) {
             const photos = await MinioRepo.getPostPhotoUrl(post.id)
             if (photos) {
-                post.photos = await MinioRepo.getPostPhotoUrl(post.id)
+                post.photos = photos
             }
         }
         if (post !== undefined)

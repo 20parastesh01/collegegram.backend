@@ -1,18 +1,14 @@
 
 import { IPostRepository } from '../post.repository'
 import { IUserRepository } from '../../user/user.repository'
-import { PostService } from '../bll/post.service'
-import { messages } from '../../../utility/persian-messages'
-import { mockCreatedPost, mockFiles, mockJustId, mockPostId, mockUserId, mockcreatePostDto, postArrayDao, postWithLikeOrNullDao, postWithoutLikeDao } from '../../../data/fakeData'
-import { IBookmarkRepository } from '../../postAction/bookmark.repository'
-import { ILikeRepository } from '../../postAction/like.repository'
+import { PostService, arrayResult } from '../bll/post.service'
+import { mockCreatedPost, mockFiles, mockJustId, mockPostId, mockUserId, mockcreatePostDto, postArrayDao, postWithDetailOrNullDao, postWithoutDetailDao } from '../../../data/fakeData'
+import { PostWithDetail } from '../model/post'
 
 
 describe('PostService', () => {
     let postService: PostService
     let mockPostRepository: jest.Mocked<IPostRepository>
-    let mockLikeRepository: jest.Mocked<ILikeRepository>
-    let mockBookmarkRepository: jest.Mocked<IBookmarkRepository>
     let mockUserRepository: jest.Mocked<IUserRepository>
 
     beforeEach(() => {
@@ -23,16 +19,6 @@ describe('PostService', () => {
             findWithoutDetailByID: jest.fn(),
             findAllByAuthor: jest.fn(),
         } as any
-        mockLikeRepository = {
-            create : jest.fn(),
-            findByUserAndPost: jest.fn(),
-            remove : jest.fn(),
-        } as any
-        mockBookmarkRepository = {
-            create : jest.fn(),
-            findByUserAndPost: jest.fn(),
-            remove : jest.fn(),
-        } as any
         mockUserRepository = {
             findById: jest.fn()
         } as any
@@ -42,9 +28,9 @@ describe('PostService', () => {
 
     it('should create a post', async () => {
         
-        mockPostRepository.create.mockResolvedValue(postWithoutLikeDao(mockCreatedPost[0]))
+        mockPostRepository.create.mockResolvedValue(postWithoutDetailDao(mockCreatedPost[0]))
 
-        const result = await postService.createPost(mockcreatePostDto, mockFiles, mockUserId)
+        const result = await postService.createPost(mockcreatePostDto, mockFiles, mockUserId.userId1)
         if ('photos' in result.data[0]) {
             delete result.data[0].photos
         }
@@ -55,7 +41,7 @@ describe('PostService', () => {
 
     it('should get a post', async () => {
         
-        mockPostRepository.findWithDetailByID.mockResolvedValue(postWithLikeOrNullDao(mockCreatedPost[0]))
+        mockPostRepository.findWithDetailByID.mockResolvedValue(postWithDetailOrNullDao(mockCreatedPost[0]))
         const result = await postService.getPost(mockJustId.id1)
         if ('photos' in result.data[0]) {
             delete result.data[0].photos
@@ -67,8 +53,12 @@ describe('PostService', () => {
     it('should get all post of user', async () => {
         
         mockPostRepository.findAllByAuthor.mockResolvedValue(postArrayDao(mockCreatedPost))
-        const result = await postService.getAllPosts(mockUserId)
-        if (Array.isArray(result.data)) {
+        const result = await postService.getAllPosts(mockUserId.userId1)
+        type x = {
+            result: PostWithDetail[];
+            total: number;
+        }[]
+        if (Array.isArray(result.data)  && result.data.length > 0 && 'result' in result.data[0] ) {
             delete result.data[0].result[0].photos
             delete result.data[0].result[1].photos
         }

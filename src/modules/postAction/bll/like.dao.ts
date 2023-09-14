@@ -33,12 +33,6 @@ export const likeOrNullDao = (input: LikeEntity | null) => {
             else {
                 return likeEntityToLike(input)
             }
-        },
-        toLikeWithDates(): LikeWithPost | undefined {
-            if (input === null) return undefined
-            else {
-                return likeEntityToLike(input)
-            }
         }
     }
 }
@@ -58,7 +52,7 @@ export const likeArrayDao = (input: LikeEntity[]) => {
         }
     }
 }
-export const likeWithoutIdToCreateLikeEntity = (user: User, post: PostWithoutDetail ): CreateLike => {
+export const toCreateLike = (user: User, post: PostWithoutDetail ): CreateLike => {
     const createLikeEntity: CreateLike = { user: user, post: post }
     return createLikeEntity
 }

@@ -1,11 +1,10 @@
 import { BadRequestError, NotFoundError, ServerError } from '../../../utility/http-error'
 import { UserId } from '../../user/model/user-id'
 import { Service } from '../../../registry/layer-decorators'
-import { MinioRepo } from '../../../data-source'
-import { WholeNumber, zodWholeNumber } from '../../../data/whole-number'
+import { WholeNumber } from '../../../data/whole-number'
 import { ILikeRepository, LikeRepository } from '../like.repository'
 import { IUserRepository } from '../../user/user.repository'
-import { likeWithoutIdToCreateLikeEntity } from './like.dao'
+import { toCreateLike } from './like.dao'
 import { LikeWithPost } from '../model/like'
 import { Msg, PersianErrors, messages } from '../../../utility/persian-messages'
 import { JustId } from '../../../data/just-id'
@@ -43,7 +42,7 @@ export class LikeService implements ILikeService {
             const user = (await this.userRepo.findById(userId))?.toUser()
             const post = (await this.postRepo.findWithoutDetailByID(postId)).toPost()
             if(user && post) {
-                const input = likeWithoutIdToCreateLikeEntity(user, post)
+                const input = toCreateLike(user, post)
                 const createdLike = (await this.likeRepo.create(input)).toLike()
                 const updatedPost = createdLike.post;
                 if(createdLike !== undefined) return { msg: messages.liked.persian , err : [] , data:[updatedPost] }

@@ -8,7 +8,7 @@ import { zodCaption } from '../model/caption'
 import { zodPostId } from '../model/post-id'
 import { zodBooleanOrBooleanString } from '../../../data/boolean-stringBoolean'
 
-const postEntityWithLikeToPost = (input: PostWithDetailEntity) => {
+const postEntityWithDetailToPost = (input: PostWithDetailEntity) => {
 
     const { createdAt, updatedAt, ...rest } = input
         const output: PostWithDetail = {
@@ -23,7 +23,7 @@ const postEntityWithLikeToPost = (input: PostWithDetailEntity) => {
         }
         return output
 }
-const postEntityWithoutLikeToPost = (input: PostEntity ) => {
+const postEntityWithoutDetailToPost = (input: PostEntity ) => {
         const { createdAt, updatedAt, ...rest } = input
         const output: PostWithoutDetail = {
             id: zodPostId.parse(rest.id),
@@ -43,12 +43,12 @@ const postEntityToPostThumbnail = (input: PostEntity | PostWithDetailEntity) => 
     }
     return output
 }
-export const postWithoutLikeOrNullDao = (input: PostEntity | null) => {
+export const postWithoutDetailOrNullDao = (input: PostEntity | null) => {
     return {
         toPost():  undefined | PostWithoutDetail {
             if (input === null ) return undefined
 
-            return postEntityWithoutLikeToPost(input)
+            return postEntityWithoutDetailToPost(input)
         
         },
         toThumbnail(): BasicPost | undefined {
@@ -57,11 +57,11 @@ export const postWithoutLikeOrNullDao = (input: PostEntity | null) => {
         },
     }
 }
-export const postWithLikeOrNullDao = (input: PostWithDetailEntity | undefined) => {
+export const postWithDetailOrNullDao = (input: PostWithDetailEntity | undefined) => {
     return {
         toPost(): PostWithDetail | undefined  {
             if (input === undefined ) return undefined
-            return postEntityWithLikeToPost(input)
+            return postEntityWithDetailToPost(input)
         
         },
         toThumbnail(): BasicPost | undefined {
@@ -70,10 +70,10 @@ export const postWithLikeOrNullDao = (input: PostWithDetailEntity | undefined) =
         },
     }
 }
-export const postWithoutLikeDao = (input: PostEntity) => {
+export const postWithoutDetailDao = (input: PostEntity) => {
     return {
         toPost(): PostWithDetail {
-            const rest  = postEntityWithoutLikeToPost(input)
+            const rest  = postEntityWithoutDetailToPost(input)
             const output : PostWithDetail = { likeCount:zodWholeNumber.parse(0),bookmarkCount: zodWholeNumber.parse(0),commentCount: zodWholeNumber.parse(0), ...rest}
             return output
         },
@@ -83,7 +83,7 @@ export const postArrayDao = (input: PostEntity[]) => {
     return {
         toPostList(): PostWithDetail[] {
             return input.map((entity) => {
-                const rest = postEntityWithoutLikeToPost(entity)
+                const rest = postEntityWithoutDetailToPost(entity)
                 const output : PostWithDetail = { likeCount:zodWholeNumber.parse(0),bookmarkCount: zodWholeNumber.parse(0),commentCount: zodWholeNumber.parse(0), ...rest}
                 return output
             })
@@ -96,7 +96,7 @@ export const postArrayDao = (input: PostEntity[]) => {
         },
     }
 }
-export const newPostToRepoInput = (post: NewPost): CreatePost => {
+export const toCreatePost = (post: NewPost): CreatePost => {
     const createPostEntity: CreatePost = {
         likeCount: zodWholeNumber.parse(0), //will not provided in create stage
         commentCount: zodWholeNumber.parse(0), //will not provided in create stage

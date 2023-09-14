@@ -33,12 +33,6 @@ export const bookmarkOrNullDao = (input: BookmarkEntity | null) => {
             else {
                 return bookmarkEntityToBookmark(input)
             }
-        },
-        toBookmarkWithDates(): BookmarkWithPost | undefined {
-            if (input === null) return undefined
-            else {
-                return bookmarkEntityToBookmark(input)
-            }
         }
     }
 }
@@ -58,7 +52,7 @@ export const bookmarkArrayDao = (input: BookmarkEntity[]) => {
         }
     }
 }
-export const bookmarkWithoutIdToCreateBookmarkEntity = (user: User, post: PostWithoutDetail ): CreateBookmark => {
+export const toCreateBookmark = (user: User, post: PostWithoutDetail ): CreateBookmark => {
     const createBookmarkEntity: CreateBookmark = { user: user, post: post }
     return createBookmarkEntity
 }
