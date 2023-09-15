@@ -120,7 +120,7 @@ export class UserService implements IUserService {
         return user
     }
 
-    public async getUserBasicById(userId: UserId): Promise<UserBasic | null> {
+    async getUserBasicById(userId: UserId): Promise<UserBasic | null> {
         const dao = await this.userRepo.findById(userId)
         if (!dao) return null
         const user = dao.toUserBasic()
