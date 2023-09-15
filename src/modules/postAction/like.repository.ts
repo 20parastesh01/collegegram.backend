@@ -4,19 +4,20 @@ import { UserId } from '../user/model/user-id'
 import { likeArrayDao, likeDao, likeOrNullDao } from './bll/like.dao'
 import { Repo } from '../../registry/layer-decorators'
 import { User } from '../user/model/user'
-import { PostWithoutLikeCount } from './model/post'
-import { PostId } from './model/post-id'
 import { LikeId } from './model/like-id'
+import { PostWithoutDetail } from '../post/model/post'
+import { PostId } from '../post/model/post-id'
 
 export interface CreateLike {
     user: User
-    post: PostWithoutLikeCount
+    post: PostWithoutDetail
 }
 
 export interface ILikeRepository {
     create(data: CreateLike): Promise<ReturnType<typeof likeDao>>
-    findByUser(userId: UserId): Promise<ReturnType<typeof likeArrayDao>>
-    removeLike(likeId : LikeId): Promise<ReturnType<typeof likeOrNullDao>>
+    findAllByUser(userId: UserId): Promise<ReturnType<typeof likeArrayDao>>
+    remove(likeId : LikeId): Promise<ReturnType<typeof likeOrNullDao>>
+    findAllByPost(postId: PostId): Promise<ReturnType<typeof likeArrayDao>>
     findByUserAndPost(userId: UserId, postId: PostId): Promise<ReturnType<typeof likeOrNullDao>>
 }
 
@@ -27,11 +28,19 @@ export class LikeRepository implements ILikeRepository {
     constructor(appDataSource: DataSource) {
         this.LikeRepo = appDataSource.getRepository(LikeEntity)
     }
-    async findByUser(userId: UserId) {
+    async findAllByUser(userId: UserId) {
         const like: LikeEntity[] = await this.LikeRepo.createQueryBuilder("like")
         .leftJoinAndSelect("like.user", "user")
         .leftJoinAndSelect("like.post", "post")
         .where('like.user.id = :userId', { userId })
+        .getMany()
+        return likeArrayDao(like)
+    }
+    async findAllByPost(postId: PostId) {
+        const like: LikeEntity[] = await this.LikeRepo.createQueryBuilder("like")
+        .leftJoinAndSelect("like.user", "user")
+        .leftJoinAndSelect("like.post", "post")
+        .where('like.post.id = :postId', { postId })
         .getMany()
         return likeArrayDao(like)
     }
@@ -48,7 +57,7 @@ export class LikeRepository implements ILikeRepository {
         const likeEntity = await this.LikeRepo.save(data)
         return likeDao(likeEntity)
     }
-    async removeLike(likeId : LikeId) {
+    async remove(likeId : LikeId) {
         const like = await this.LikeRepo.findOneBy({ id: likeId });
         return like === null ?  likeOrNullDao(null) : likeOrNullDao(await this.LikeRepo.remove(like));
     }

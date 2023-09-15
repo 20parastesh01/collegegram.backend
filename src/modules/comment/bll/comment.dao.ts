@@ -36,11 +36,12 @@ export const commentOrNullDao = (input: CommentEntity | null) => {
     }
 }
 
-export const newCommentModelToRepoInput = (comment: NewComment): CreateComment => {
+export const toCreateComment = (comment: NewComment): CreateComment => {
     const { parentId, ...rest } = comment
     const createCommentEntity: CreateComment = {
         likesCount: zodWholeNumber.parse(0), //will not provided in create stage
         ...rest,
+        parentId
     }
 
     return createCommentEntity

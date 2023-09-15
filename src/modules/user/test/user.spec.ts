@@ -56,11 +56,12 @@ class MockUserRepository implements IUserRepository {
             postsCount: 0 as WholeNumber,
             private: false,
             likes:[],
+            bookmarks:[],
             createdAt: new Date(),
             updatedAt: new Date(),
         })
     }
-    edit(userId: UserId, data: EditUser): Promise<{ toUser(): User; toUserBasic(): { userId: UserId; username: Username; name: string; lastname: string }; toUserWithPassword(): { id: UserId; username: Username; password: Password; email: Email; name: string; lastname: string; followers: WholeNumber; following: WholeNumber; bio: string; postsCount: WholeNumber; private: boolean }; toUserShort(): UserShort } | null> {
+    edit(userId: UserId, data: EditUser): Promise<ReturnType<typeof userDao>> {
         throw new Error('Method not implemented.')
     }
    
@@ -94,6 +95,7 @@ class MockUserRepository implements IUserRepository {
             postsCount: 0 as WholeNumber,
             private: false,
             likes:[],
+            bookmarks:[],
             createdAt: new Date(),
             updatedAt: new Date(),
         })
@@ -108,6 +110,7 @@ class MockUserRepository implements IUserRepository {
             postsCount: 0 as WholeNumber,
             private: false,
             likes:[],
+            bookmarks:[],
             createdAt: new Date(),
             updatedAt: new Date(),
         })

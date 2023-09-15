@@ -1,20 +1,38 @@
+import { MinioRepo } from '../../../data-source'
 import { Service } from '../../../registry/layer-decorators'
 import { ForbiddenError, NotFoundError } from '../../../utility/http-error'
 import { messages } from '../../../utility/persian-messages'
 import { NotificationService } from '../../notification/bll/notification.service'
-import { UserWithStatus } from '../model/user'
+import { resMessage } from '../../post/bll/post.service'
+import { Relation, RelationStatus } from '../model/relation'
+import { User, UserWithStatus } from '../model/user'
 import { UserId } from '../model/user-id'
 import { CreateRelation, IRelationRepository, RelationRepository } from '../relation.repository'
-import { IUserRepository, UserRepository } from '../user.repository'
 import { UserService } from './user.service'
+export type accessToUser = 'FullAccess' | 'JustProfile' | 'Denied'
+export interface IRelationService {
+    getTargetUser(userId: UserId, targetUserId: UserId): Promise<UserWithStatus | NotFoundError>
+    getRelations(userId: UserId, targetId: UserId): Promise<{
+        relation: Relation | undefined;
+        reverseRelation: Relation | undefined;
+    }>
+    checkAccessAuth (userId: UserId , targetUser: User , status: RelationStatus): Promise<accessToUser>
+}
 
 @Service(RelationRepository, UserService, NotificationService)
-export class RelationService {
+export class RelationService implements IRelationService {
     constructor(
         private relationRepo: IRelationRepository,
         private userService: UserService,
         private notifService: NotificationService
     ) {}
+    async checkAccessAuth (userId: UserId , targetUser: User , status: RelationStatus) {
+        const relation = (await this.getRelations(userId,targetUser.id)).relation
+        if (targetUser.private === false || (relation && relation.status === 'Following')) {
+            return 'FullAccess'
+        }else if (relation && relation.status === 'Following') return 'JustProfile'
+        return 'Denied'
+    }
 
     async getRelations(userId: UserId, targetId: UserId) {
         const relationDao = await this.relationRepo.getRelation(userId, targetId)

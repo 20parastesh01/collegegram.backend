@@ -7,16 +7,16 @@ import {
     CreateDateColumn,
     Column,
   } from 'typeorm';
-import { LikeId } from '../model/like-id';
+import { BookmarkId} from '../model/bookmark-id';
 import { UserEntity } from '../../user/entity/user.entity';
-import { PostEntity } from './post.entity';
-import { PostId } from '../model/post-id';
 import { UserId } from '../../user/model/user-id';
+import { PostEntity } from '../../post/entity/post.entity';
+import { PostId } from '../../post/model/post-id';
   
-@Entity('likes')
-export class LikeEntity {
+@Entity('bookmarks')
+export class BookmarkEntity {
   @PrimaryGeneratedColumn()
-  id!: LikeId;
+  id!: BookmarkId;
   
   @Column()
   user_id!: UserId

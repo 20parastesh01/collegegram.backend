@@ -1,47 +1,48 @@
 
 import { IPostRepository } from '../post.repository'
-import { ILikeRepository } from '../like.repository'
 import { IUserRepository } from '../../user/user.repository'
-import { PostService } from '../bll/post.service'
-import { messages } from '../../../utility/persian-messages'
-import { likeDao, likeOrNullDao, mockCreatedLike, mockCreatedPost, mockFiles, mockJustId, mockLikeDto, mockPostId, mockPostWithoutLikeCount, mockUser, mockUserId, mockcreatePostDto, postArrayDao, postWithLikeOrNullDao, postWithoutLikeDao, postWithoutLikeOrNullDao } from '../../../data/fakeData'
-import { userDao } from '../../user/bll/user.dao'
-
-
+import { PostService, arrayResult } from '../bll/post.service'
+import { mockCreatedPost, mockFiles, mockJustId, mockPostId, mockRelation, mockUser, mockUserId, mockcreatePostDto, postArrayDao, postWithDetailOrNullDao, postWithoutDetailDao, relationDao } from '../../../data/fakeData'
+import { PostWithDetail } from '../model/post'
+import { IRelationService, RelationService } from '../../user/bll/relation.service'
+import { IUserService } from '../../user/bll/user.service'
+import { IRelationRepository } from '../../user/relation.repository'
 
 
 describe('PostService', () => {
     let postService: PostService
+    let relationService: jest.Mocked<IRelationService>
+    let userService: jest.Mocked<IUserService>
     let mockPostRepository: jest.Mocked<IPostRepository>
-    let mockLikeRepository: jest.Mocked<ILikeRepository>
     let mockUserRepository: jest.Mocked<IUserRepository>
+
 
     beforeEach(() => {
         mockPostRepository = {
             findByID: jest.fn(),
             create: jest.fn(),
-            findPostWithLikeCountByID: jest.fn(),
-            findPostWithoutLikeCountByID: jest.fn(),
+            findWithDetailByID: jest.fn(),
+            findWithoutDetailByID: jest.fn(),
             findAllByAuthor: jest.fn(),
-        } as any
-        mockLikeRepository = {
-            findLikeByUserAndPost: jest.fn(),
-            create : jest.fn(),
-            findByUserAndPost: jest.fn(),
-            removeLike : jest.fn(),
         } as any
         mockUserRepository = {
             findById: jest.fn()
         } as any
-        postService = new PostService(mockPostRepository, mockLikeRepository, mockUserRepository)
+        userService = {
+            getUserById: jest.fn()
+        } as any
+        relationService = {
+            getRelations: jest.fn()
+        }as any
+        postService = new PostService(mockPostRepository, mockUserRepository, userService, relationService)
     })
 
 
     it('should create a post', async () => {
         
-        mockPostRepository.create.mockResolvedValue(postWithoutLikeDao(mockCreatedPost[0]))
+        mockPostRepository.create.mockResolvedValue(postWithoutDetailDao(mockCreatedPost[0]))
 
-        const result = await postService.createPost(mockcreatePostDto, mockFiles, mockUserId)
+        const result = await postService.createPost(mockcreatePostDto, mockFiles, mockUserId.userId1)
         if ('photos' in result.data[0]) {
             delete result.data[0].photos
         }
@@ -52,20 +53,24 @@ describe('PostService', () => {
 
     it('should get a post', async () => {
         
-        mockPostRepository.findPostWithLikeCountByID.mockResolvedValue(postWithLikeOrNullDao(mockCreatedPost[0]))
+        mockPostRepository.findWithDetailByID.mockResolvedValue(postWithDetailOrNullDao(mockCreatedPost[0]))
         const result = await postService.getPost(mockJustId.id1)
         if ('photos' in result.data[0]) {
             delete result.data[0].photos
         }
         expect(result.data[0]).toEqual(mockCreatedPost[0])
-        expect(mockPostRepository.findPostWithLikeCountByID).toHaveBeenCalledWith(mockPostId.postId1)
+        expect(mockPostRepository.findWithDetailByID).toHaveBeenCalledWith(mockPostId.postId1)
     })
 
-    it('should get all post of user', async () => {
+    it('should get all post of mine', async () => {
         
         mockPostRepository.findAllByAuthor.mockResolvedValue(postArrayDao(mockCreatedPost))
-        const result = await postService.getAllPosts(mockUserId)
-        if (Array.isArray(result.data)) {
+        const result = await postService.getMyPosts(mockUserId.userId1)
+        type x = {
+            result: PostWithDetail[];
+            total: number;
+        }[]
+        if (Array.isArray(result.data)  && result.data.length > 0 && 'result' in result.data[0] ) {
             delete result.data[0].result[0].photos
             delete result.data[0].result[1].photos
         }
@@ -74,31 +79,17 @@ describe('PostService', () => {
         expect(mockPostRepository.findAllByAuthor).toHaveBeenCalledWith(mockUserId)
     })
 
-    it('should like a post', async () => {
+    it('should get all post of user', async () => {
+        relationService.getRelations.mockResolvedValue({relation: mockRelation, reverseRelation:  undefined,})
+        userService.getUserById.mockResolvedValue(mockUser[0])
+        mockPostRepository.findAllByAuthor.mockResolvedValue(postArrayDao(mockCreatedPost))
+        const result = await postService.getAllPosts(mockUserId.userId3,mockJustId.id1)
+        if (Array.isArray(result.data)  && result.data.length > 0 && 'result' in result.data[0] ) {
+            delete result.data[0].result[0].photos
+            delete result.data[0].result[1].photos
+        }
         
-        mockLikeRepository.create.mockResolvedValue(likeDao(mockCreatedLike))
-        mockLikeRepository.findByUserAndPost.mockResolvedValue(likeOrNullDao(null))
-        mockPostRepository.findPostWithoutLikeCountByID.mockResolvedValue(postWithoutLikeOrNullDao(mockPostWithoutLikeCount))
-        mockUserRepository.findById.mockResolvedValue(userDao(mockUser))
-        const result = await postService.likePost(mockLikeDto.user.id,mockJustId.id1)
-
-        expect(result.msg).toEqual(messages.liked.persian)
-        expect(result.data[0]).toEqual(mockCreatedPost[1])
-        expect(mockLikeRepository.create).toHaveBeenCalledWith(expect.objectContaining({post:mockPostWithoutLikeCount,user:mockUser}))
+        expect(result.data[0]).toEqual({result:mockCreatedPost,total:2})
+        expect(mockPostRepository.findAllByAuthor).toHaveBeenCalledWith(mockUserId)
     })
-    it('should unlike a post', async () => {
-        
-        mockLikeRepository.removeLike.mockResolvedValue(likeOrNullDao(mockCreatedLike))
-        mockLikeRepository.findByUserAndPost.mockResolvedValue(likeOrNullDao(mockCreatedLike))
-        mockPostRepository.findPostWithoutLikeCountByID.mockResolvedValue(postWithoutLikeOrNullDao(mockPostWithoutLikeCount))
-        const dao = userDao(mockUser)
-        mockUserRepository.findById.mockResolvedValue(dao)
-        const result = await postService.unlikePost(mockLikeDto.user.id,mockJustId.id1)
-
-        expect(result.msg).toEqual(messages.unliked.persian)
-        expect(result.data[0]).toEqual(mockCreatedPost[1])
-        expect(mockLikeRepository.removeLike).toHaveBeenCalledWith(mockCreatedLike.id)
-    })
-
-
 })

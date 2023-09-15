@@ -9,13 +9,13 @@ export const userDao = (input: UserEntity | null) => {
             const { createdAt, updatedAt, password, ...rest } = input
             return { ...rest, photo: '' }
         },
-        toUserBasic() {
+        toUserBasic(): UserBasic {
             const { id: userId, username, name, lastname } = input
             return { userId, username, name, lastname }
         },
-        toUserWithPassword() {
-            const { createdAt, updatedAt, likes, ...rest } = input
-            return rest
+        toUserWithPassword(): UserWithPassword {
+            const { createdAt, updatedAt, likes, bookmarks, ...rest } = input
+            return { ...rest, photo: '' }
         },
         toUserShort(): UserShort {
             const { id, username, name, lastname } = input

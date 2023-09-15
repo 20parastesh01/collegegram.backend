@@ -5,7 +5,9 @@ import { Caption } from '../model/caption'
 import { Tag } from '../model/tag'
 import { UserId } from '../../user/model/user-id'
 import { UserEntity } from '../../user/entity/user.entity'
-import { LikeEntity } from './like.entity'
+import { CommentEntity } from '../../comment/entity/comment.entity'
+import { BookmarkEntity } from '../../postAction/entity/bookmark.entity'
+import { LikeEntity } from '../../postAction/entity/like.entity'
 
 @Entity('posts')
 export class PostEntity {
@@ -28,9 +30,17 @@ export class PostEntity {
     @Column('boolean', { default: false })
     closeFriend!: boolean
 
-    @OneToMany((type) => LikeEntity, (like)=>like.post , { lazy: true ,onDelete: 'CASCADE'})
+    @OneToMany((type) => LikeEntity, (like)=>like.post , { lazy: true })
     @JoinColumn({ name: 'like_id' })
     likes: LikeEntity[] | undefined
+
+    @OneToMany((type) => BookmarkEntity, (bookmark)=>bookmark.post , { lazy: true })
+    @JoinColumn({ name: 'bookmark_id' })
+    bookmarks: BookmarkEntity[] | undefined
+    
+    @OneToMany((type) => CommentEntity, (comment)=>comment.postId , { lazy: true })
+    @JoinColumn({ name: 'like_id' })
+    comments: CommentEntity[] | undefined
 
     @CreateDateColumn()
     createdAt!: Date

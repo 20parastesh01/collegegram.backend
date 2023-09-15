@@ -2,9 +2,7 @@ import { BadRequestError, NotFoundError, ServerError, UnauthorizedError } from '
 import { ICommentRepository, CommentRepository } from '../comment.repository'
 import { CreateCommentDTO } from '../dto/createComment.dto'
 import { Comment } from '../model/comment'
-import { CommentEntity } from '../entity/comment.entity'
-import { CommentId } from '../model/comment-id'
-import { newCommentModelToRepoInput } from './comment.dao'
+import { toCreateComment } from './comment.dao'
 import { UserId } from '../../user/model/user-id'
 import { PostId } from '../../post/model/post-id'
 import { Service } from '../../../registry/layer-decorators'
@@ -34,7 +32,7 @@ export class CommentService implements ICommentService {
     }
 
     async createComment(dto: CreateCommentDTO, userId: UserId): Promise<resComment> {
-        const commentEntity = newCommentModelToRepoInput({
+        const commentEntity = toCreateComment({
             ...dto,
             author: userId,
         })

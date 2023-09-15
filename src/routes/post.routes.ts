@@ -7,10 +7,12 @@ import { zodGetAllPostsDTO } from '../modules/post/dto/getAllPosts.dto'
 import { Route } from '../registry/layer-decorators'
 import { Auth, Delete, Files, Get, Post, RequestBody } from '../registry/endpoint-decorator'
 import { zodJustId } from '../data/just-id'
+import { LikeService } from '../modules/postAction/bll/like.service'
+import { BookmarkService } from '../modules/postAction/bll/bookmark.service'
 
-@Route('/post', PostService)
+@Route('/post', PostService,LikeService,BookmarkService)
 export class PostRouter {
-    constructor(private postService: PostService) {}
+    constructor(private postService: PostService,private likeService: LikeService, private bookmarkService: BookmarkService) {}
 
     @Post()
     @RequestBody('CreatePostDTO')
@@ -25,26 +27,43 @@ export class PostRouter {
     @Get('/:postId')
     @Auth()
     getAPost(req: Request, res: Response) {
-        const data = zodGetPostDTO.parse(req.params.postId)
+        const data = zodJustId.parse(req.params.postId)
         handleExpress(res, () => this.postService.getPost(data))
+    }
+
+    @Get('/MyPosts')
+    @Auth()
+    getMyPosts(req: Request, res: Response) {
+        handleExpress(res, () => this.postService.getMyPosts(req.user.userId))
     }
 
     @Get('/user/:userId')
     @Auth()
     getAllPost(req: Request, res: Response) {
-        const data = zodGetAllPostsDTO.parse(req.params.userId)
-        handleExpress(res, () => this.postService.getAllPosts(data))
+        const data = zodJustId.parse(req.params.userId)
+        handleExpress(res, () => this.postService.getAllPosts(req.user.userId,  data))
     }
+
     @Post('/:id/like')
     @Auth()
     likeAPost(req: Request, res: Response) {
-        handleExpress(res, () => this.postService.likePost(req.user.userId, zodJustId.parse(req.params.id)))
+        handleExpress(res, () => this.likeService.likePost(req.user.userId, zodJustId.parse(req.params.id)))
     }
 
     @Delete('/:id/unlike')
     @Auth()
-    unlikePost(req: Request, res: Response) {
-        handleExpress(res, () => this.postService.unlikePost(req.user.userId, zodJustId.parse(req.params.id)))
+    unlikeAPost(req: Request, res: Response) {
+        handleExpress(res, () => this.likeService.unlikePost(req.user.userId, zodJustId.parse(req.params.id)))
     }
-    
+    @Post('/:id/bookmark')
+    @Auth()
+    bookmarkAPost(req: Request, res: Response) {
+        handleExpress(res, () => this.bookmarkService.bookmarkPost(req.user.userId, zodJustId.parse(req.params.id)))
+    }
+
+    @Delete('/:id/unbookmark')
+    @Auth()
+    unbookmarkAPost(req: Request, res: Response) {
+        handleExpress(res, () => this.bookmarkService.unbookmarkPost(req.user.userId, zodJustId.parse(req.params.id)))
+    }
 }

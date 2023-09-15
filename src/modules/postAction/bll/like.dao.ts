@@ -1,11 +1,11 @@
 import { LikeEntity } from '../entity/like.entity'
 import { CreateLike } from '../like.repository'
 import { zodUserId } from '../../user/model/user-id'
-import { zodPostId } from '../model/post-id'
 import { zodLikeId } from '../model/like-id'
-import { PostWithoutLikeCount, zodStrictPost } from '../model/post'
 import { User } from '../../user/model/user'
 import { BasicLike , LikeWithPost } from '../model/like'
+import { zodStrictPost, PostWithoutDetail } from '../../post/model/post'
+import { zodPostId } from '../../post/model/post-id'
 
 const likeEntityToLike = (input: LikeEntity) => {
     const { id, post, user } = input
@@ -33,12 +33,6 @@ export const likeOrNullDao = (input: LikeEntity | null) => {
             else {
                 return likeEntityToLike(input)
             }
-        },
-        toLikeWithDates(): LikeWithPost | undefined {
-            if (input === null) return undefined
-            else {
-                return likeEntityToLike(input)
-            }
         }
     }
 }
@@ -58,7 +52,7 @@ export const likeArrayDao = (input: LikeEntity[]) => {
         }
     }
 }
-export const likeWithoutIdToCreateLikeEntity = (user: User, post: PostWithoutLikeCount ): CreateLike => {
+export const toCreateLike = (user: User, post: PostWithoutDetail ): CreateLike => {
     const createLikeEntity: CreateLike = { user: user, post: post }
     return createLikeEntity
 }
