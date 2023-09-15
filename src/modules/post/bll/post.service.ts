@@ -15,6 +15,7 @@ import { LikeWithPost } from '../../postAction/model/like'
 import { IUserService } from '../../user/bll/user.service'
 import { IRelationService } from '../../user/bll/relation.service'
 import { RelationStatus } from '../../user/model/relation'
+import { ZodObject } from 'zod'
 
 export type arrayResult = { result: PostWithDetail[], total: number }
 export type requestedPostId = { requestedPostId: PostId | JustId }
@@ -48,7 +49,7 @@ export class PostService implements IPostService {
         const targetUser = (await this.userService.getUserById(targetUserId))
         if(targetUser){
             const relation = (await this.relationService.getRelations(userId,targetUserId)).relation
-            if (targetUser.private === false || (relation && relation.status === 'Following')) {
+            if (targetUser.private === false && !relation || (relation && relation.status === 'Following')) {
                 const result = (await this.postRepo.findAllByAuthor(targetUserId)).toPostList()
                 if (result.length >= 1){
                     for (let post of result) {
@@ -66,17 +67,18 @@ export class PostService implements IPostService {
         return { msg: messages.userNotFound.persian , err : [] , data:[{requestedUserId:targetId}] }
     }
     
-    async getMyPosts(userId: UserId) {const result = (await this.postRepo.findAllByAuthor(userId)).toPostList()
-                if (result.length >= 1){
-                    for (let post of result) {
-                        const photos = await MinioRepo.getPostPhotoUrl(post.id)
-                        if (photos) {
-                            post.photos = photos
-                        }
-                    }
-                    return { msg: messages.succeeded.persian , err : [] , data:[ {result, total: result.length} ] }
-                } 
-                return { msg: messages.postNotFound.persian , err : [] , data:[{requestedUserId:userId}] }
+    async getMyPosts(userId: UserId) {
+        const result = (await this.postRepo.findAllByAuthor(userId)).toPostList()
+        if (result.length >= 1){
+            for (let post of result) {
+                const photos = await MinioRepo.getPostPhotoUrl(post.id)
+                if (photos) {
+                    post.photos = photos
+                }
+            }
+            return { msg: messages.succeeded.persian , err : [] , data:[ {result, total: result.length} ] }
+        } 
+        return { msg: messages.postNotFound.persian , err : [] , data:[{requestedUserId:userId}] }
     }
 
     async createPost(dto: CreatePostDTO, files: Express.Multer.File[], userId: UserId) {
