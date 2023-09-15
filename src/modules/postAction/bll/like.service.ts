@@ -36,33 +36,35 @@ export class LikeService implements ILikeService {
         ) {}
     
     async likePost(userId: UserId, id: JustId) {
+        
         const postId = zodPostId.parse(id)
         const like = (await this.likeRepo.findByUserAndPost(userId, postId)).toLike();
-        if (!like) {
-            const user = (await this.userRepo.findById(userId))?.toUser()
-            const post = (await this.postRepo.findWithoutDetailByID(postId)).toPost()
-            if(user && post) {
-                const input = toCreateLike(user, post)
-                const createdLike = (await this.likeRepo.create(input)).toLike()
-                const updatedPost = createdLike.post;
-                if(createdLike !== undefined) return { msg: messages.liked.persian , err : [] , data:[updatedPost] }
-                return { msg: messages.failed.persian , err : [new ServerError(PersianErrors.ServerError)] , data:[] }
-            }
+        if (like)
+            return { msg: messages.alreadyLiked.persian , err : [] , data:[{requestedPostId:id}] }
+
+        const user = (await this.userRepo.findById(userId))?.toUser()
+        const post = (await this.postRepo.findWithoutDetailByID(postId)).toPost()
+        if(!user || !post)
             return { msg: messages.postNotFound.persian , err : [] , data:[{requestedPostId:id}] }
-        }
-        return { msg: messages.notLikedYet.persian , err : [] , data:[{requestedPostId:id}] }
+        
+        const input = toCreateLike(user, post)
+        const createdLike = (await this.likeRepo.create(input)).toLike()
+        const updatedPost = createdLike.post;
+        return { msg: messages.liked.persian , err : [] , data:[updatedPost] }
+        
     }
     async unlikePost(userId: UserId, id: JustId) {
+        
         const postId = zodPostId.parse(id)
         const like = (await this.likeRepo.findByUserAndPost(userId, postId)).toLike();
-        if (!like) {
+        if (!like) 
             return { msg: messages.notLikedYet.persian , err : [] , data:[{requestedPostId:id}] }
-        }
+
         const createdLike = (await this.likeRepo.remove(like.id)).toLike()
-        if( createdLike !== undefined){
-            const updatedPost = createdLike.post; 
-            return  { msg: messages.unliked.persian , err : [] , data:[updatedPost] }
-        }
-        return { msg: messages.failed.persian , err : [new ServerError(PersianErrors.ServerError)] , data:[] }
+        if(!createdLike)
+            return { msg: messages.failed.persian , err : [new ServerError(PersianErrors.ServerError)] , data:[] }
+        
+        const updatedPost = createdLike.post; 
+        return  { msg: messages.unliked.persian , err : [] , data:[updatedPost] }
     }
 }

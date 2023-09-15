@@ -9,13 +9,14 @@ import { Service } from '../../../registry/layer-decorators'
 import { MinioRepo } from '../../../data-source'
 import { WholeNumber } from '../../../data/whole-number'
 import { IUserRepository } from '../../user/user.repository'
-import { Msg, messages } from '../../../utility/persian-messages'
+import { Msg, PersianErrors, messages } from '../../../utility/persian-messages'
 import { JustId } from '../../../data/just-id'
 import { LikeWithPost } from '../../postAction/model/like'
 import { IUserService } from '../../user/bll/user.service'
 import { IRelationService } from '../../user/bll/relation.service'
-import { RelationStatus } from '../../user/model/relation'
-import { ZodObject } from 'zod'
+import { User } from '../../user/model/user'
+import { Relation } from '../../user/model/relation'
+
 
 export type arrayResult = { result: PostWithDetail[], total: number }
 export type requestedPostId = { requestedPostId: PostId | JustId }
@@ -43,69 +44,59 @@ export class PostService implements IPostService {
         private userService: IUserService,
         private relationService: IRelationService,
         ) {}
+    
+    validateAccess = (targetUser:User, relation?: Relation | undefined) => {
+        return ((relation && relation.status === 'Following') || (!relation && targetUser.private === false)) 
+    }
 
     async getAllPosts(userId: UserId, targetId: JustId) {
         const targetUserId = zodUserId.parse(targetId)
         const targetUser = (await this.userService.getUserById(targetUserId))
-        if(targetUser){
-            const relation = (await this.relationService.getRelations(userId,targetUserId)).relation
-            if (targetUser.private === false && !relation || (relation && relation.status === 'Following')) {
-                const result = (await this.postRepo.findAllByAuthor(targetUserId)).toPostList()
-                if (result.length >= 1){
-                    for (let post of result) {
-                        const photos = await MinioRepo.getPostPhotoUrl(post.id)
-                        if (photos) {
-                            post.photos = photos
-                        }
-                    }
-                    return { msg: messages.succeeded.persian , err : [] , data:[ {result, total: result.length} ] }
-                } 
-                return { msg: messages.postNotFound.persian , err : [] , data:[{requestedUserId:targetUserId}] }
-            }
+        if(!targetUser)
+            return { msg: messages.userNotFound.persian , err : [] , data:[{requestedUserId:targetId}] }
+
+        const relation = (await this.relationService.getRelations(userId,targetUserId)).relation
+        if (!this.validateAccess(targetUser,relation)) 
             return { msg: messages.postAccessDenied.persian , err : [] , data:[{requestedUserId:targetUserId}] }
-        } 
-        return { msg: messages.userNotFound.persian , err : [] , data:[{requestedUserId:targetId}] }
+        
+        const result = (await this.postRepo.findAllByAuthor(targetUserId)).toPostList()
+        if (result.length < 1)
+            return { msg: messages.postNotFound.persian , err : [] , data:[{requestedUserId:targetUserId}] }
+        
+        result.every(async (post) => (post.photos = (await MinioRepo.getPostPhotoUrl(post.id)) || []))
+        return { msg: messages.succeeded.persian , err : [] , data:[ {result, total: result.length} ] }    
     }
     
     async getMyPosts(userId: UserId) {
+
         const result = (await this.postRepo.findAllByAuthor(userId)).toPostList()
-        if (result.length >= 1){
-            for (let post of result) {
-                const photos = await MinioRepo.getPostPhotoUrl(post.id)
-                if (photos) {
-                    post.photos = photos
-                }
-            }
-            return { msg: messages.succeeded.persian , err : [] , data:[ {result, total: result.length} ] }
-        } 
-        return { msg: messages.postNotFound.persian , err : [] , data:[{requestedUserId:userId}] }
+        if (result.length < 1)
+            return { msg: messages.postNotFound.persian , err : [] , data:[{requestedUserId:userId}] }
+
+        result.every(async (post) => (post.photos = (await MinioRepo.getPostPhotoUrl(post.id)) || []))
+        return { msg: messages.succeeded.persian , err : [] , data:[ {result, total: result.length} ] }
     }
 
     async createPost(dto: CreatePostDTO, files: Express.Multer.File[], userId: UserId) {
+
         const createPostRepoInput = toCreatePost({ ...dto, author: userId })
         const createdPost = (await this.postRepo.create(createPostRepoInput)).toPost()
-        if (createdPost) {
-            const photos = await MinioRepo.getPostPhotoUrl(createdPost.id)
-            if (photos) {
-                createdPost.photos = photos
-            }
-            await MinioRepo.uploadPostPhoto(createdPost.id, files)
-        }
+        if (!createdPost) 
+            return { msg: messages.failed.persian , err : [ new ServerError(PersianErrors.ServerError) ] , data:[{requestedUserId:userId}] }
 
+        await MinioRepo.uploadPostPhoto(createdPost.id, files)
+        createdPost.photos = await MinioRepo.getPostPhotoUrl(createdPost.id) || []
         return { msg: messages.succeeded.persian , err : [] , data:[ createdPost ] } 
     }
 
     async getPost(id: JustId) {
+
         const postId = zodPostId.parse(id)
         const post = (await this.postRepo.findWithDetailByID(postId)).toPost()
-        if (post) {
-            const photos = await MinioRepo.getPostPhotoUrl(post.id)
-            if (photos) {
-                post.photos = photos
-            }
-        }
-        if (post !== undefined)
-            return { msg: messages.succeeded.persian , err : [] , data:[post] }
-        return { msg: messages.postNotFound.persian , err : [] , data:[{requestedPostId:id}] }
+        if (!post)
+            return { msg: messages.postNotFound.persian , err : [] , data:[{requestedPostId:id}] }
+
+        post.photos = await MinioRepo.getPostPhotoUrl(post.id) || []
+        return { msg: messages.succeeded.persian , err : [] , data:[post] }
     }
 }
