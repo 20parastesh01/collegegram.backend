@@ -7,6 +7,7 @@ import { UserId } from '../../user/model/user-id'
 import { PostId } from '../../post/model/post-id'
 import { Service } from '../../../registry/layer-decorators'
 import { MinioRepo } from '../../../data-source'
+import { DataSource } from 'typeorm'
 
 type resComment = Comment | BadRequestError | ServerError | NotFoundError
 type resComments = { result: Comment[]; total: number } | BadRequestError | ServerError
