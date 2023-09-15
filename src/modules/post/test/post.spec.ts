@@ -2,10 +2,11 @@
 import { IPostRepository } from '../post.repository'
 import { IUserRepository } from '../../user/user.repository'
 import { PostService, arrayResult } from '../bll/post.service'
-import { mockCreatedPost, mockFiles, mockJustId, mockPostId, mockUserId, mockcreatePostDto, postArrayDao, postWithDetailOrNullDao, postWithoutDetailDao } from '../../../data/fakeData'
+import { mockCreatedPost, mockFiles, mockJustId, mockPostId, mockRelation, mockUser, mockUserId, mockcreatePostDto, postArrayDao, postWithDetailOrNullDao, postWithoutDetailDao, relationDao } from '../../../data/fakeData'
 import { PostWithDetail } from '../model/post'
 import { IRelationService, RelationService } from '../../user/bll/relation.service'
 import { IUserService } from '../../user/bll/user.service'
+import { IRelationRepository } from '../../user/relation.repository'
 
 
 describe('PostService', () => {
@@ -27,6 +28,12 @@ describe('PostService', () => {
         mockUserRepository = {
             findById: jest.fn()
         } as any
+        userService = {
+            getUserById: jest.fn()
+        } as any
+        relationService = {
+            getRelations: jest.fn()
+        }as any
         postService = new PostService(mockPostRepository, mockUserRepository, userService, relationService)
     })
 
@@ -55,14 +62,28 @@ describe('PostService', () => {
         expect(mockPostRepository.findWithDetailByID).toHaveBeenCalledWith(mockPostId.postId1)
     })
 
-    it('should get all post of user', async () => {
+    it('should get all post of mine', async () => {
         
         mockPostRepository.findAllByAuthor.mockResolvedValue(postArrayDao(mockCreatedPost))
-        const result = await postService.getAllPosts(mockUserId.userId3,mockJustId.id1)
+        const result = await postService.getMyPosts(mockUserId.userId1)
         type x = {
             result: PostWithDetail[];
             total: number;
         }[]
+        if (Array.isArray(result.data)  && result.data.length > 0 && 'result' in result.data[0] ) {
+            delete result.data[0].result[0].photos
+            delete result.data[0].result[1].photos
+        }
+        
+        expect(result.data[0]).toEqual({result:mockCreatedPost,total:2})
+        expect(mockPostRepository.findAllByAuthor).toHaveBeenCalledWith(mockUserId)
+    })
+
+    it('should get all post of user', async () => {
+        relationService.getRelations.mockResolvedValue({relation: mockRelation, reverseRelation:  undefined,})
+        userService.getUserById.mockResolvedValue(mockUser[0])
+        mockPostRepository.findAllByAuthor.mockResolvedValue(postArrayDao(mockCreatedPost))
+        const result = await postService.getAllPosts(mockUserId.userId3,mockJustId.id1)
         if (Array.isArray(result.data)  && result.data.length > 0 && 'result' in result.data[0] ) {
             delete result.data[0].result[0].photos
             delete result.data[0].result[1].photos

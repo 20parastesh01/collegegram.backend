@@ -16,6 +16,7 @@ import { LikeId } from "../modules/postAction/model/like-id"
 import { BookmarkId } from "../modules/postAction/model/bookmark-id"
 import { BookmarkWithPost } from "../modules/postAction/model/bookmark"
 import { Password } from "../modules/user/model/password"
+import { Relation, RelationStatus } from "../modules/user/model/relation"
 
 export const mockJustId = {
     id1: 1 as JustId,
@@ -153,6 +154,11 @@ export const mockCreatedBookmark = {
     postId : mockPostId.postId2,
     post: mockCreatedPost[1]
 }
+export const mockRelation = {
+    userA: mockUserId.userId2,
+    userB: mockUserId.userId1,
+    status: 'Following' as RelationStatus,
+}
 
 export const postWithDetailOrNullDao = (input: PostWithDetail) => {
     return {
@@ -265,6 +271,14 @@ export const userDao = (input: User | null) => {
         toUserShort(): UserShort {
             const { id, username, name, lastname } = input
             return { id, username, name, lastname, photo: '' }
+        },
+    }
+}
+export const relationDao = (input: Relation | null) => {
+    if (!input) return null
+    return {
+        toRelation(): Relation {
+            return input
         },
     }
 }
