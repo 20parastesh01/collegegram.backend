@@ -31,12 +31,19 @@ export class PostRouter {
         handleExpress(res, () => this.postService.getPost(data))
     }
 
+    @Get('/MyPosts')
+    @Auth()
+    getMyPosts(req: Request, res: Response) {
+        handleExpress(res, () => this.postService.getMyPosts(req.user.userId))
+    }
+
     @Get('/user/:userId')
     @Auth()
     getAllPost(req: Request, res: Response) {
         const data = zodJustId.parse(req.params.userId)
         handleExpress(res, () => this.postService.getAllPosts(req.user.userId,  data))
     }
+
     @Post('/:id/like')
     @Auth()
     likeAPost(req: Request, res: Response) {

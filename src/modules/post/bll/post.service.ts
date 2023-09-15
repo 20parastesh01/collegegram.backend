@@ -31,6 +31,7 @@ export interface IPostService {
     createPost(dto: CreatePostDTO, files: Express.Multer.File[], userId: UserId): Promise<resMessage>
     getPost(id: JustId): Promise<resMessage>
     getAllPosts(userId: UserId, targetUserId: JustId): Promise<resMessage>
+    getMyPosts(userId: UserId): Promise<resMessage>
 }
 
 @Service(PostRepository)
@@ -63,6 +64,19 @@ export class PostService implements IPostService {
             return { msg: messages.postAccessDenied.persian , err : [] , data:[{requestedUserId:targetUserId}] }
         } 
         return { msg: messages.userNotFound.persian , err : [] , data:[{requestedUserId:targetId}] }
+    }
+    
+    async getMyPosts(userId: UserId) {const result = (await this.postRepo.findAllByAuthor(userId)).toPostList()
+                if (result.length >= 1){
+                    for (let post of result) {
+                        const photos = await MinioRepo.getPostPhotoUrl(post.id)
+                        if (photos) {
+                            post.photos = photos
+                        }
+                    }
+                    return { msg: messages.succeeded.persian , err : [] , data:[ {result, total: result.length} ] }
+                } 
+                return { msg: messages.postNotFound.persian , err : [] , data:[{requestedUserId:userId}] }
     }
 
     async createPost(dto: CreatePostDTO, files: Express.Multer.File[], userId: UserId) {
