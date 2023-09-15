@@ -27,15 +27,15 @@ export class PostRouter {
     @Get('/:postId')
     @Auth()
     getAPost(req: Request, res: Response) {
-        const data = zodGetPostDTO.parse(req.params.postId)
+        const data = zodJustId.parse(req.params.postId)
         handleExpress(res, () => this.postService.getPost(data))
     }
 
     @Get('/user/:userId')
     @Auth()
     getAllPost(req: Request, res: Response) {
-        const data = zodGetAllPostsDTO.parse(req.params.userId)
-        handleExpress(res, () => this.postService.getAllPosts(data))
+        const data = zodJustId.parse(req.params.userId)
+        handleExpress(res, () => this.postService.getAllPosts(req.user.userId,  data))
     }
     @Post('/:id/like')
     @Auth()

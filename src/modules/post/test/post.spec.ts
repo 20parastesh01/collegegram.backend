@@ -4,12 +4,17 @@ import { IUserRepository } from '../../user/user.repository'
 import { PostService, arrayResult } from '../bll/post.service'
 import { mockCreatedPost, mockFiles, mockJustId, mockPostId, mockUserId, mockcreatePostDto, postArrayDao, postWithDetailOrNullDao, postWithoutDetailDao } from '../../../data/fakeData'
 import { PostWithDetail } from '../model/post'
+import { IRelationService, RelationService } from '../../user/bll/relation.service'
+import { IUserService } from '../../user/bll/user.service'
 
 
 describe('PostService', () => {
     let postService: PostService
+    let relationService: jest.Mocked<IRelationService>
+    let userService: jest.Mocked<IUserService>
     let mockPostRepository: jest.Mocked<IPostRepository>
     let mockUserRepository: jest.Mocked<IUserRepository>
+
 
     beforeEach(() => {
         mockPostRepository = {
@@ -22,7 +27,7 @@ describe('PostService', () => {
         mockUserRepository = {
             findById: jest.fn()
         } as any
-        postService = new PostService(mockPostRepository, mockUserRepository)
+        postService = new PostService(mockPostRepository, mockUserRepository, userService, relationService)
     })
 
 
@@ -53,7 +58,7 @@ describe('PostService', () => {
     it('should get all post of user', async () => {
         
         mockPostRepository.findAllByAuthor.mockResolvedValue(postArrayDao(mockCreatedPost))
-        const result = await postService.getAllPosts(mockUserId.userId1)
+        const result = await postService.getAllPosts(mockUserId.userId3,mockJustId.id1)
         type x = {
             result: PostWithDetail[];
             total: number;
