@@ -5,7 +5,7 @@ import { Email } from '../../data/email'
 import { Password } from './model/password'
 import { UserId } from './model/user-id'
 import { Repo } from '../../registry/layer-decorators'
-import { userDao } from './bll/user.dao'
+import { userDao, userListDao } from './bll/user.dao'
 import { WholeNumber } from '../../data/whole-number'
 
 export interface CreateUser {
@@ -34,6 +34,7 @@ export interface IUserRepository {
     findByUsername(username: Username): Promise<ReturnType<typeof userDao>>
     findByEmail(email: Email): Promise<ReturnType<typeof userDao>>
     findById(userId: UserId): Promise<ReturnType<typeof userDao>>
+    findListById(userIds:{id: UserId}[]): Promise<ReturnType<typeof userListDao>>
     changePassword(userId: UserId, newPassword: Password): Promise<ReturnType<typeof userDao>>
     edit(userId: UserId, data: EditUser): Promise<ReturnType<typeof userDao>>
 }
@@ -64,6 +65,10 @@ export class UserRepository implements IUserRepository {
     async findById(userId: UserId): Promise<ReturnType<typeof userDao>> {
         const userEntity = await this.userRepo.findOneBy({ id: userId })
         return userDao(userEntity)
+    }
+    async findListById(userIds:{id: UserId}[]): Promise<ReturnType<typeof userListDao>> {
+        const userEntities = await this.userRepo.findBy(userIds)
+        return userListDao(userEntities)
     }
     async edit(userId: UserId, data: EditUser): Promise<ReturnType<typeof userDao>> {
         const userEntity = await this.userRepo.save({ id: userId, ...data })

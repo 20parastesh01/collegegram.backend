@@ -30,6 +30,7 @@ export interface IUserService {
     signup(data: SignUpDto): Promise<LoginSignUp>
     login(data: LoginDto): Promise<LoginSignUp>
     getUserById(userId: UserId): Promise<User | null>
+    getUserListById(userIds: UserId[]): Promise<User[]>
     forgetPassSendEmail(data: SendEmailDto): Promise<SimpleMessage | BadRequestError>
     forgetPassSetPass(data: SetPasswordDto): Promise<LoginSignUp>
     editProfile(user: UserBasic, data: EditProfileDto, file?: Express.Multer.File): Promise<{ user: User; token: Token } | ServerError>
@@ -226,5 +227,11 @@ export class UserService implements IUserService {
         const following = userDao.toUser().following
         const editedDao = (await this.userRepo.edit(id, { following: zodWholeNumber.parse(following - 1) }))!
         return editedDao.toUser()
+    }
+
+    async getUserListById(userIds: UserId[]) {
+        const userList = userIds.map((userId) => ({ id: userId }))
+        const users = (await this.userRepo.findListById(userList)).toUserList()
+        return users
     }
 }

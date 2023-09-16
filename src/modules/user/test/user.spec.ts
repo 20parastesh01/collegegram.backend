@@ -61,6 +61,9 @@ class MockUserRepository implements IUserRepository {
             updatedAt: new Date(),
         })
     }
+    findListById(userIds: { id: UserId }[]): Promise<{ toUserList(): User[] }> {
+        throw new Error('Method not implemented.')
+    }
     edit(userId: UserId, data: EditUser): Promise<ReturnType<typeof userDao>> {
         throw new Error('Method not implemented.')
     }
