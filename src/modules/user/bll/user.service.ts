@@ -33,6 +33,7 @@ export interface IUserService {
     forgetPassSendEmail(data: SendEmailDto): Promise<SimpleMessage | BadRequestError>
     forgetPassSetPass(data: SetPasswordDto): Promise<LoginSignUp>
     editProfile(user: UserBasic, data: EditProfileDto, file?: Express.Multer.File): Promise<{ user: User; token: Token } | ServerError>
+    logout(userId: UserId): Promise<SimpleMessage | BadRequestError>
 }
 
 export const hash = async (input: string): Promise<Password> => {
@@ -226,5 +227,9 @@ export class UserService implements IUserService {
         const following = userDao.toUser().following
         const editedDao = (await this.userRepo.edit(id, { following: zodWholeNumber.parse(following - 1) }))!
         return editedDao.toUser()
+    }
+    async logout(userId: UserId): Promise<SimpleMessage> {
+        await RedisRepo.deleteSession(userId)
+        return { msg: 'User Logged Out' }
     }
 }
