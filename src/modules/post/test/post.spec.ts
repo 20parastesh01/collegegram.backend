@@ -25,16 +25,13 @@ describe('PostService', () => {
             findWithoutDetailByID: jest.fn(),
             findAllByAuthor: jest.fn(),
         } as any
-        mockUserRepository = {
-            findById: jest.fn()
-        } as any
         userService = {
             getUserById: jest.fn()
         } as any
         relationService = {
             getRelations: jest.fn()
         }as any
-        postService = new PostService(mockPostRepository, mockUserRepository, userService, relationService)
+        postService = new PostService(mockPostRepository, userService, relationService)
     })
 
 

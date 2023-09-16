@@ -44,6 +44,13 @@ export class PostRouter {
         handleExpress(res, () => this.postService.getAllPosts(req.user.userId,  data))
     }
 
+    @Get('/MyTimeline')
+    @Auth()
+    getMyTimeline(req: Request, res: Response) {
+        handleExpress(res, () => this.postService.getMyTimeline(req.user.userId))
+    }
+
+
     @Post('/:id/like')
     @Auth()
     likeAPost(req: Request, res: Response) {

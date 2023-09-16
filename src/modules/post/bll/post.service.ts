@@ -8,7 +8,6 @@ import { UserId, zodUserId } from '../../user/model/user-id'
 import { Service } from '../../../registry/layer-decorators'
 import { MinioRepo } from '../../../data-source'
 import { WholeNumber } from '../../../data/whole-number'
-import { IUserRepository } from '../../user/user.repository'
 import { Msg, PersianErrors, messages } from '../../../utility/persian-messages'
 import { JustId } from '../../../data/just-id'
 import { LikeWithPost } from '../../postAction/model/like'
@@ -19,13 +18,14 @@ import { Relation } from '../../user/model/relation'
 
 
 export type arrayResult = { result: PostWithDetail[], total: number }
+export type timelineArrayResult = { result: {user: User, post:PostWithDetail}[], total: number }
 export type requestedPostId = { requestedPostId: PostId | JustId }
 export type requestedUserId = { requestedUserId: UserId | JustId}
 
 export type resMessage = {
     msg: Msg,
     err: BadRequestError[] | ServerError[] | NotFoundError[],
-    data: PostWithDetail[] | PostWithoutDetail[] | LikeWithPost[]| arrayResult[]| requestedPostId[] | requestedUserId[],
+    data: PostWithDetail[] | PostWithoutDetail[] | LikeWithPost[]| arrayResult[]| requestedPostId[] | requestedUserId[] | timelineArrayResult[],
     errCode?: WholeNumber,
 }
 
@@ -34,13 +34,13 @@ export interface IPostService {
     getPost(id: JustId): Promise<resMessage>
     getAllPosts(userId: UserId, targetUserId: JustId): Promise<resMessage>
     getMyPosts(userId: UserId): Promise<resMessage>
+    getMyTimeline(userId: UserId): Promise<resMessage>
 }
 
 @Service(PostRepository)
 export class PostService implements IPostService {
     constructor(
         private postRepo: IPostRepository,
-        private readonly userRepo: IUserRepository,
         private userService: IUserService,
         private relationService: IRelationService,
         ) {}
@@ -74,7 +74,26 @@ export class PostService implements IPostService {
             return { msg: messages.postNotFound.persian , err : [] , data:[{requestedUserId:userId}] }
 
         result.every(async (post) => (post.photos = (await MinioRepo.getPostPhotoUrl(post.id)) || []))
-        return { msg: messages.succeeded.persian , err : [] , data:[ {result, total: result.length} ] }
+        return { msg: messages.succeeded.persian , err : [] , data:[ {result: result, total: result.length} ] }
+    }
+
+    async getMyTimeline(userId: UserId) {
+
+        const usersId = (await this.relationService.getFollowing(userId))
+        if (usersId.length < 1)
+            return { msg: messages.postNotFound.persian , err : [] , data:[{requestedUserId:userId}] }
+
+        const users = (await this.userService.getUserListById(usersId))
+        if (users.length < usersId.length)
+            return { msg: messages.failed.persian , err : [new ServerError(PersianErrors.ServerError)] , data:[{requestedUserId:userId}] }
+
+        const posts = (await this.postRepo.findAllByAuthor(userId)).toPostList()
+        if (posts.length < 1)
+            return { msg: messages.postNotFound.persian , err : [] , data:[{requestedUserId:userId}] }
+
+        posts.every(async (post) => (post.photos = (await MinioRepo.getPostPhotoUrl(post.id)) || []))
+        const result = posts.map( (post) => ({user: users.filter((user)=>(user.id === post.author))[0], post:post}))
+        return { msg: messages.succeeded.persian , err : [] , data:[ {result: result, total: result.length} ] }
     }
 
     async createPost(dto: CreatePostDTO, files: Express.Multer.File[], userId: UserId) {
