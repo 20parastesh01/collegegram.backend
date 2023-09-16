@@ -79,15 +79,12 @@ export class PostService implements IPostService {
 
     async getMyTimeline(userId: UserId) {
 
-        const usersId = (await this.relationService.getFollowing(userId))
-        if (usersId.length < 1)
-            return { msg: messages.postNotFound.persian , err : [] , data:[{requestedUserId:userId}] }
-
+        const usersId = (await this.relationService.getFollowing(userId)).concat(userId)
         const users = (await this.userService.getUserListById(usersId))
         if (users.length < usersId.length)
             return { msg: messages.failed.persian , err : [new ServerError(PersianErrors.ServerError)] , data:[{requestedUserId:userId}] }
 
-        const posts = (await this.postRepo.findAllByAuthor(userId)).toPostList()
+        const posts = (await this.postRepo.findAllByAuthorList(usersId)).toPostList()
         if (posts.length < 1)
             return { msg: messages.postNotFound.persian , err : [] , data:[{requestedUserId:userId}] }
 
