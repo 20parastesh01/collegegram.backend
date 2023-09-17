@@ -111,9 +111,14 @@ export class UserRouter {
         handleExpress(res, () => this.relationService.block(req.user.userId, zodUserId.parse(req.params.id)))
     }
 
-    @Delete('/:id/profile')
+    @Get('/:id/profile')
     @Auth()
     getTargetUser(req: Request, res: Response) {
         handleExpress(res, () => this.relationService.getTargetUser(req.user.userId, zodUserId.parse(req.params.id)))
+    }
+
+    @Delete('/logout')
+    logout(req: Request, res: Response) {
+        handleExpress(res, () => this.userService.logout(req.user.userId))
     }
 }

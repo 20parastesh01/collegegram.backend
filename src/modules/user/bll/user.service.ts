@@ -35,6 +35,7 @@ export interface IUserService {
     forgetPassSendEmail(data: SendEmailDto): Promise<SimpleMessage | BadRequestError>
     forgetPassSetPass(data: SetPasswordDto): Promise<LoginSignUp>
     editProfile(user: UserBasic, data: EditProfileDto, file?: Express.Multer.File): Promise<{ user: User; token: Token } | ServerError>
+    logout(userId: UserId): Promise<SimpleMessage | BadRequestError>
 }
 
 export const hash = async (input: string): Promise<Password> => {
@@ -234,5 +235,9 @@ export class UserService implements IUserService {
         const userList = userIds.map((userId) => ({ id: userId }))
         const users = (await this.userRepo.findListById(userList)).toUserList()
         return users
+    }
+    async logout(userId: UserId): Promise<SimpleMessage> {
+        await RedisRepo.deleteSession(userId)
+        return { msg: 'User Logged Out' }
     }
 }

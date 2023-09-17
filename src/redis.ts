@@ -12,6 +12,7 @@ export interface IRedis {
     getUserId(session: Hashed): Promise<UserId | null>
     setResetPasswordToken(uuId: string, userId: UserId): Promise<void>
     getResetPasswordUserId(uuId: string): Promise<UserId | null>
+    deleteSession(userId: UserId): Promise<void>
 }
 export class Redis implements IRedis {
     private client
@@ -71,5 +72,13 @@ export class Redis implements IRedis {
         const convertedUserId = Number(userId)
         if (isUserId(convertedUserId)) return convertedUserId
         return null
+    }
+
+    async deleteSession(userId: UserId): Promise<void> {
+        const session = await this.getSession(userId)
+        if (session) {
+            await this.client.del(session)
+            await this.client.del(userId + '')
+        }
     }
 }
