@@ -7,13 +7,14 @@ import { ParentId } from './model/parent-id'
 import { WholeNumber } from '../../data/whole-number'
 import { commentDao, commentListDao } from './bll/comment.dao'
 import { Repo } from '../../registry/layer-decorators'
+import { User } from '../user/model/user'
 
 export interface CreateComment {
     content: Content
-    author: UserId
+    author: User
     postId: PostId
     parentId?: ParentId
-    likesCount: WholeNumber
+    likeCount: WholeNumber
 }
 
 export interface ICommentRepository {
@@ -34,7 +35,7 @@ export class CommentRepository implements ICommentRepository {
             .where('comment.postId = :postId', { postId })
             .orderBy('comment.createdAt', 'DESC')
             .leftJoinAndSelect('comment.author', 'author')
-            .select(['comment.id', 'comment.content', 'comment.postId', 'comment.likesCount', 'author.id', 'author.username', 'author.name', 'author.lastname'])
+            .groupBy('comment.id')
             .getMany()
         return commentListDao(comments)
     }

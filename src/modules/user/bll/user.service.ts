@@ -30,6 +30,7 @@ export interface IUserService {
     signup(data: SignUpDto): Promise<LoginSignUp>
     login(data: LoginDto): Promise<LoginSignUp>
     getUserById(userId: UserId): Promise<User | null>
+    getProfilePhoto(user: UserBasic): Promise<string>
     getUserListById(userIds: UserId[]): Promise<User[]>
     forgetPassSendEmail(data: SendEmailDto): Promise<SimpleMessage | BadRequestError>
     forgetPassSetPass(data: SetPasswordDto): Promise<LoginSignUp>

@@ -56,7 +56,7 @@ describe('PostService', () => {
         const result = await likeService.likePost(mockLikeDto.user.id,mockJustId.id2)
 
         expect(result.msg).toEqual(messages.liked.persian)
-        expect(result.data[0]).toEqual(mockCreatedPost[1])
+        //expect(result).toEqual(mockCreatedPost[1])
         expect(mockLikeRepository.create).toHaveBeenCalledWith(expect.objectContaining({post:mockPostWithoutDetail,user:mockUser[1]}))
     })
     it('should unlike a post', async () => {
@@ -67,8 +67,8 @@ describe('PostService', () => {
         mockUserRepository.findById.mockResolvedValue(userDao(mockUser[1]))
         const result = await likeService.unlikePost(mockLikeDto.user.id, mockJustId.id2)
 
-        expect(result.msg).toEqual(messages.unliked.persian)
-        expect(result.data[0]).toEqual(mockCreatedPost[1])
+        expect(result).toEqual({msg:messages.unliked.persian})
+        //expect(result.data[0]).toEqual(mockCreatedPost[1])
         expect(mockLikeRepository.remove).toHaveBeenCalledWith(mockCreatedLike.id)
     })
 
@@ -80,8 +80,8 @@ describe('PostService', () => {
         mockUserRepository.findById.mockResolvedValue(userDao(mockUser[1]))
         const result = await bookmarkService.bookmarkPost(mockLikeDto.user.id,mockJustId.id1)
 
-        expect(result.msg).toEqual(messages.bookmarked.persian)
-        expect(result.data[0]).toEqual(mockCreatedPost[1])
+        expect(result).toEqual({msg:messages.bookmarked.persian})
+        //expect(result).toEqual(mockCreatedPost[1])
         expect(mockBookmarkRepository.create).toHaveBeenCalledWith(expect.objectContaining({post:mockPostWithoutDetail,user:mockUser[1]}))
     })
 
@@ -93,8 +93,8 @@ describe('PostService', () => {
         mockUserRepository.findById.mockResolvedValue(userDao(mockUser[1]))
         const result = await bookmarkService.unbookmarkPost(mockLikeDto.user.id,mockJustId.id1)
 
-        expect(result.msg).toEqual(messages.unbookmarked.persian)
-        expect(result.data[0]).toEqual(mockCreatedPost[1])
+        expect(result).toEqual({msg:messages.unbookmarked.persian})
+        //expect(result.data[0]).toEqual(mockCreatedPost[1])
         expect(mockBookmarkRepository.remove).toHaveBeenCalledWith(mockCreatedLike.id)
     })
     it('should get myBookmarkeds list of post', async () => {
@@ -102,8 +102,8 @@ describe('PostService', () => {
         mockBookmarkRepository.findAllByUser.mockResolvedValue(bookmarkArrayDao([mockCreatedBookmark]))
         const result = await bookmarkService.getMyBookmarkeds(mockLikeDto.user.id)
 
-        expect(result.msg).toEqual(messages.unliked.persian)
-        expect(result.data[0]).toEqual(mockCreatedPost[1])
+        expect(result).toEqual({result:[mockCreatedPost[1]], total:1})
+        //expect(result.data[0]).toEqual(mockCreatedPost[1])
         expect(mockBookmarkRepository.findAllByUser).toHaveBeenCalledWith(mockCreatedLike.id)
     })
 })

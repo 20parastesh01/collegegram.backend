@@ -7,7 +7,8 @@ import { UserId } from '../../user/model/user-id'
 import { PostId } from '../../post/model/post-id'
 import { Service } from '../../../registry/layer-decorators'
 import { MinioRepo } from '../../../data-source'
-import { DataSource } from 'typeorm'
+import { IUserService } from '../../user/bll/user.service'
+import { PersianErrors } from '../../../utility/persian-messages'
 
 type resComment = Comment | BadRequestError | ServerError | NotFoundError
 type resComments = { result: Comment[]; total: number } | BadRequestError | ServerError
@@ -20,21 +21,27 @@ export interface ICommentService {
 
 @Service(CommentRepository)
 export class CommentService implements ICommentService {
-    constructor(private commentRepo: ICommentRepository) {}
+    constructor(
+        private commentRepo: ICommentRepository,
+        private userService: IUserService,
+        ) {}
 
     async getAllComments(postId: PostId): Promise<resComments> {
         const comments = (await this.commentRepo.findAllByPost(postId)).toCommentModelList()
         for (let comment of comments) {
-            const profilePhoto = await MinioRepo.getProfileUrl((comment.author as any).id) //TODO: FIX AS ANY!
-            if (profilePhoto) comment.authorProfile = profilePhoto
+            const profilePhoto = await MinioRepo.getProfileUrl(comment.author.id)
+            if (profilePhoto) comment.author.photo = profilePhoto
         }
         return { result: comments, total: comments.length }
     }
 
     async createComment(dto: CreateCommentDTO, userId: UserId): Promise<resComment> {
+        const user = await this.userService.getUserById(userId)
+        if(user === null)
+            return new ServerError(PersianErrors.ServerError)
         const commentEntity = toCreateComment({
+            author: user,
             ...dto,
-            author: userId,
         })
         const createdComment = (await this.commentRepo.create(commentEntity)).toCommentModel()
         return createdComment ?? new ServerError()

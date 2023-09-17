@@ -5,6 +5,7 @@ import { mockCreatedPost, mockFiles, mockJustId, mockPostId, mockRelation, mockU
 import { PostWithDetail } from '../model/post'
 import { IRelationService } from '../../user/bll/relation.service'
 import { IUserService } from '../../user/bll/user.service'
+import { HttpError } from '../../../utility/http-error'
 
 
 describe('PostService', () => {
@@ -40,22 +41,22 @@ describe('PostService', () => {
         mockPostRepository.create.mockResolvedValue(postWithoutDetailDao(mockCreatedPost[0]))
 
         const result = await postService.createPost(mockcreatePostDto, mockFiles, mockUserId.userId1)
-        if ('photos' in result.data[0]) {
-            delete result.data[0].photos
+        if (!(result instanceof HttpError)) {
+            delete result.photos
         }
         const {id,...rest} = mockCreatedPost[0]
-        expect(result.data[0]).toEqual(mockCreatedPost[0])
+        expect(result).toEqual(mockCreatedPost[0])
         expect(mockPostRepository.create).toHaveBeenCalledWith(expect.objectContaining(rest))
     })
 
     it('should get a post', async () => {
         
         mockPostRepository.findWithDetailByID.mockResolvedValue(postWithDetailOrNullDao(mockCreatedPost[0]))
-        const result = await postService.getPost(mockJustId.id1)
-        if ('photos' in result.data[0]) {
-            delete result.data[0].photos
+        const result  = await postService.getPost(mockJustId.id1)
+        if (!('msg' in result)) {
+            delete result.photos
         }
-        expect(result.data[0]).toEqual(mockCreatedPost[0])
+        expect(result).toEqual(mockCreatedPost[0])
         expect(mockPostRepository.findWithDetailByID).toHaveBeenCalledWith(mockPostId.postId1)
     })
 
@@ -67,10 +68,10 @@ describe('PostService', () => {
             result: PostWithDetail[];
             total: number;
         }[]
-        if (Array.isArray(result.data)  && result.data.length > 0 && 'result' in result.data[0] ) {
-            result.data[0].result.every((data) => (delete data.photos))
+        if (!('msg' in result)) {
+            result.result.every((data) => (delete data.photos))
         }
-        expect(result.data[0]).toEqual({result:mockCreatedPost,total:2})
+        expect(result).toEqual({result:mockCreatedPost,total:2})
         expect(mockPostRepository.findAllByAuthor).toHaveBeenCalledWith(mockUserId)
     })
 
@@ -79,10 +80,10 @@ describe('PostService', () => {
         userService.getUserById.mockResolvedValue(mockUser[0])
         mockPostRepository.findAllByAuthor.mockResolvedValue(postArrayDao(mockCreatedPost))
         const result = await postService.getAllPosts(mockUserId.userId3,mockJustId.id1)
-        if (Array.isArray(result.data)  && result.data.length > 0 && 'result' in result.data[0] ) {
-            result.data[0].result.every((data) => (delete data.photos))
+        if (!('msg' in result) ) {
+            result.result.every((data) => (delete data.photos))
         }
-        expect(result.data[0]).toEqual({result:mockCreatedPost,total:2})
+        expect(result).toEqual({result:mockCreatedPost,total:2})
         expect(mockPostRepository.findAllByAuthor).toHaveBeenCalledWith(mockUserId)
     })
 
@@ -91,10 +92,10 @@ describe('PostService', () => {
         userService.getUserListById.mockResolvedValue([mockUser[0],mockUser[1]])
         mockPostRepository.findAllByAuthorList.mockResolvedValue(postArrayDao(mockCreatedPost))
         let result = await postService.getMyTimeline(mockUserId.userId2)
-        if (Array.isArray(result.data)  && result.data.length > 0 && 'result' in result.data[0] ) {
-            result.data[0].result.every((data) => (delete data.post.photos)) 
+        if (('result' in result) && Array.isArray(result.result)) {
+            result.result.every((data) => (delete data.post.photos)) 
         }
-        expect(result.data[0]).toEqual({result:{user: mockCreatedPost},total:2})
+        expect(result).toEqual({result:{user: mockCreatedPost},total:2})
         expect(mockPostRepository.findAllByAuthorList).toHaveBeenCalledWith(mockUserId)
     })
 })

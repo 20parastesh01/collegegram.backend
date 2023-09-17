@@ -21,13 +21,14 @@ export type arrayResult = { result: PostWithDetail[], total: number }
 export type timelineArrayResult = { result: {user: User, post:PostWithDetail}[], total: number }
 export type requestedPostId = { requestedPostId: PostId | JustId }
 export type requestedUserId = { requestedUserId: UserId | JustId}
-
-export type resMessage = {
-    msg: Msg,
-    err: BadRequestError[] | ServerError[] | NotFoundError[],
-    data: PostWithDetail[] | PostWithoutDetail[] | LikeWithPost[]| arrayResult[]| requestedPostId[] | requestedUserId[] | timelineArrayResult[],
-    errCode?: WholeNumber,
-}
+type Message = {msg: Msg }
+export type resMessage = Message | PostWithDetail | PostWithoutDetail | LikeWithPost | arrayResult | timelineArrayResult | BadRequestError | ServerError
+// {
+//     msg: Msg,
+//     err: BadRequestError[] | ServerError[] | NotFoundError[],
+//     data: PostWithDetail[] | PostWithoutDetail[] | LikeWithPost[]| arrayResult[]| requestedPostId[] | requestedUserId[] | timelineArrayResult[],
+//     errCode?: WholeNumber,
+//}
 
 export interface IPostService {
     createPost(dto: CreatePostDTO, files: Express.Multer.File[], userId: UserId): Promise<resMessage>
@@ -53,28 +54,28 @@ export class PostService implements IPostService {
         const targetUserId = zodUserId.parse(targetId)
         const targetUser = (await this.userService.getUserById(targetUserId))
         if(!targetUser)
-            return { msg: messages.userNotFound.persian , err : [] , data:[{requestedUserId:targetId}] }
+            return { msg: messages.userNotFound.persian }
 
         const relation = (await this.relationService.getRelations(userId,targetUserId)).relation
         if (!this.validateAccess(targetUser,relation)) 
-            return { msg: messages.postAccessDenied.persian , err : [] , data:[{requestedUserId:targetUserId}] }
+            return { msg: messages.postAccessDenied.persian }
         
         const result = (await this.postRepo.findAllByAuthor(targetUserId)).toPostList()
         if (result.length < 1)
-            return { msg: messages.postNotFound.persian , err : [] , data:[{requestedUserId:targetUserId}] }
+            return { msg: messages.postNotFound.persian }
         
         result.every(async (post) => (post.photos = (await MinioRepo.getPostPhotoUrl(post.id)) || []))
-        return { msg: messages.succeeded.persian , err : [] , data:[ {result, total: result.length} ] }    
+        return { result, total: result.length}    
     }
     
     async getMyPosts(userId: UserId) {
 
         const result = (await this.postRepo.findAllByAuthor(userId)).toPostList()
         if (result.length < 1)
-            return { msg: messages.postNotFound.persian , err : [] , data:[{requestedUserId:userId}] }
+            return { msg: messages.postNotFound.persian }
 
         result.every(async (post) => (post.photos = (await MinioRepo.getPostPhotoUrl(post.id)) || []))
-        return { msg: messages.succeeded.persian , err : [] , data:[ {result: result, total: result.length} ] }
+        return { result: result, total: result.length }
     }
 
     async getMyTimeline(userId: UserId) {
@@ -82,15 +83,14 @@ export class PostService implements IPostService {
         const usersId = (await this.relationService.getFollowing(userId)).concat(userId)
         const users = (await this.userService.getUserListById(usersId))
         if (users.length < usersId.length)
-            return { msg: messages.failed.persian , err : [new ServerError(PersianErrors.ServerError)] , data:[{requestedUserId:userId}] }
+            return new ServerError(PersianErrors.ServerError)
 
         const posts = (await this.postRepo.findAllByAuthorList(usersId)).toPostList()
         if (posts.length < 1)
-            return { msg: messages.postNotFound.persian , err : [] , data:[{requestedUserId:userId}] }
-
-        posts.every(async (post) => (post.photos = (await MinioRepo.getPostPhotoUrl(post.id)) || []))
+            return { msg: messages.postNotFound.persian }
+        posts.map(async (post) => (post.photos = (await MinioRepo.getPostPhotoUrl(post.id)) || []))
         const result = posts.map( (post) => ({user: users.filter((user)=>(user.id === post.author))[0], post:post}))
-        return { msg: messages.succeeded.persian , err : [] , data:[ {result: result, total: result.length} ] }
+        return { result: result, total: result.length }
     }
 
     async createPost(dto: CreatePostDTO, files: Express.Multer.File[], userId: UserId) {
@@ -98,11 +98,11 @@ export class PostService implements IPostService {
         const createPostRepoInput = toCreatePost({ ...dto, author: userId })
         const createdPost = (await this.postRepo.create(createPostRepoInput)).toPost()
         if (!createdPost) 
-            return { msg: messages.failed.persian , err : [ new ServerError(PersianErrors.ServerError) ] , data:[{requestedUserId:userId}] }
+            return new ServerError(PersianErrors.ServerError)
 
         await MinioRepo.uploadPostPhoto(createdPost.id, files)
         createdPost.photos = await MinioRepo.getPostPhotoUrl(createdPost.id) || []
-        return { msg: messages.succeeded.persian , err : [] , data:[ createdPost ] } 
+        return createdPost 
     }
 
     async getPost(id: JustId) {
@@ -110,9 +110,9 @@ export class PostService implements IPostService {
         const postId = zodPostId.parse(id)
         const post = (await this.postRepo.findWithDetailByID(postId)).toPost()
         if (!post)
-            return { msg: messages.postNotFound.persian , err : [] , data:[{requestedPostId:id}] }
+            return { msg: messages.postNotFound.persian }
 
         post.photos = await MinioRepo.getPostPhotoUrl(post.id) || []
-        return { msg: messages.succeeded.persian , err : [] , data:[post] }
+        return post
     }
 }

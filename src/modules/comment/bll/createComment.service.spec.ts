@@ -7,6 +7,8 @@ import { PostId } from '../../post/model/post-id'
 import { CommentId } from '../model/comment-id'
 import { ParentId } from '../model/parent-id'
 import { Comment } from '../model/comment'
+import { mockUser } from '../../../data/fakeData'
+import { IUserService } from '../../user/bll/user.service'
 const mockcreateCommentDto = {
     content: 'Test content' as Content,
     postId: 123 as PostId,
@@ -18,8 +20,8 @@ const userId = 123 as UserId
 const mockCreatedComment: Comment = {
     id: 1 as CommentId,
     content: mockcreateCommentDto.content,
-    author: userId,
-    likesCount: 0 as WholeNumber,
+    author: mockUser[0],
+    likeCount: 0 as WholeNumber,
     parentId: mockcreateCommentDto.parentId,
     postId: mockcreateCommentDto.postId,
 }
@@ -33,13 +35,14 @@ const commentDao = (input: Comment) => {
 describe('CommentService', () => {
     let commentService: CommentService
     let mockCommentRepository: jest.Mocked<ICommentRepository>
+    let userService: jest.Mocked<IUserService>
 
     beforeEach(() => {
         mockCommentRepository = {
             create: jest.fn(),
         } as any
 
-        commentService = new CommentService(mockCommentRepository)
+        commentService = new CommentService(mockCommentRepository, userService)
     })
 
     it('should create a comment', async () => {
@@ -50,6 +53,6 @@ describe('CommentService', () => {
         const result = await commentService.createComment(mockcreateCommentDto, userId)
 
         expect(result).toEqual(mockCreatedComment)
-        expect(mockCommentRepository.create).toHaveBeenCalledWith({...mockcreateCommentDto,likesCount:0 as WholeNumber,author:123 as UserId})
+        expect(mockCommentRepository.create).toHaveBeenCalledWith({...mockcreateCommentDto,likeCount:0 as WholeNumber,author:123 as UserId})
     })
 })

@@ -15,13 +15,14 @@ import { zodPostId } from '../../post/model/post-id'
   
 type arrayResult = { result: PostWithDetail[], total: number }
 export type requestedPostId = { requestedPostId: JustId }
-
-export type resMessage = {
-    msg: Msg,
-    err: BadRequestError[] | ServerError[] | NotFoundError[],
-    data: PostWithDetail[] | PostWithoutDetail[] | LikeWithPost[]| arrayResult[]| requestedPostId[],
-    errCode?: WholeNumber,
-}
+type Message = {msg: Msg }
+export type resMessage = Message | BadRequestError| ServerError| NotFoundError| PostWithDetail| PostWithoutDetail| LikeWithPost | arrayResult 
+// {
+//     msg: Msg,
+//     err: BadRequestError[] | ServerError[] | NotFoundError[],
+//     data: PostWithDetail[] | PostWithoutDetail[] | LikeWithPost[]| arrayResult[]| requestedPostId[],
+//     errCode?: WholeNumber,
+//}
 
 export interface IBookmarkService {
     bookmarkPost(userId: UserId,id: JustId): Promise<resMessage>
@@ -41,11 +42,11 @@ export class BookmarkService implements IBookmarkService {
 
         const result = (await this.bookmarkRepo.findAllByUser(userId)).toBookmarkList()
         if(result.length < 1)
-            return { msg: messages.postNotFound.persian , err : [] , data:[ ] }
+            return { msg: messages.postNotFound.persian }
         
-        const posts = result.map((bookmark) => { return bookmark.post })
-        posts.every(async (post) => (post.photos = (await MinioRepo.getPostPhotoUrl(post.id)) || []))
-        return { msg: messages.succeeded.persian , err : [] , data:[ {result: posts, total: posts.length} ] }
+        const posts = result.map((bookmark) => (bookmark.post))
+        posts.map(async (post) => { post.photos = (await MinioRepo.getPostPhotoUrl(post.id)) || []})
+        return {result: posts, total: posts.length}
     }
     
     async bookmarkPost(userId: UserId, id: JustId) {
@@ -53,18 +54,18 @@ export class BookmarkService implements IBookmarkService {
         const postId = zodPostId.parse(id)
         const bookmark = (await this.bookmarkRepo.findByUserAndPost(userId, postId)).toBookmark();
         if (bookmark)
-            return { msg: messages.alreadyBookmarked.persian , err : [] , data:[{requestedPostId:id}] }
+            return { msg: messages.alreadyBookmarked.persian }
         
         const user = (await this.userRepo.findById(userId))?.toUser()
         const post = (await this.postRepo.findWithoutDetailByID(postId)).toPost()
         if(!user || !post)
-            return { msg: messages.postNotFound.persian , err : [] , data:[{requestedPostId:id}] }
+            return { msg: messages.postNotFound.persian }
 
         const input = toCreateBookmark(user, post)
         const createdBookmark = (await this.bookmarkRepo.create(input)).toBookmark()
         const updatedPost = createdBookmark.post;
-        if(createdBookmark !== undefined) return { msg: messages.bookmarked.persian , err : [] , data:[updatedPost] }
-        return { msg: messages.failed.persian , err : [new ServerError(PersianErrors.ServerError)] , data:[] }
+        if(createdBookmark !== undefined) return { msg: messages.bookmarked.persian }
+        return new ServerError(PersianErrors.ServerError)
     }
 
     async unbookmarkPost(userId: UserId, id: JustId) {
@@ -72,12 +73,12 @@ export class BookmarkService implements IBookmarkService {
         const postId = zodPostId.parse(id)
         const bookmark = (await this.bookmarkRepo.findByUserAndPost(userId, postId)).toBookmark();
         if (!bookmark) 
-            return { msg: messages.notBookmarkedYet.persian , err : [] , data:[{requestedPostId:id}] }
+            return { msg: messages.notBookmarkedYet.persian }
 
         const createdBookmark = (await this.bookmarkRepo.remove(bookmark.id)).toBookmark()
         if(!createdBookmark)
-            return { msg: messages.failed.persian , err : [new ServerError(PersianErrors.ServerError)] , data:[] }
+            return new ServerError(PersianErrors.ServerError)
         const updatedPost = createdBookmark.post; 
-        return  { msg: messages.unbookmarked.persian , err : [] , data:[updatedPost] }
+        return  { msg: messages.unbookmarked.persian }
     }
 }

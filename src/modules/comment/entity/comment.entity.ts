@@ -24,12 +24,12 @@ export class CommentEntity {
     @JoinColumn()
     parentId?: ParentId
 
-    @ManyToOne(() => UserEntity)
-    @JoinColumn()
-    author!: UserId
+    @ManyToOne(() => UserEntity, { eager: true, cascade : true, onDelete: 'CASCADE' })
+    @JoinColumn({ name: 'user_id' })
+    author!: UserEntity;
 
     @Column('integer', { default: 0 })
-    likesCount!: WholeNumber
+    likeCount!: WholeNumber
 
     @CreateDateColumn()
     createdAt!: Date
