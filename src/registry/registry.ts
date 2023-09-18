@@ -40,7 +40,7 @@ export async function scan(app: Express) {
             app.use(router)
         }
         const swaggerFilePath = path.join(process.cwd(), 'src', 'registry', 'swagger.json')
-        fs.writeFileSync(swaggerFilePath, JSON.stringify(swaggerObject))
+        if (process.env.SWAGGER) fs.writeFileSync(swaggerFilePath, JSON.stringify(swaggerObject))
         const filePath = swaggerUi.getAbsoluteFSPath() + '/swagger-initializer.js'
         fs.writeFileSync(filePath, fs.readFileSync(filePath).toString().replace('https://petstore.swagger.io/v2/swagger.json', '/swagger'))
         app.use('/api-docs', express.static(swaggerUi.getAbsoluteFSPath()))

@@ -29,6 +29,48 @@ function extractNamesFromFile(filePath: string) {
     }
     return []
 }
+export const customSymbols: any = {}
+const generateSwaggerSchemas = () => {
+    if (process.env.SWAGGER) {
+        const basePath = './src'
+        const modelFiles = getTsFilePaths(process.cwd() + '/src/modules').filter((a) => a.includes('model') || a.includes('dto'))
+        const program = TJS.getProgramFromFiles(modelFiles, compilerOptions, basePath)!
+        const generator = TJS.buildGenerator(program, settings)!
+
+        const mySymbols = modelFiles.flatMap((file) => {
+            return extractNamesFromFile(file)
+        })
+        for (let s of mySymbols) {
+            let a: any = generator.getSchemaForSymbol(s)
+            delete a.$schema
+            if (!a.properties) {
+                customSymbols[s] = a
+                continue
+            }
+            let props = JSON.stringify(a.properties)
+            try {
+                if (a.definitions && props) {
+                    let index = 0
+                    while (props.includes('#/definitions/')) {
+                        for (let key in a.definitions) {
+                            if (key != s) {
+                                props = props.replace(`{"$ref":"#/definitions/${key}"}`, JSON.stringify(a.definitions[key]))
+                            } else {
+                                props.replace(`{"$ref":"#/definitions/${key}"}`, '{}')
+                            }
+                        }
+                        index += 1
+                    }
+                }
+                customSymbols[s] = { properties: JSON.parse(props) }
+            } catch (e: any) {
+                console.log(e.message)
+            }
+            processAllOfProperties(customSymbols)
+            fs.writeFileSync(path.join(process.cwd(), 'src', 'types.ts'), `export type Types = ` + mySymbols.map((a) => `'${a}'`).join('|'))
+        }
+    }
+}
 
 const settings: TJS.PartialArgs = {
     required: true,
@@ -37,15 +79,6 @@ const settings: TJS.PartialArgs = {
 const compilerOptions: TJS.CompilerOptions = {
     strictNullChecks: true,
 }
-
-const basePath = './src'
-const modelFiles = getTsFilePaths(process.cwd() + '/src/modules').filter((a) => a.includes('model') || a.includes('dto'))
-const program = TJS.getProgramFromFiles(modelFiles, compilerOptions, basePath)!
-const generator = TJS.buildGenerator(program, settings)!
-
-const mySymbols = modelFiles.flatMap((file) => {
-    return extractNamesFromFile(file)
-})
 
 function processAllOfProperties(obj: any) {
     for (const key in obj) {
@@ -69,27 +102,4 @@ function processAllOfProperties(obj: any) {
     }
 }
 
-export const customSymbols: any = {}
-for (let s of mySymbols) {
-    let a: any = generator.getSchemaForSymbol(s)
-    delete a.$schema
-    if (!a.properties) {
-        customSymbols[s] = a
-        continue
-    }
-    let props = JSON.stringify(a.properties)
-    try {
-        if (a.definitions && props) {
-            while (props.includes('#/definitions/')) {
-                for (let key in a.definitions) {
-                    props = props.replace(`{"$ref":"#/definitions/${key}"}`, JSON.stringify(a.definitions[key]))
-                }
-            }
-        }
-        customSymbols[s] = { properties: JSON.parse(props) }
-    } catch (e: any) {
-        console.log(e.message)
-    }
-}
-processAllOfProperties(customSymbols)
-fs.writeFileSync(path.join(process.cwd(), 'src', 'types.ts'), `export type Types = ` + mySymbols.map((a) => `'${a}'`).join('|'))
+generateSwaggerSchemas()
