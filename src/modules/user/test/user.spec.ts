@@ -1,7 +1,6 @@
 import { QueryFailedError } from 'typeorm'
 import { Email } from '../../../data/email'
 import { WholeNumber } from '../../../data/whole-number'
-import { IRedis, Redis } from '../../../redis'
 import { BadRequestError, UnauthorizedError } from '../../../utility/http-error'
 import { LoginSignUp, UserService } from '../bll/user.service'
 import { LoginDto } from '../dto/login.dto'

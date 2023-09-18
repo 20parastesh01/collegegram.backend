@@ -11,6 +11,8 @@ import { JustId } from '../../../data/just-id'
 import { IPostRepository } from '../../post/post.repository'
 import { PostWithDetail, PostWithoutDetail } from '../../post/model/post'
 import { zodPostId } from '../../post/model/post-id'
+import { PostService, IPostService } from '../../post/bll/post.service'
+import { UserService, IUserService } from '../../user/bll/user.service'
   
 type arrayResult = { result: PostWithDetail[], total: number }
 export type requestedPostId = { requestedPostId: JustId }
@@ -28,12 +30,12 @@ export interface ILikeService {
     unlikePost(userId: UserId,id: JustId): Promise<resMessage>
 }
 
-@Service(LikeRepository)
+@Service(LikeRepository, PostService, UserService)
 export class LikeService implements ILikeService {
     constructor(
-        private postRepo: IPostRepository,
         private likeRepo: ILikeRepository,
-        private readonly userRepo: IUserRepository
+        private postService : IPostService,
+        private userService: IUserService,
         ) {}
     
     async likePost(userId: UserId, id: JustId) {
@@ -43,9 +45,9 @@ export class LikeService implements ILikeService {
         if (like)
             return { msg: messages.alreadyLiked.persian }
 
-        const user = (await this.userRepo.findById(userId))?.toUser()
-        const post = (await this.postRepo.findWithoutDetailByID(postId)).toPost()
-        if(!user || !post)
+        const user = (await this.userService.getUserById(userId))
+        const post = (await this.postService.getPostWitoutDetail(id))
+        if(user === null || 'msg' in post)
             return { msg: messages.postNotFound.persian }
         
         const input = toCreateLike(user, post)

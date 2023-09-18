@@ -7,7 +7,7 @@ import { UserId } from '../../user/model/user-id'
 import { PostId } from '../../post/model/post-id'
 import { Service } from '../../../registry/layer-decorators'
 import { MinioRepo } from '../../../data-source'
-import { IUserService } from '../../user/bll/user.service'
+import { IUserService, UserService } from '../../user/bll/user.service'
 import { PersianErrors } from '../../../utility/persian-messages'
 
 type resComment = Comment | BadRequestError | ServerError | NotFoundError
@@ -19,7 +19,7 @@ export interface ICommentService {
     getAllComments(postId: PostId): Promise<resComments>
 }
 
-@Service(CommentRepository)
+@Service(CommentRepository, UserService)
 export class CommentService implements ICommentService {
     constructor(
         private commentRepo: ICommentRepository,

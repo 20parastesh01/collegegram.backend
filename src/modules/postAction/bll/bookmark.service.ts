@@ -6,12 +6,14 @@ import { WholeNumber } from '../../../data/whole-number'
 import { IUserRepository } from '../../user/user.repository'
 import { LikeWithPost } from '../model/like'
 import { Msg, PersianErrors, messages } from '../../../utility/persian-messages'
-import { JustId } from '../../../data/just-id'
+import { JustId, isJustId } from '../../../data/just-id'
 import { BookmarkRepository, IBookmarkRepository } from '../bookmark.repository'
 import { toCreateBookmark } from './bookmark.dao'
 import { IPostRepository } from '../../post/post.repository'
 import { PostWithDetail, PostWithoutDetail } from '../../post/model/post'
 import { zodPostId } from '../../post/model/post-id'
+import { IPostService, PostService } from '../../post/bll/post.service'
+import { IUserService, UserService } from '../../user/bll/user.service'
   
 type arrayResult = { result: PostWithDetail[], total: number }
 export type requestedPostId = { requestedPostId: JustId }
@@ -30,12 +32,12 @@ export interface IBookmarkService {
     getMyBookmarkeds(userId: UserId): Promise<resMessage>
 }
 
-@Service(BookmarkRepository)
+@Service(BookmarkRepository, PostService, UserService)
 export class BookmarkService implements IBookmarkService {
     constructor(
-        private postRepo: IPostRepository,
         private bookmarkRepo: IBookmarkRepository,
-        private readonly userRepo: IUserRepository
+        private postService : IPostService,
+        private userService: IUserService
         ) {}
 
     async getMyBookmarkeds(userId: UserId): Promise<resMessage> {
@@ -45,7 +47,7 @@ export class BookmarkService implements IBookmarkService {
             return { msg: messages.postNotFound.persian }
         
         const posts = result.map((bookmark) => (bookmark.post))
-        posts.map(async (post) => { post.photos = (await MinioRepo.getPostPhotoUrl(post.id)) || []})
+        posts.forEach(async (post) => { post.photos = (await MinioRepo.getPostPhotoUrl(post.id)) || []})
         return {result: posts, total: posts.length}
     }
     
@@ -56,9 +58,9 @@ export class BookmarkService implements IBookmarkService {
         if (bookmark)
             return { msg: messages.alreadyBookmarked.persian }
         
-        const user = (await this.userRepo.findById(userId))?.toUser()
-        const post = (await this.postRepo.findWithoutDetailByID(postId)).toPost()
-        if(!user || !post)
+        const user = (await this.userService.getUserById(userId))
+        const post = (await this.postService.getPostWitoutDetail(id))
+        if(user === null || 'msg' in post)
             return { msg: messages.postNotFound.persian }
 
         const input = toCreateBookmark(user, post)
