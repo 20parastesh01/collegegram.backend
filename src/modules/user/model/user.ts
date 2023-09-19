@@ -1,11 +1,20 @@
+import { z } from 'zod'
 import { Email } from '../../../data/email'
 import { Hashed } from '../../../data/hashed'
 import { Token } from '../../../data/token'
 import { WholeNumber } from '../../../data/whole-number'
 import { Password } from './password'
 import { RelationStatus } from './relation'
-import { UserId, isUserId } from './user-id'
-import { Username, isUsername } from './username'
+import { UserId, isUserId, zodUserId } from './user-id'
+import { Username, isUsername, zodUsername } from './username'
+
+export const zodUserShort = z.object({
+    id: zodUserId,
+    username: zodUsername,
+    name: z.string(),
+    photo: z.string(),
+    lastname: z.string(),
+})
 
 export interface User {
     id: UserId

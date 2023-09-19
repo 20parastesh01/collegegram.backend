@@ -17,6 +17,7 @@ export interface IRelationService {
         reverseRelation: Relation | undefined;
     }>
     checkAccessAuth (userId: UserId , targetUser: User , status: RelationStatus): Promise<accessToUser>
+    getFollowing(id: UserId): Promise<UserId[]>
 }
 
 @Service(RelationRepository, UserService, NotificationService)
@@ -134,5 +135,12 @@ export class RelationService implements IRelationService {
         let reverseStatus = null
         if (reverseRelationDao) reverseStatus = reverseRelationDao.toRelation().status
         return { user: target, status, reverseStatus }
+    }
+    async getFollowing(id: UserId) {
+        const relations = (await this.relationRepo.findByRelation(id , 'Following')).toRelationList()
+        if(relations.length < 1)
+            return[]
+        const users = relations.map((relation)=>(relation.userB))
+        return users
     }
 }

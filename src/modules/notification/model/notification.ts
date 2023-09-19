@@ -1,3 +1,4 @@
+import { CommentWithDetail } from '../../comment/comment.repository'
 import { Comment } from '../../comment/model/comment'
 import { BasicPost, Post } from '../../post/model/post'
 import { RelationStatus } from '../../user/model/relation'

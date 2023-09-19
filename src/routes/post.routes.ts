@@ -2,13 +2,12 @@ import { Request, Response } from 'express'
 import { handleExpress } from '../utility/handle-express'
 import { PostService } from '../modules/post/bll/post.service'
 import { zodCreatePostDTO } from '../modules/post/dto/createPost.dto'
-import { zodGetPostDTO } from '../modules/post/dto/getPost.dto'
-import { zodGetAllPostsDTO } from '../modules/post/dto/getAllPosts.dto'
 import { Route } from '../registry/layer-decorators'
-import { Auth, Delete, Files, Get, Post, RequestBody } from '../registry/endpoint-decorator'
+import { Auth, Delete, Files, Get, Patch, Post, RequestBody } from '../registry/endpoint-decorator'
 import { zodJustId } from '../data/just-id'
 import { LikeService } from '../modules/postAction/bll/like.service'
 import { BookmarkService } from '../modules/postAction/bll/bookmark.service'
+import { zodEditPostDTO } from '../modules/post/dto/editPost.dto'
 
 @Route('/post', PostService,LikeService,BookmarkService)
 export class PostRouter {
@@ -22,6 +21,16 @@ export class PostRouter {
         const data = zodCreatePostDTO.parse(req.body)
         const files = (req.files && !Array.isArray(req.files) && req.files['photos']) || []
         handleExpress(res, () => this.postService.createPost(data, files, req.user.userId))
+    }
+
+    @Patch('/:postId')
+    @RequestBody('EditPostDTO')
+    @Auth()
+    editPost(req: Request, res: Response) {
+        const input = {...req.body}
+        const data = zodEditPostDTO.parse(input)
+        const id = zodJustId.parse(req.params.postId)
+        handleExpress(res, () => this.postService.editPost(data, id , req.user.userId))
     }
 
     @Get('/:postId')
@@ -43,6 +52,13 @@ export class PostRouter {
         const data = zodJustId.parse(req.params.userId)
         handleExpress(res, () => this.postService.getAllPosts(req.user.userId,  data))
     }
+
+    @Get('/MyTimeline')
+    @Auth()
+    getMyTimeline(req: Request, res: Response) {
+        handleExpress(res, () => this.postService.getMyTimeline(req.user.userId))
+    }
+
 
     @Post('/:id/like')
     @Auth()

@@ -7,6 +7,7 @@ import { UserId } from '../user/model/user-id'
 import { WholeNumber } from '../../data/whole-number'
 import { postArrayDao, postWithDetailOrNullDao, postWithoutDetailDao, postWithoutDetailOrNullDao } from './bll/post.dao'
 import { Repo } from '../../registry/layer-decorators'
+import { PostWithoutDetail } from './model/post'
 
 export interface CreatePost {
     caption: Caption
@@ -25,8 +26,10 @@ export interface PostWithDetailEntity extends PostEntity {
 export interface IPostRepository {
     findWithDetailByID(postId: PostId): Promise<ReturnType<typeof postWithDetailOrNullDao>>
     create(data: CreatePost): Promise<ReturnType<typeof postWithoutDetailDao>>
+    edit(data: PostWithoutDetail): Promise<ReturnType<typeof postWithoutDetailDao>>
     findAllByAuthor(userId: UserId): Promise<ReturnType<typeof postArrayDao>>
     findWithoutDetailByID(postId: PostId): Promise<ReturnType<typeof postWithoutDetailOrNullDao>>
+    findAllByAuthorList(usersId: UserId[]): Promise<ReturnType<typeof postArrayDao>>
 }
 
 @Repo()
@@ -37,11 +40,14 @@ export class PostRepository implements IPostRepository {
         this.PostRepo = appDataSource.getRepository(PostEntity)
     }
     async findAllByAuthor(userId: UserId) {
-        const posts: PostEntity[] = await this.PostRepo.createQueryBuilder('post')
-        .leftJoin("post.author", "author")
+        const posts: PostWithDetailEntity[] = await this.PostRepo.createQueryBuilder('post')
+        .leftJoinAndSelect("post.author", "userId")
         .loadRelationCountAndMap('post.likes', 'post.likeCount')
+        .loadRelationCountAndMap('post.bookmarks', 'post.bookmarkCount')
+        .loadRelationCountAndMap('post.comments', 'post.commentCount')
         .where('post.author = :userId', { userId })
         .groupBy('post.id')
+        .orderBy("createdAt", "DESC")
         .getRawMany();
         // const posts: PostEntity[] = await this.PostRepo.createQueryBuilder('post')
         // .leftJoin("post.author", "author")
@@ -53,21 +59,40 @@ export class PostRepository implements IPostRepository {
         // .getRawMany();
         return postArrayDao(posts)
     }
+    async findAllByAuthorList(usersId: UserId[]) {
+        const posts: PostWithDetailEntity[] = await this.PostRepo.createQueryBuilder('post')
+        .leftJoinAndSelect('post.author', 'userId')
+        .loadRelationCountAndMap('post.likes', 'post.likeCount')
+        .loadRelationCountAndMap('post.bookmarks', 'post.bookmarkCount')
+        .loadRelationCountAndMap('post.comments', 'post.commentCount')
+        .where('post.author IN (:...usersId)', { usersId })
+        .orderBy("createdAt", "DESC")
+        .getRawMany();
+        return postArrayDao(posts)
+    }
     async findWithoutDetailByID(postId: PostId) {
         const postEntity : PostEntity | null = await this.PostRepo.createQueryBuilder('post')
-        .leftJoin("post.author", "author")
+        .leftJoinAndSelect("post.author", "userId")
         .where('post.id = :postId', { postId })
         .groupBy('post.id')
         .setLock("pessimistic_read")
         .getOne();
         return postWithoutDetailOrNullDao(postEntity)
     }
+    
     async create(data: CreatePost) {
         const postEntity : PostEntity = await this.PostRepo.save(data)
         return postWithoutDetailDao(postEntity)
     }
+
+    async edit(data: PostWithoutDetail) {
+        const postEntity : PostEntity = await this.PostRepo.save(data)
+        return postWithoutDetailDao(postEntity)
+    }
+
     async findWithDetailByID(postId: PostId) {
         const output : PostWithDetailEntity | undefined = await this.PostRepo.createQueryBuilder('post')
+        .leftJoinAndSelect("post.author", "userId")
         .loadRelationCountAndMap('post.likes', 'post.likeCount')
         .loadRelationCountAndMap('post.bookmarks', 'post.bookmarkCount')
         .loadRelationCountAndMap('post.comments', 'post.commentCount')
