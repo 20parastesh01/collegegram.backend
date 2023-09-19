@@ -30,7 +30,7 @@ export class PostRouter {
         const input = {...req.body}
         const data = zodEditPostDTO.parse(input)
         const id = zodJustId.parse(req.params.postId)
-        handleExpress(res, () => this.postService.editPost(data, id ,req.user.userId))
+        handleExpress(res, () => this.postService.editPost(data, id , req.user.userId))
     }
 
     @Get('/:postId')

@@ -71,7 +71,6 @@ export const mockEditPostDTO = {
     tags: ['c', 'x'] as Tag[],
     caption: 'edited' as Caption,
     closeFriend: true,
-    id: mockJustId.id1,
 }
 export const mockFiles: Express.Multer.File[] = [
     {

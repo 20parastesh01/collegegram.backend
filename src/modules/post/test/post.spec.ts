@@ -54,8 +54,8 @@ describe('PostService', () => {
         mockPostRepository.edit.mockResolvedValue(postWithoutDetailDao(mockEditedPost))
         mockPostRepository.findWithoutDetailByID.mockResolvedValue(postWithoutDetailOrNullDao(mockCreatedPost[0]))
 
-        const result = await postService.editPost(mockEditPostDTO, mockUserId.userId1)
-        if (!(result instanceof HttpError)) {
+        const result = await postService.editPost(mockEditPostDTO,mockJustId.id1, mockUserId.userId1)
+        if (!(result instanceof HttpError) && !('msg' in result)) {
             delete result.photos
         }
         expect(result).toEqual(mockEditedPost)

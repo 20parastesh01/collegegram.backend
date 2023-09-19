@@ -47,7 +47,10 @@ export class BookmarkService implements IBookmarkService {
             return { msg: messages.postNotFound.persian }
         
         const posts = result.map((bookmark) => (bookmark.post))
-        posts.forEach(async (post) => { post.photos = (await MinioRepo.getPostPhotoUrl(post.id)) || []})
+        for (let post of posts) {
+            const postPhotos = await MinioRepo.getPostPhotoUrl(post.id) ?? []
+            post.photos = postPhotos
+        }
         return {result: posts, total: posts.length}
     }
     
@@ -65,7 +68,6 @@ export class BookmarkService implements IBookmarkService {
 
         const input = toCreateBookmark(user, post)
         const createdBookmark = (await this.bookmarkRepo.create(input)).toBookmark()
-        const updatedPost = createdBookmark.post;
         if(createdBookmark !== undefined) return { msg: messages.bookmarked.persian }
         return new ServerError(PersianErrors.ServerError)
     }

@@ -53,7 +53,8 @@ export class PostService implements IPostService {
     }
     adjustPhoto = async (post: PostWithDetail) => {
         const postPhotos = await MinioRepo.getPostPhotoUrl(post.id)
-        return post.photos = postPhotos ?? []
+        post.photos = postPhotos || []
+        return post
     }
 
     async getAllPosts(userId: UserId, targetId: JustId) {
@@ -70,7 +71,9 @@ export class PostService implements IPostService {
         if (posts.length < 1)
             return { msg: messages.postNotFound.persian }
         
-        posts.forEach((post) => (this.adjustPhoto(post)));
+        for (let post of posts) {
+            await this.adjustPhoto(post)
+        }
         return { result: posts, total: posts.length}    
     }
     
@@ -80,7 +83,9 @@ export class PostService implements IPostService {
         if (posts.length < 1)
             return { msg: messages.postNotFound.persian }
 
-        posts.forEach((post) => (this.adjustPhoto(post)));
+        for (let post of posts) {
+            await this.adjustPhoto(post)
+        }
         return { result: posts, total: posts.length }
     }
 
@@ -94,7 +99,9 @@ export class PostService implements IPostService {
         const posts = (await this.postRepo.findAllByAuthorList(usersId)).toPostList()
         if (posts.length < 1)
             return { msg: messages.postNotFound.persian }
-        posts.forEach((post) => (this.adjustPhoto(post)));
+        for (let post of posts) {
+            await this.adjustPhoto(post)
+        }
         //posts.map(async (post) => (post.photos = (await MinioRepo.getPostPhotoUrl(post.id)) || []))
         const result = posts.map( (post) => ({user: users.filter((user)=>(user.id === post.author))[0], post:post}))
         return { result: result, total: result.length }
@@ -108,13 +115,14 @@ export class PostService implements IPostService {
             return new ServerError(PersianErrors.ServerError)
         
         await MinioRepo.uploadPostPhoto(createdPost.id, files)
-        return this.adjustPhoto(createdPost) 
+        const result = await this.adjustPhoto(createdPost) 
+        return  result
     }
 
     async editPost(dto: EditPostDTO, id:JustId, userId: UserId) {
         const postId = zodPostId.parse(id)
         const post = (await this.postRepo.findWithoutDetailByID(postId)).toPost()
-        if (!post)
+        if (!post || post.author !== userId)
             return { msg: messages.postNotFound.persian }
         post.caption = dto.caption
         post.closeFriend = dto.closeFriend
@@ -123,7 +131,8 @@ export class PostService implements IPostService {
         if (!editedPost) 
             return new ServerError(PersianErrors.ServerError)
 
-        return this.adjustPhoto(editedPost) 
+        const result = await this.adjustPhoto(editedPost)
+        return result
     }
 
     async getPost(id: JustId) {
@@ -133,7 +142,8 @@ export class PostService implements IPostService {
         if (!post)
             return { msg: messages.postNotFound.persian }
 
-        return this.adjustPhoto(post)
+        const result = await this.adjustPhoto(post)
+        return this.adjustPhoto(result)
     }
     async getPostWitoutDetail(id: JustId) {
 

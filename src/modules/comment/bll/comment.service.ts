@@ -18,7 +18,7 @@ type resComments = { result: Comment[]; total: number } | BadRequestError | Serv
 export interface ICommentService {
     createComment(data: CreateCommentDTO, userId: UserId): Promise<resComment>
     getComment(id: JustId): Promise<Comment | null>;
-    getAllComments(postId: PostId): Promise<resComments>
+    getAllComments(postId: PostId): Promise<{ result: Comment[]; total: number }>
 }
 
 @Service(CommentRepository, UserService)
@@ -28,7 +28,7 @@ export class CommentService implements ICommentService {
         private userService: IUserService,
         ) {}
 
-    async getAllComments(postId: PostId): Promise<resComments> {
+    async getAllComments(postId: PostId) {
         const comments = (await this.commentRepo.findAllByPost(postId)).toCommentModelList()
         for (let comment of comments) {
             const profilePhoto = await MinioRepo.getProfileUrl(comment.author.id)
@@ -37,7 +37,7 @@ export class CommentService implements ICommentService {
         return { result: comments, total: comments.length }
     }
 
-    async createComment(dto: CreateCommentDTO, userId: UserId): Promise<resComment> {
+    async createComment(dto: CreateCommentDTO, userId: UserId) {
         const user = await this.userService.getUserById(userId)
         if(user === null)
             return new ServerError(PersianErrors.ServerError)
@@ -49,7 +49,7 @@ export class CommentService implements ICommentService {
         return createdComment ?? new ServerError()
     }
 
-    async getComment(id: JustId): Promise<Comment | null> {
+    async getComment(id: JustId) {
         const commentId = zodCommentId.parse(id)
         const comment = (await this.commentRepo.findByID(commentId)).toCommentModel();
         return comment ?? null;
