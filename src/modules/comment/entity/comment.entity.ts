@@ -1,4 +1,4 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
 import { WholeNumber } from '../../../data/whole-number'
 import { CommentId } from '../model/comment-id'
 import { Content } from '../model/content'
@@ -7,6 +7,7 @@ import { PostEntity } from '../../post/entity/post.entity'
 import { UserEntity } from '../../user/entity/user.entity'
 import { UserId } from '../../user/model/user-id'
 import { ParentId } from '../model/parent-id'
+import { CommentLikeEntity } from './commentLike.entity'
 
 @Entity('comments')
 export class CommentEntity {
@@ -30,6 +31,10 @@ export class CommentEntity {
 
     @Column('integer', { default: 0 })
     likeCount!: WholeNumber
+
+    @OneToMany((type) => CommentLikeEntity, (commentLike: CommentLikeEntity)=>commentLike.comment , { lazy: true })
+    @JoinColumn({ name: 'like_id' })
+    likes: CommentLikeEntity[] | undefined
 
     @CreateDateColumn()
     createdAt!: Date

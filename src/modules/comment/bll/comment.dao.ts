@@ -28,7 +28,7 @@ export const commentListDao = (input: CommentEntity[]) => {
 export const commentOrNullDao = (input: CommentEntity | null) => {
     return {
         toCommentModel(): Comment | undefined {
-            if (!input) return undefined
+            if (input === null) return undefined
             else {
                 const { updatedAt, author, ...rest } = input
                 return { author: zodUserShort.parse( {photo:'', ...author}), ...rest }

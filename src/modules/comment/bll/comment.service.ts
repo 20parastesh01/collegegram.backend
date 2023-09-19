@@ -9,13 +9,15 @@ import { Service } from '../../../registry/layer-decorators'
 import { MinioRepo } from '../../../data-source'
 import { IUserService, UserService } from '../../user/bll/user.service'
 import { PersianErrors } from '../../../utility/persian-messages'
+import { CommentId, zodCommentId } from '../model/comment-id'
+import { JustId } from '../../../data/just-id'
 
 type resComment = Comment | BadRequestError | ServerError | NotFoundError
 type resComments = { result: Comment[]; total: number } | BadRequestError | ServerError
 
 export interface ICommentService {
     createComment(data: CreateCommentDTO, userId: UserId): Promise<resComment>
-    //getComment(commentId: CommentId): Promise<Comment | null>;
+    getComment(id: JustId): Promise<Comment | null>;
     getAllComments(postId: PostId): Promise<resComments>
 }
 
@@ -47,11 +49,9 @@ export class CommentService implements ICommentService {
         return createdComment ?? new ServerError()
     }
 
-    // async getComment(commentId: CommentId): Promise<Comment | null> {
-    //   const commentEntity = await this.commentRepo.findByID(commentId);
-    //   if (commentEntity) {
-    //     return toCommentModel(commentEntity);
-    //   }
-    //   return null;
-    // }
+    async getComment(id: JustId): Promise<Comment | null> {
+        const commentId = zodCommentId.parse(id)
+        const comment = (await this.commentRepo.findByID(commentId)).toCommentModel();
+        return comment ?? null;
+    }
 }

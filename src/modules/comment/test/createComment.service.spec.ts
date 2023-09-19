@@ -1,6 +1,6 @@
 import { WholeNumber } from '../../../data/whole-number'
 import { UserId } from '../../user/model/user-id'
-import { CommentService } from './comment.service'
+import { CommentService } from '../bll/comment.service'
 import { ICommentRepository } from '../comment.repository'
 import { Content } from '../model/content'
 import { PostId } from '../../post/model/post-id'
