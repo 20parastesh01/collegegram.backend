@@ -32,3 +32,4 @@ export interface BaseComment {
     postId: PostId
     content: Content
 }
+

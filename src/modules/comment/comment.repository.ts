@@ -15,6 +15,8 @@ export interface CreateComment {
     author: User
     postId: PostId
     parentId?: ParentId
+}
+export interface CommentWithDetail extends CommentEntity {
     likeCount: WholeNumber
 }
 
@@ -32,19 +34,30 @@ export class CommentRepository implements ICommentRepository {
         this.CommentRepo = appDataSource.getRepository(CommentEntity)
     }
     async findAllByPost(postId: PostId) {
-        const comments = await this.CommentRepo.createQueryBuilder('comment')
+        const comments : CommentWithDetail[] = await this.CommentRepo.createQueryBuilder('comment')
+            .loadRelationCountAndMap('comment.likes', 'comment.likeCount')
             .where('comment.postId = :postId', { postId })
-            .orderBy('comment.createdAt', 'DESC')
-            .leftJoinAndSelect('comment.author', 'author')
+            .leftJoinAndSelect('comment.author', 'user')
+            .leftJoinAndSelect('comment.postId', 'postId')
+            .leftJoinAndSelect('comment.parentId', 'commentId')
             .groupBy('comment.id')
-            .getMany()
+            .orderBy('comment.createdAt', 'DESC')
+            .getRawMany()
         return commentListDao(comments)
     }
     // async findByauthor(userID: UserId): Promise<PostEntity[] | null> {
     //     return this.PostRepo.findBy({ author:userID })
     // }
     async findByID(commentId: CommentId) {
-        const commentEntity = await this.CommentRepo.findOneBy({ id: commentId });
+        const commentEntity = await this.CommentRepo.createQueryBuilder('comment')
+        .loadRelationCountAndMap('comment.likes', 'comment.likeCount')
+        .where('comment.id = :commentId', { commentId })
+        .leftJoinAndSelect('comment.author', 'user')
+        .leftJoinAndSelect('comment.postId', 'postId')
+        .leftJoinAndSelect('comment.parentId', 'commentId')
+        .groupBy('comment.id')
+        .orderBy('comment.createdAt', 'DESC')
+        .getRawOne()
         return commentOrNullDao(commentEntity)
     }
     async create(data: CreateComment) {

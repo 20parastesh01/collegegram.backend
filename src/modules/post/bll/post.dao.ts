@@ -84,12 +84,12 @@ export const postWithoutDetailDao = (input: PostEntity) => {
         },
     }
 }
-export const postArrayDao = (input: PostEntity[]) => {
+export const postArrayDao = (input: PostWithDetailEntity[]) => {
     return {
         toPostList(): PostWithDetail[] {
             return input.map((entity) => {
-                const rest = postEntityWithoutDetailToPost(entity)
-                const output : PostWithDetail = { likeCount:zodWholeNumber.parse(0),bookmarkCount: zodWholeNumber.parse(0),commentCount: zodWholeNumber.parse(0), ...rest}
+                const rest = postEntityWithDetailToPost(entity)
+                const output : PostWithDetail = {...rest}
                 return output
             })
         },

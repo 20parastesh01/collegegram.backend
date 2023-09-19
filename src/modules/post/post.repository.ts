@@ -40,9 +40,11 @@ export class PostRepository implements IPostRepository {
         this.PostRepo = appDataSource.getRepository(PostEntity)
     }
     async findAllByAuthor(userId: UserId) {
-        const posts: PostEntity[] = await this.PostRepo.createQueryBuilder('post')
-        .leftJoin("post.author", "author")
+        const posts: PostWithDetailEntity[] = await this.PostRepo.createQueryBuilder('post')
+        .leftJoinAndSelect("post.author", "userId")
         .loadRelationCountAndMap('post.likes', 'post.likeCount')
+        .loadRelationCountAndMap('post.bookmarks', 'post.bookmarkCount')
+        .loadRelationCountAndMap('post.comments', 'post.commentCount')
         .where('post.author = :userId', { userId })
         .groupBy('post.id')
         .orderBy("createdAt", "DESC")
@@ -58,8 +60,8 @@ export class PostRepository implements IPostRepository {
         return postArrayDao(posts)
     }
     async findAllByAuthorList(usersId: UserId[]) {
-        const posts: PostEntity[] = await this.PostRepo.createQueryBuilder('post')
-        .leftJoin('post.author', 'author')
+        const posts: PostWithDetailEntity[] = await this.PostRepo.createQueryBuilder('post')
+        .leftJoinAndSelect('post.author', 'userId')
         .loadRelationCountAndMap('post.likes', 'post.likeCount')
         .loadRelationCountAndMap('post.bookmarks', 'post.bookmarkCount')
         .loadRelationCountAndMap('post.comments', 'post.commentCount')
@@ -70,7 +72,7 @@ export class PostRepository implements IPostRepository {
     }
     async findWithoutDetailByID(postId: PostId) {
         const postEntity : PostEntity | null = await this.PostRepo.createQueryBuilder('post')
-        .leftJoin("post.author", "author")
+        .leftJoinAndSelect("post.author", "userId")
         .where('post.id = :postId', { postId })
         .groupBy('post.id')
         .setLock("pessimistic_read")
@@ -90,7 +92,7 @@ export class PostRepository implements IPostRepository {
 
     async findWithDetailByID(postId: PostId) {
         const output : PostWithDetailEntity | undefined = await this.PostRepo.createQueryBuilder('post')
-        .leftJoin("post.author", "author")
+        .leftJoinAndSelect("post.author", "userId")
         .loadRelationCountAndMap('post.likes', 'post.likeCount')
         .loadRelationCountAndMap('post.bookmarks', 'post.bookmarkCount')
         .loadRelationCountAndMap('post.comments', 'post.commentCount')
