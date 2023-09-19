@@ -236,6 +236,7 @@ export class UserService implements IUserService {
         const users = (await this.userRepo.findListById(userList)).toUserList()
         return users
     }
+    
     async logout(userId: UserId): Promise<SimpleMessage> {
         await RedisRepo.deleteSession(userId)
         return { msg: 'User Logged Out' }
