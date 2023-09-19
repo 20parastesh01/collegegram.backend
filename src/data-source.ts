@@ -11,6 +11,7 @@ import { RelationEntity } from './modules/user/entity/relation.entity'
 import { NotificationEntity } from './modules/notification/entity/notification.entity'
 import { BookmarkEntity } from './modules/postAction/entity/bookmark.entity'
 import { LikeEntity } from './modules/postAction/entity/like.entity'
+import { CommentLikeEntity } from './modules/comment/entity/commentLike.entity'
 
 export const AppDataSource = new DataSource({
     type: 'postgres',
@@ -21,7 +22,7 @@ export const AppDataSource = new DataSource({
     database: process.env.DB_NAME,
     synchronize: true,
     logging: false,
-    entities: [EmailEntity, UserEntity, CommentEntity, PostEntity, RelationEntity, NotificationEntity, LikeEntity, BookmarkEntity],
+    entities: [EmailEntity, UserEntity, CommentEntity, PostEntity, RelationEntity, NotificationEntity, LikeEntity, BookmarkEntity, CommentLikeEntity],
     migrations: ['./src/migration/*.ts'],
     subscribers: [],
 })
