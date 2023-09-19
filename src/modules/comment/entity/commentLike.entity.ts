@@ -21,9 +21,9 @@ export class CommentLikeEntity {
   @JoinColumn({ name: 'user_id' })
   user!: UserId;
   
-  @ManyToOne(() => CommentEntity,  (entity: CommentEntity) => entity.id, { eager: true,cascade : true ,onDelete: 'CASCADE' })
+  @ManyToOne(() => CommentEntity, { eager: true,cascade : true ,onDelete: 'CASCADE' })
   @JoinColumn({ name: 'post_id' })
-  comment!: CommentId;
+  comment!: CommentEntity;
 
   @CreateDateColumn()
   createdAt!: Date

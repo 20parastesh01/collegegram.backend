@@ -37,6 +37,7 @@ export class CommentLikeService implements ICommentLikeService {
         
         const commentId = zodCommentId.parse(id)
         const commentLike = (await this.commentLikeRepo.findByUserAndComment(userId, commentId)).toCommentLike();
+
         if (commentLike)
             return { msg: messages.alreadyLiked.persian }
 
@@ -45,7 +46,7 @@ export class CommentLikeService implements ICommentLikeService {
         if(user === null || comment === null)
             return { msg: messages.postNotFound.persian }
         
-        const input = toCreateCommentLike(userId, commentId)
+        const input = toCreateCommentLike(userId, comment)
         const createdCommentLike = (await this.commentLikeRepo.create(input)).toCommentLike()
         return { msg: messages.liked.persian }
         

@@ -5,10 +5,11 @@ import { Repo } from '../../registry/layer-decorators'
 import { CommentId } from './model/comment-id'
 import { LikeId } from '../postAction/model/like-id'
 import { commentLikeDao, commentLikeArrayDao, commentLikeOrNullDao } from './bll/commentLike.dao'
+import { Comment } from './model/comment'
 
 export interface CreateCommentLike {
     user: UserId
-    comment: CommentId
+    comment: Comment
 }
 
 export interface ICommentLikeRepository {

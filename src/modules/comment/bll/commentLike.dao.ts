@@ -2,7 +2,8 @@ import { zodLikeId } from '../../postAction/model/like-id'
 import { UserId, zodUserId } from '../../user/model/user-id'
 import { CreateCommentLike } from '../commentLike.repository'
 import { CommentLikeEntity } from '../entity/commentLike.entity'
-import { CommentId, zodCommentId } from '../model/comment-id'
+import { Comment } from '../model/comment'
+import { zodCommentId } from '../model/comment-id'
 import { BasicCommentLike } from '../model/commentLike'
 
 const ToBasicCommentLike = (input: CommentLikeEntity) => {
@@ -40,7 +41,7 @@ export const commentLikeArrayDao = (input: CommentLikeEntity[]) => {
         }
     }
 }
-export const toCreateCommentLike = (user: UserId, comment: CommentId ): CreateCommentLike => {
+export const toCreateCommentLike = (user: UserId, comment: Comment ): CreateCommentLike => {
     const createCommentLikeEntity: CreateCommentLike = { user: user, comment: comment }
     return createCommentLikeEntity
 }

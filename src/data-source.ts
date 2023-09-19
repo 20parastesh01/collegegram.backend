@@ -22,7 +22,7 @@ export const AppDataSource = new DataSource({
     database: process.env.DB_NAME,
     synchronize: true,
     logging: false,
-    entities: [EmailEntity, UserEntity, CommentEntity, PostEntity, RelationEntity, NotificationEntity, LikeEntity, BookmarkEntity, CommentLikeEntity],
+    entities: [EmailEntity, UserEntity, CommentLikeEntity, CommentEntity, PostEntity, RelationEntity, NotificationEntity, LikeEntity, BookmarkEntity],
     migrations: ['./src/migration/*.ts'],
     subscribers: [],
 })

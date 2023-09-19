@@ -5,14 +5,13 @@ import { ICommentRepository } from '../comment.repository'
 import { Content } from '../model/content'
 import { PostId } from '../../post/model/post-id'
 import { CommentId } from '../model/comment-id'
-import { ParentId } from '../model/parent-id'
 import { Comment } from '../model/comment'
 import { mockUser } from '../../../data/fakeData'
 import { IUserService } from '../../user/bll/user.service'
 const mockcreateCommentDto = {
     content: 'Test content' as Content,
     postId: 123 as PostId,
-    parentId: 1 as ParentId,
+    parentId: 1 as CommentId,
 }
 
 const userId = 123 as UserId

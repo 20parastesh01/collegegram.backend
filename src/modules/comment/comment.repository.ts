@@ -3,7 +3,6 @@ import { Content } from './model/content'
 import { CommentEntity } from './entity/comment.entity'
 import { UserId } from '../user/model/user-id'
 import { PostId } from '../post/model/post-id'
-import { ParentId } from './model/parent-id'
 import { WholeNumber } from '../../data/whole-number'
 import { commentDao, commentListDao, commentOrNullDao } from './bll/comment.dao'
 import { Repo } from '../../registry/layer-decorators'
@@ -14,7 +13,7 @@ export interface CreateComment {
     content: Content
     author: User
     postId: PostId
-    parentId?: ParentId
+    parentId?: CommentId
 }
 export interface CommentWithDetail extends CommentEntity {
     likeCount: WholeNumber
