@@ -2,8 +2,10 @@ import { z } from 'zod'
 import { zodTags } from '../model/tag'
 import { zodCaption } from '../model/caption'
 import { zodBooleanOrBooleanString } from '../../../data/boolean-stringBoolean'
+import { zodJustId } from '../../../data/just-id'
 
-export const zodCreatePostDTO = z.object({
+export const zodEditPostDTO = z.object({
+    id: zodJustId,
     tags: zodTags.optional(),
     caption: zodCaption,
     closeFriend: zodBooleanOrBooleanString.default(false),
@@ -12,4 +14,4 @@ export const zodCreatePostDTO = z.object({
     // }),
 })
 
-export type CreatePostDTO = z.infer<typeof zodCreatePostDTO>
+export type EditPostDTO = z.infer<typeof zodEditPostDTO>

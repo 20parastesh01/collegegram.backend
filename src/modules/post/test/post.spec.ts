@@ -1,7 +1,7 @@
 
 import { IPostRepository } from '../post.repository'
 import { PostService } from '../bll/post.service'
-import { mockCreatedPost, mockFiles, mockJustId, mockPostId, mockRelation, mockUser, mockUserId, mockcreatePostDto, postArrayDao, postWithDetailOrNullDao, postWithoutDetailDao, relationDao } from '../../../data/fakeData'
+import { mockCreatedPost, mockFiles, mockJustId, mockPostId, mockRelation, mockUser, mockUserId, mockCreatePostDTO, postArrayDao, postWithDetailOrNullDao, postWithoutDetailDao, mockEditedPost, postWithoutDetailOrNullDao, mockEditPostDTO } from '../../../data/fakeData'
 import { PostWithDetail } from '../model/post'
 import { IRelationService } from '../../user/bll/relation.service'
 import { IUserService } from '../../user/bll/user.service'
@@ -19,6 +19,7 @@ describe('PostService', () => {
         mockPostRepository = {
             findByID: jest.fn(),
             create: jest.fn(),
+            edit: jest.fn(),
             findWithDetailByID: jest.fn(),
             findWithoutDetailByID: jest.fn(),
             findAllByAuthor: jest.fn(),
@@ -40,13 +41,25 @@ describe('PostService', () => {
         
         mockPostRepository.create.mockResolvedValue(postWithoutDetailDao(mockCreatedPost[0]))
 
-        const result = await postService.createPost(mockcreatePostDto, mockFiles, mockUserId.userId1)
+        const result = await postService.createPost(mockCreatePostDTO, mockFiles, mockUserId.userId1)
         if (!(result instanceof HttpError)) {
             delete result.photos
         }
         const {id,...rest} = mockCreatedPost[0]
         expect(result).toEqual(mockCreatedPost[0])
         expect(mockPostRepository.create).toHaveBeenCalledWith(expect.objectContaining(rest))
+    })
+    it('should edit the post', async () => {
+        
+        mockPostRepository.edit.mockResolvedValue(postWithoutDetailDao(mockEditedPost))
+        mockPostRepository.findWithoutDetailByID.mockResolvedValue(postWithoutDetailOrNullDao(mockCreatedPost[0]))
+
+        const result = await postService.editPost(mockEditPostDTO, mockUserId.userId1)
+        if (!(result instanceof HttpError)) {
+            delete result.photos
+        }
+        expect(result).toEqual(mockEditedPost)
+        expect(mockPostRepository.create).toHaveBeenCalledWith(expect.objectContaining(mockEditedPost))
     })
 
     it('should get a post', async () => {

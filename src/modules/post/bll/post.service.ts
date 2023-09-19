@@ -1,13 +1,12 @@
-import { BadRequestError, NotFoundError, ServerError } from '../../../utility/http-error'
+import { BadRequestError, ServerError } from '../../../utility/http-error'
 import { IPostRepository, PostRepository } from '../post.repository'
 import { CreatePostDTO } from '../dto/createPost.dto'
 import { PostWithDetail, PostWithoutDetail } from '../model/post'
-import { PostId, zodPostId } from '../model/post-id'
+import { zodPostId } from '../model/post-id'
 import { toCreatePost } from './post.dao'
 import { UserId, zodUserId } from '../../user/model/user-id'
 import { Service } from '../../../registry/layer-decorators'
 import { MinioRepo } from '../../../data-source'
-import { WholeNumber } from '../../../data/whole-number'
 import { Msg, PersianErrors, messages } from '../../../utility/persian-messages'
 import { JustId } from '../../../data/just-id'
 import { LikeWithPost } from '../../postAction/model/like'
@@ -15,6 +14,7 @@ import { IUserService, UserService } from '../../user/bll/user.service'
 import { IRelationService, RelationService } from '../../user/bll/relation.service'
 import { User } from '../../user/model/user'
 import { Relation } from '../../user/model/relation'
+import { EditPostDTO } from '../dto/editPost.dto'
 
 
 export type arrayResult = { result: PostWithDetail[], total: number }
@@ -32,11 +32,12 @@ export type resMessage = Message | PostWithDetail | PostWithoutDetail | LikeWith
 
 export interface IPostService {
     createPost(dto: CreatePostDTO, files: Express.Multer.File[], userId: UserId): Promise<ServerError|PostWithDetail>
+    editPost(dto: EditPostDTO, userId: UserId): Promise<Message|ServerError|PostWithDetail>
     getPost(id: JustId): Promise<Message|PostWithDetail>
     getPostWitoutDetail(id: JustId): Promise<Message|PostWithoutDetail>
-    getAllPosts(userId: UserId, targetUserId: JustId): Promise<resMessage>
-    getMyPosts(userId: UserId): Promise<resMessage>
-    getMyTimeline(userId: UserId): Promise<resMessage>
+    getAllPosts(userId: UserId, targetUserId: JustId): Promise<arrayResult|Message>
+    getMyPosts(userId: UserId): Promise<arrayResult|Message>
+    getMyTimeline(userId: UserId): Promise<timelineArrayResult|Message|ServerError>
 }
 
 @Service(PostRepository, UserService, RelationService)
@@ -52,7 +53,7 @@ export class PostService implements IPostService {
     }
     adjustPhoto = async (post: PostWithDetail) => {
         const postPhotos = await MinioRepo.getPostPhotoUrl(post.id)
-        return post.photos = postPhotos || []
+        return post.photos = postPhotos ?? []
     }
 
     async getAllPosts(userId: UserId, targetId: JustId) {
@@ -105,8 +106,24 @@ export class PostService implements IPostService {
         const createdPost = (await this.postRepo.create(createPostRepoInput)).toPost()
         if (!createdPost) 
             return new ServerError(PersianErrors.ServerError)
-
+        
+        await MinioRepo.uploadPostPhoto(createdPost.id, files)
         return this.adjustPhoto(createdPost) 
+    }
+
+    async editPost(dto: EditPostDTO, userId: UserId) {
+        const postId = zodPostId.parse(dto.id)
+        const post = (await this.postRepo.findWithoutDetailByID(postId)).toPost()
+        if (!post)
+            return { msg: messages.postNotFound.persian }
+        post.caption = dto.caption
+        post.closeFriend = dto.closeFriend
+        post.tags = dto.tags ?? []
+        const editedPost = (await this.postRepo.edit(post)).toPost()
+        if (!editedPost) 
+            return new ServerError(PersianErrors.ServerError)
+
+        return this.adjustPhoto(editedPost) 
     }
 
     async getPost(id: JustId) {

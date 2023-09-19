@@ -1,4 +1,4 @@
-import { DataSource, In, Repository } from 'typeorm'
+import { DataSource, Repository } from 'typeorm'
 import { Caption } from './model/caption'
 import { Tag } from './model/tag'
 import { PostId } from './model/post-id'
@@ -7,6 +7,7 @@ import { UserId } from '../user/model/user-id'
 import { WholeNumber } from '../../data/whole-number'
 import { postArrayDao, postWithDetailOrNullDao, postWithoutDetailDao, postWithoutDetailOrNullDao } from './bll/post.dao'
 import { Repo } from '../../registry/layer-decorators'
+import { PostWithoutDetail } from './model/post'
 
 export interface CreatePost {
     caption: Caption
@@ -25,6 +26,7 @@ export interface PostWithDetailEntity extends PostEntity {
 export interface IPostRepository {
     findWithDetailByID(postId: PostId): Promise<ReturnType<typeof postWithDetailOrNullDao>>
     create(data: CreatePost): Promise<ReturnType<typeof postWithoutDetailDao>>
+    edit(data: PostWithoutDetail): Promise<ReturnType<typeof postWithoutDetailDao>>
     findAllByAuthor(userId: UserId): Promise<ReturnType<typeof postArrayDao>>
     findWithoutDetailByID(postId: PostId): Promise<ReturnType<typeof postWithoutDetailOrNullDao>>
     findAllByAuthorList(usersId: UserId[]): Promise<ReturnType<typeof postArrayDao>>
@@ -75,10 +77,17 @@ export class PostRepository implements IPostRepository {
         .getOne();
         return postWithoutDetailOrNullDao(postEntity)
     }
+    
     async create(data: CreatePost) {
         const postEntity : PostEntity = await this.PostRepo.save(data)
         return postWithoutDetailDao(postEntity)
     }
+
+    async edit(data: PostWithoutDetail) {
+        const postEntity : PostEntity = await this.PostRepo.save(data)
+        return postWithoutDetailDao(postEntity)
+    }
+
     async findWithDetailByID(postId: PostId) {
         const output : PostWithDetailEntity | undefined = await this.PostRepo.createQueryBuilder('post')
         .leftJoin("post.author", "author")

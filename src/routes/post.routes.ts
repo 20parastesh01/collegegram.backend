@@ -5,10 +5,11 @@ import { zodCreatePostDTO } from '../modules/post/dto/createPost.dto'
 import { zodGetPostDTO } from '../modules/post/dto/getPost.dto'
 import { zodGetAllPostsDTO } from '../modules/post/dto/getAllPosts.dto'
 import { Route } from '../registry/layer-decorators'
-import { Auth, Delete, Files, Get, Post, RequestBody } from '../registry/endpoint-decorator'
+import { Auth, Delete, Files, Get, Patch, Post, RequestBody } from '../registry/endpoint-decorator'
 import { zodJustId } from '../data/just-id'
 import { LikeService } from '../modules/postAction/bll/like.service'
 import { BookmarkService } from '../modules/postAction/bll/bookmark.service'
+import { zodEditPostDTO } from '../modules/post/dto/editPost.dto'
 
 @Route('/post', PostService,LikeService,BookmarkService)
 export class PostRouter {
@@ -22,6 +23,15 @@ export class PostRouter {
         const data = zodCreatePostDTO.parse(req.body)
         const files = (req.files && !Array.isArray(req.files) && req.files['photos']) || []
         handleExpress(res, () => this.postService.createPost(data, files, req.user.userId))
+    }
+
+    @Patch()
+    @RequestBody('EditPostDTO')
+    @Auth()
+    editPost(req: Request, res: Response) {
+        const {postId, ...rest} = req.body
+        const data = zodEditPostDTO.parse(rest)
+        handleExpress(res, () => this.postService.editPost(data,req.user.userId))
     }
 
     @Get('/:postId')

@@ -62,12 +62,17 @@ export const mockUser : User[] = [{
     private: false as boolean,
 }] as User[]
 
-export const mockcreatePostDto = {
+export const mockCreatePostDTO = {
     tags: ['a', 'b'] as Tag[],
     caption: 'test' as Caption,
     closeFriend: false,
 }
-
+export const mockEditPostDTO = {
+    tags: ['c', 'x'] as Tag[],
+    caption: 'edited' as Caption,
+    closeFriend: true,
+    id: mockJustId.id1,
+}
 export const mockFiles: Express.Multer.File[] = [
     {
         fieldname: 'file1',
@@ -128,6 +133,16 @@ export const mockCreatedPost: PostWithDetail[] = [{
     bookmarkCount: 1 as WholeNumber,
     commentCount: 1 as WholeNumber,
 }]
+export const mockEditedPost ={
+    id: mockPostId.postId1,
+    caption: 'Edited' as Caption,
+    tags: ['c', 'x'] as Tag[],
+    author: mockUserId.userId1,
+    closeFriend: true,
+    likeCount: 1 as WholeNumber,
+    bookmarkCount: 1 as WholeNumber,
+    commentCount: 1 as WholeNumber,
+}
 
 export const mockPostWithoutDetail : PostWithoutDetail = {
     id: mockPostId.postId2,
@@ -192,6 +207,10 @@ export const postWithoutDetailDao = (input: PostWithDetail) => {
     return {
         toPost():PostWithDetail{
             return input
+        },
+        toPostWithoutDetail():PostWithoutDetail{
+            const { likeCount,bookmarkCount,commentCount,...rest} = input
+            return rest
         },
     }
 }
