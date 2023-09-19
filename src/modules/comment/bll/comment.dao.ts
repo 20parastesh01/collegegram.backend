@@ -3,7 +3,6 @@ import { zodUserShort } from '../../user/model/user'
 import { CommentWithDetail, CreateComment } from '../comment.repository'
 import { CommentEntity } from '../entity/comment.entity'
 import { NewComment, Comment } from '../model/comment'
-import { zodParentId } from '../model/parent-id'
 
 const convertToModel = (entity: CommentWithDetail) => {
     const { updatedAt, author, ...rest } = entity
