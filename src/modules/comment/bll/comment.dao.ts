@@ -1,36 +1,39 @@
 import { zodWholeNumber } from '../../../data/whole-number'
-import { CreateComment } from '../comment.repository'
+import { zodUserShort } from '../../user/model/user'
+import { CommentWithDetail, CreateComment } from '../comment.repository'
 import { CommentEntity } from '../entity/comment.entity'
 import { NewComment, Comment } from '../model/comment'
-import { zodParentId } from '../model/parent-id'
+
+const convertToModel = (entity: CommentWithDetail) => {
+    const { updatedAt, author, ...rest } = entity
+    return { author: zodUserShort.parse( {photo:'', ...author}), ...rest }
+}
 
 export const commentDao = (input: CommentEntity) => {
     return {
         toCommentModel(): Comment | undefined {
-            const { createdAt, updatedAt, ...rest } = input
-            return rest
+            const { updatedAt, author, ...rest } = input
+            return { author: zodUserShort.parse( {photo:'', ...author}), likeCount: zodWholeNumber.parse(0) ,...rest }
         },
     }
 }
-export const commentListDao = (input: CommentEntity[]) => {
+export const commentListDao = (input: CommentWithDetail[]) => {
     return {
         toCommentModelList(): Comment[] {
             // Handle the case when input is an array of PostEntity
             //trow error
             return input.map((entity) => {
-                const { createdAt, updatedAt, ...rest } = entity
-                return rest
+                return convertToModel(entity)
             })
         },
     }
 }
-export const commentOrNullDao = (input: CommentEntity | null) => {
+export const commentOrNullDao = (input: CommentWithDetail | null) => {
     return {
         toCommentModel(): Comment | undefined {
-            if (!input) return undefined
+            if (input === null) return undefined
             else {
-                const { createdAt, updatedAt, ...rest } = input
-                return rest
+                return convertToModel(input)
             }
         },
     }
@@ -39,7 +42,6 @@ export const commentOrNullDao = (input: CommentEntity | null) => {
 export const toCreateComment = (comment: NewComment): CreateComment => {
     const { parentId, ...rest } = comment
     const createCommentEntity: CreateComment = {
-        likesCount: zodWholeNumber.parse(0), //will not provided in create stage
         ...rest,
         parentId
     }

@@ -1,7 +1,6 @@
 import { QueryFailedError } from 'typeorm'
 import { Email } from '../../../data/email'
 import { WholeNumber } from '../../../data/whole-number'
-import { IRedis, Redis } from '../../../redis'
 import { BadRequestError, UnauthorizedError } from '../../../utility/http-error'
 import { LoginSignUp, UserService } from '../bll/user.service'
 import { LoginDto } from '../dto/login.dto'
@@ -60,6 +59,9 @@ class MockUserRepository implements IUserRepository {
             createdAt: new Date(),
             updatedAt: new Date(),
         })
+    }
+    findListById(userIds: { id: UserId }[]): Promise<{ toUserList(): User[] }> {
+        throw new Error('Method not implemented.')
     }
     edit(userId: UserId, data: EditUser): Promise<ReturnType<typeof userDao>> {
         throw new Error('Method not implemented.')

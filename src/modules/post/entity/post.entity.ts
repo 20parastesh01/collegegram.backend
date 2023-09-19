@@ -20,7 +20,7 @@ export class PostEntity {
     @Column({ type: 'text', array: true, default: [], nullable:true })
     tags?: Tag[]
 
-    @ManyToOne(() => UserEntity , { eager: true})
+    @ManyToOne(() => UserEntity , { eager: true, onDelete: 'CASCADE' })
     @JoinColumn()
     author!: UserId
 

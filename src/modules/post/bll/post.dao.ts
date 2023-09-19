@@ -74,17 +74,22 @@ export const postWithoutDetailDao = (input: PostEntity) => {
     return {
         toPost(): PostWithDetail {
             const rest  = postEntityWithoutDetailToPost(input)
-            const output : PostWithDetail = { likeCount:zodWholeNumber.parse(0),bookmarkCount: zodWholeNumber.parse(0),commentCount: zodWholeNumber.parse(0), ...rest}
+            const output : PostWithDetail = { likeCount:zodWholeNumber.parse(0),bookmarkCount: zodWholeNumber.parse(0),commentCount: zodWholeNumber.parse(0),...rest}
+            return output
+        },
+        toPostWithoutDetail(): PostWithoutDetail {
+            const rest  = postEntityWithoutDetailToPost(input)
+            const output : PostWithoutDetail = {...rest}
             return output
         },
     }
 }
-export const postArrayDao = (input: PostEntity[]) => {
+export const postArrayDao = (input: PostWithDetailEntity[]) => {
     return {
         toPostList(): PostWithDetail[] {
             return input.map((entity) => {
-                const rest = postEntityWithoutDetailToPost(entity)
-                const output : PostWithDetail = { likeCount:zodWholeNumber.parse(0),bookmarkCount: zodWholeNumber.parse(0),commentCount: zodWholeNumber.parse(0), ...rest}
+                const rest = postEntityWithDetailToPost(entity)
+                const output : PostWithDetail = {...rest}
                 return output
             })
         },
