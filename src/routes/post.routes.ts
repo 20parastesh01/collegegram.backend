@@ -23,12 +23,12 @@ export class PostRouter {
         handleExpress(res, () => this.postService.createPost(data, files, req.user.userId))
     }
 
-    @Patch()
+    @Patch('/:postId')
     @RequestBody('EditPostDTO')
     @Auth()
     editPost(req: Request, res: Response) {
-        const {postId, ...rest} = req.body
-        const data = zodEditPostDTO.parse(rest)
+        const input = {id: req.params.postId , ...req.body}
+        const data = zodEditPostDTO.parse(input)
         handleExpress(res, () => this.postService.editPost(data,req.user.userId))
     }
 

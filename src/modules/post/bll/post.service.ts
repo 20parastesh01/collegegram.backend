@@ -32,7 +32,7 @@ export type resMessage = Message | PostWithDetail | PostWithoutDetail | LikeWith
 
 export interface IPostService {
     createPost(dto: CreatePostDTO, files: Express.Multer.File[], userId: UserId): Promise<ServerError|PostWithDetail>
-    editPost(dto: EditPostDTO, userId: UserId): Promise<Message|ServerError|PostWithDetail>
+    editPost(dto: EditPostDTO, id:JustId, userId: UserId): Promise<Message|ServerError|PostWithDetail>
     getPost(id: JustId): Promise<Message|PostWithDetail>
     getPostWitoutDetail(id: JustId): Promise<Message|PostWithoutDetail>
     getAllPosts(userId: UserId, targetUserId: JustId): Promise<arrayResult|Message>
@@ -111,8 +111,8 @@ export class PostService implements IPostService {
         return this.adjustPhoto(createdPost) 
     }
 
-    async editPost(dto: EditPostDTO, userId: UserId) {
-        const postId = zodPostId.parse(dto.id)
+    async editPost(dto: EditPostDTO, id:JustId, userId: UserId) {
+        const postId = zodPostId.parse(id)
         const post = (await this.postRepo.findWithoutDetailByID(postId)).toPost()
         if (!post)
             return { msg: messages.postNotFound.persian }

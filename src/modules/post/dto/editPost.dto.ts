@@ -5,7 +5,6 @@ import { zodBooleanOrBooleanString } from '../../../data/boolean-stringBoolean'
 import { zodJustId } from '../../../data/just-id'
 
 export const zodEditPostDTO = z.object({
-    id: zodJustId,
     tags: zodTags.optional(),
     caption: zodCaption,
     closeFriend: zodBooleanOrBooleanString.default(false),
