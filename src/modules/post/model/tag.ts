@@ -22,8 +22,8 @@ export const isTags = (tagsArray: string[]): tagsArray is Tag[] => {
     return tagsArray.length < 8 && tagsArray.length > 0 && validatedTags
 }
 
-export const zodTags = z
-    .string()
-    .transform((x) => spliter(x))
-    .refine(isTags)
+export const zodTags = z.union(
+    [z.string()
+    .transform((x) => spliter(x)),z.array(z.string())
+    ]).refine(isTags)
 //export const zodTag = z.string().refine(isTag)
