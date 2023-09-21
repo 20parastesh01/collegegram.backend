@@ -11,3 +11,9 @@ export interface BasicBookmark {
     postId: PostId
     userId: UserId
 }
+export interface DeletedBookmark {
+    id: BookmarkId
+    postId: PostId
+    userId: UserId
+    post: PostWithDetail
+}

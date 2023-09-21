@@ -57,7 +57,10 @@ export class RelationRepository implements IRelationRepository {
     }
 
     async findByRelation(userId: UserId, status: RelationStatus) {
-        const result: RelationEntity[] = await this.relationRepo.createQueryBuilder('relation').where('relation.userA = :userId', { userId }).andWhere('relation.status = :status', { status }).groupBy('relation.userA').getMany()
+        const result: RelationEntity[] = await this.relationRepo.createQueryBuilder('relation')
+        .where('relation.userA = :userId', { userId })
+        .andWhere('relation.status = :status', { status })
+        .getMany()
 
         return relationListDao(result)
     }

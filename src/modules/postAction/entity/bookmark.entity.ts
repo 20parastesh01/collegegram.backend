@@ -13,14 +13,14 @@ export class BookmarkEntity {
     @Column()
     user_id!: UserId
 
-    @ManyToOne(() => UserEntity, { eager: true, onDelete: 'CASCADE' })
+    @ManyToOne(() => UserEntity, (post)=>post.bookmarks, { eager: true, onDelete: 'CASCADE' })
     @JoinColumn({ name: 'user_id' })
     user!: UserEntity
 
     @Column()
     post_id!: PostId
 
-    @ManyToOne(() => PostEntity, { onDelete: 'CASCADE' })
+    @ManyToOne(() => PostEntity, (post)=>post.bookmarks, { eager: true, onDelete: 'CASCADE' })
     @JoinColumn({ name: 'post_id' })
     post!: PostEntity
 

@@ -10,7 +10,7 @@ import { JustId, isJustId } from '../../../data/just-id'
 import { BookmarkRepository, IBookmarkRepository } from '../bookmark.repository'
 import { toCreateBookmark } from './bookmark.dao'
 import { IPostRepository } from '../../post/post.repository'
-import { PostWithDetail, PostWithoutDetail } from '../../post/model/post'
+import { PostWithDetail } from '../../post/model/post'
 import { zodPostId } from '../../post/model/post-id'
 import { IPostService, PostService } from '../../post/bll/post.service'
 import { IUserService, UserService } from '../../user/bll/user.service'
@@ -18,13 +18,7 @@ import { IUserService, UserService } from '../../user/bll/user.service'
 type arrayResult = { result: PostWithDetail[]; total: number }
 export type requestedPostId = { requestedPostId: JustId }
 type Message = { msg: Msg }
-export type resMessage = Message | BadRequestError | ServerError | NotFoundError | PostWithDetail | PostWithoutDetail | LikeWithPost | arrayResult
-// {
-//     msg: Msg,
-//     err: BadRequestError[] | ServerError[] | NotFoundError[],
-//     data: PostWithDetail[] | PostWithoutDetail[] | LikeWithPost[]| arrayResult[]| requestedPostId[],
-//     errCode?: WholeNumber,
-//}
+export type resMessage = Message | BadRequestError | ServerError | NotFoundError | PostWithDetail | LikeWithPost | arrayResult
 
 export interface IBookmarkService {
     bookmarkPost(userId: UserId, id: JustId): Promise<resMessage>
@@ -58,7 +52,7 @@ export class BookmarkService implements IBookmarkService {
         if (bookmark) return { msg: messages.alreadyBookmarked.persian }
 
         const user = await this.userService.getUserById(userId)
-        const post = await this.postService.getPostWitoutDetail(id)
+        const post = await this.postService.getPost(id)
         if (user === null || 'msg' in post) return { msg: messages.postNotFound.persian }
 
         const input = toCreateBookmark(user, post)

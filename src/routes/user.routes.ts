@@ -74,17 +74,17 @@ export class UserRouter {
     getProfilePhoto(req: Request, res: Response) {
         handleExpress(res, () => this.userService.getProfilePhoto(req.user))
     }
+    
+    @Get('/myBookmarkeds')
+    @Auth()
+    getMyBookmarkeds(req: Request, res: Response) {
+        handleExpress(res, () => this.bookmarkService.getMyBookmarkeds(req.user.userId))
+    }
 
     @Post('/:id/follow')
     @Auth()
     followOrRequestForFollow(req: Request, res: Response) {
         handleExpress(res, () => this.relationService.follow(req.user.userId, zodUserId.parse(req.params.id)))
-    }
-
-    @Get('/myBookmarkeds')
-    @Auth()
-    getMyBookmarkeds(req: Request, res: Response) {
-        handleExpress(res, () => this.bookmarkService.getMyBookmarkeds(req.user.userId))
     }
 
     @Delete('/:id/unfollow')

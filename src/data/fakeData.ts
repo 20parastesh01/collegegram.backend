@@ -156,7 +156,7 @@ export const mockPostWithoutDetail: PostWithoutDetail = {
 
 export const mockLikeDto: CreateLike = {
     user: { id: mockUserId.userId2 } as User,
-    post: { ...mockPostWithoutDetail } as PostWithoutDetail,
+    post: { ...mockCreatedPost[0] } as PostWithDetail,
 }
 
 export const mockCreatedLike = {

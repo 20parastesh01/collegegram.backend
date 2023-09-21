@@ -1,16 +1,18 @@
 import { BookmarkEntity } from '../entity/bookmark.entity'
 import { CreateBookmark } from '../bookmark.repository'
 import { zodUserId } from '../../user/model/user-id'
-import { zodBookmarkId } from '../model/bookmark-id'
+import { BookmarkId, zodBookmarkId } from '../model/bookmark-id'
 import { User } from '../../user/model/user'
 import { BasicBookmark, BookmarkWithPost } from '../model/bookmark'
-import { zodStrictPost, PostWithoutDetail } from '../../post/model/post'
+import { PostWithDetail, zodStrictPost } from '../../post/model/post'
 import { zodPostId } from '../../post/model/post-id'
 
 const bookmarkEntityToBookmark = (input: BookmarkEntity) => {
     const { id, post, user } = input
+    console.log(input)
+    const ID = id ?? (0 as BookmarkId)
     const output: BookmarkWithPost = {
-        id: zodBookmarkId.parse(id),
+        id: zodBookmarkId.parse(ID),
         post: zodStrictPost.parse(post),
         userId: zodUserId.parse(user.id),
         postId: zodPostId.parse(post.id),
@@ -19,8 +21,9 @@ const bookmarkEntityToBookmark = (input: BookmarkEntity) => {
 }
 const bookmarkEntityToBasicBookmark = (input: BookmarkEntity) => {
     const { id, post, user } = input
+    const ID = id ?? (0 as BookmarkId)
     const output: BasicBookmark = {
-        id: zodBookmarkId.parse(id),
+        id: zodBookmarkId.parse(ID),
         userId: zodUserId.parse(user.id),
         postId: zodPostId.parse(post.id),
     }
@@ -52,7 +55,8 @@ export const bookmarkArrayDao = (input: BookmarkEntity[]) => {
         },
     }
 }
-export const toCreateBookmark = (user: User, post: PostWithoutDetail): CreateBookmark => {
-    const createBookmarkEntity: CreateBookmark = { user: user, post: post }
+export const toCreateBookmark = (user: User, post: PostWithDetail): CreateBookmark => {
+    const {photos , ...rest } = post
+    const createBookmarkEntity: CreateBookmark = { user: user, post: rest }
     return createBookmarkEntity
 }

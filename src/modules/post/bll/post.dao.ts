@@ -9,7 +9,6 @@ import { zodPostId } from '../model/post-id'
 import { zodBooleanOrBooleanString } from '../../../data/boolean-stringBoolean'
 
 const postEntityWithDetailToPost = (input: PostEntity) => {
-    console.log(input)
     const { createdAt, updatedAt, ...rest } = input
     const output: PostWithDetail = {
         id: zodPostId.parse(rest.id),
@@ -24,13 +23,13 @@ const postEntityWithDetailToPost = (input: PostEntity) => {
     return output
 }
 const postEntityWithoutDetailToPost = (input: PostEntity) => {
-    const { createdAt, updatedAt, ...rest } = input
+    const { createdAt, updatedAt, likeCount, bookmarkCount, commentCount, ...rest } = input
     const output: PostWithoutDetail = {
         id: zodPostId.parse(rest.id),
         caption: zodCaption.parse(rest.caption),
         author: zodUserId.parse(rest.author),
         closeFriend: zodBooleanOrBooleanString.parse(rest.closeFriend),
-        tags: zodTags.optional().parse(rest.tags),
+        tags: zodTags.optional().parse(rest.tags)
     }
     return output
 }

@@ -11,3 +11,9 @@ export interface BasicLike {
     postId: PostId
     userId: UserId
 }
+export interface DeletedLike {
+    id: LikeId
+    post: PostWithDetail
+    postId: PostId
+    userId: UserId
+}

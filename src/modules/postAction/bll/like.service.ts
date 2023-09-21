@@ -9,7 +9,7 @@ import { LikeWithPost } from '../model/like'
 import { Msg, PersianErrors, messages } from '../../../utility/persian-messages'
 import { JustId } from '../../../data/just-id'
 import { IPostRepository } from '../../post/post.repository'
-import { PostWithDetail, PostWithoutDetail } from '../../post/model/post'
+import { PostWithDetail } from '../../post/model/post'
 import { zodPostId } from '../../post/model/post-id'
 import { PostService, IPostService } from '../../post/bll/post.service'
 import { UserService, IUserService } from '../../user/bll/user.service'
@@ -17,7 +17,7 @@ import { UserService, IUserService } from '../../user/bll/user.service'
 type arrayResult = { result: PostWithDetail[]; total: number }
 export type requestedPostId = { requestedPostId: JustId }
 type Message = { msg: Msg }
-export type resMessage = Message | PostWithDetail | PostWithoutDetail | LikeWithPost | arrayResult | BadRequestError | ServerError | NotFoundError
+export type resMessage = Message | PostWithDetail | LikeWithPost | arrayResult | BadRequestError | ServerError | NotFoundError
 // {
 //     msg: Msg,
 //     err: BadRequestError[] | ServerError[] | NotFoundError[],
@@ -41,13 +41,15 @@ export class LikeService implements ILikeService {
     async likePost(userId: UserId, id: JustId) {
         const postId = zodPostId.parse(id)
         const like = (await this.likeRepo.findByUserAndPost(userId, postId)).toLike()
+        console.log(like)
         if (like) return { msg: messages.alreadyLiked.persian }
 
         const user = await this.userService.getUserById(userId)
-        const post = await this.postService.getPostWitoutDetail(id)
+        const post = await this.postService.getPost(id)
         if (user === null || 'msg' in post) return { msg: messages.postNotFound.persian }
 
         const input = toCreateLike(user, post)
+        console.log(input)
         const createdLike = (await this.likeRepo.create(input)).toLike()
         const updatedPost = createdLike.post
         return { msg: messages.liked.persian }
@@ -55,6 +57,7 @@ export class LikeService implements ILikeService {
     async unlikePost(userId: UserId, id: JustId) {
         const postId = zodPostId.parse(id)
         const like = (await this.likeRepo.findByUserAndPost(userId, postId)).toLike()
+        console.log(like)
         if (!like) return { msg: messages.notLikedYet.persian }
 
         const createdLike = (await this.likeRepo.remove(like.id)).toLike()
