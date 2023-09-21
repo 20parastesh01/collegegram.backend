@@ -17,22 +17,22 @@ export class CommentEntity {
     @Column()
     content!: Content
 
-    @ManyToOne(() => PostEntity, (post:PostEntity)=>post.id)
+    @ManyToOne(() => PostEntity, (post: PostEntity) => post.id)
     @JoinColumn()
     postId!: PostId
 
-    @ManyToOne(() => CommentEntity, (comment)=>comment.id, { nullable: true })
+    @ManyToOne(() => CommentEntity, (comment) => comment.id, { nullable: true })
     @JoinColumn()
     parentId?: CommentId
 
     @Column('integer', { name: 'likeCount', default: 0 })
     likeCount!: WholeNumber
 
-    @ManyToOne(() => UserEntity, { eager: true, cascade : true, onDelete: 'CASCADE' })
+    @ManyToOne(() => UserEntity, { eager: true, cascade: true, onDelete: 'CASCADE' })
     @JoinColumn({ name: 'user_id' })
-    author!: UserEntity;
+    author!: UserEntity
 
-    @OneToMany(() => CommentLikeEntity, (commentLikes)=>commentLikes.comment , { lazy: true })
+    @OneToMany(() => CommentLikeEntity, (commentLikes) => commentLikes.comment, { lazy: true })
     @JoinColumn({ name: 'like_id' })
     likes: CommentLikeEntity[] | undefined
 

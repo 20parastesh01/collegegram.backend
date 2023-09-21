@@ -6,14 +6,14 @@ import { NewComment, Comment } from '../model/comment'
 
 const convertToModel = (entity: CommentEntity) => {
     const { updatedAt, author, ...rest } = entity
-    return { author: zodUserShort.parse( {photo:'', ...author}), ...rest }
+    return { author: zodUserShort.parse({ photo: '', ...author }), ...rest }
 }
 
 export const commentDao = (input: CommentEntity) => {
     return {
         toCommentModel(): Comment | undefined {
             const { updatedAt, author, ...rest } = input
-            return { author: zodUserShort.parse( {photo:'', ...author}), ...rest }
+            return { author: zodUserShort.parse({ photo: '', ...author }), ...rest }
         },
     }
 }
@@ -43,7 +43,7 @@ export const toCreateComment = (comment: NewComment): CreateComment => {
     const { parentId, ...rest } = comment
     const createCommentEntity: CreateComment = {
         ...rest,
-        parentId
+        parentId,
     }
 
     return createCommentEntity

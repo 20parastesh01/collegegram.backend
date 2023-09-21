@@ -54,8 +54,8 @@ class MockUserRepository implements IUserRepository {
             following: 0 as WholeNumber,
             postsCount: 0 as WholeNumber,
             private: false,
-            likes:[],
-            bookmarks:[],
+            likes: [],
+            bookmarks: [],
             createdAt: new Date(),
             updatedAt: new Date(),
         })
@@ -66,7 +66,6 @@ class MockUserRepository implements IUserRepository {
     edit(userId: UserId, data: EditUser): Promise<ReturnType<typeof userDao>> {
         throw new Error('Method not implemented.')
     }
-   
 
     async changePassword(userId: UserId, newPassword: Password): Promise<ReturnType<typeof userDao>> {
         let userEntity = this.users.find((a) => a.id == userId)
@@ -96,8 +95,8 @@ class MockUserRepository implements IUserRepository {
             following: 0 as WholeNumber,
             postsCount: 0 as WholeNumber,
             private: false,
-            likes:[],
-            bookmarks:[],
+            likes: [],
+            bookmarks: [],
             createdAt: new Date(),
             updatedAt: new Date(),
         })
@@ -111,8 +110,8 @@ class MockUserRepository implements IUserRepository {
             following: 0 as WholeNumber,
             postsCount: 0 as WholeNumber,
             private: false,
-            likes:[],
-            bookmarks:[],
+            likes: [],
+            bookmarks: [],
             createdAt: new Date(),
             updatedAt: new Date(),
         })

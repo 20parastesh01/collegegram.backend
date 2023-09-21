@@ -3,7 +3,7 @@ import { CreateBookmark } from '../bookmark.repository'
 import { zodUserId } from '../../user/model/user-id'
 import { zodBookmarkId } from '../model/bookmark-id'
 import { User } from '../../user/model/user'
-import { BasicBookmark , BookmarkWithPost } from '../model/bookmark'
+import { BasicBookmark, BookmarkWithPost } from '../model/bookmark'
 import { zodStrictPost, PostWithoutDetail } from '../../post/model/post'
 import { zodPostId } from '../../post/model/post-id'
 
@@ -33,14 +33,14 @@ export const bookmarkOrNullDao = (input: BookmarkEntity | null) => {
             else {
                 return bookmarkEntityToBookmark(input)
             }
-        }
+        },
     }
 }
 export const bookmarkDao = (input: BookmarkEntity) => {
     return {
         toBookmark(): BookmarkWithPost {
             return bookmarkEntityToBookmark(input)
-        }
+        },
     }
 }
 export const bookmarkArrayDao = (input: BookmarkEntity[]) => {
@@ -49,10 +49,10 @@ export const bookmarkArrayDao = (input: BookmarkEntity[]) => {
             return input.map((entity) => {
                 return bookmarkEntityToBookmark(entity)
             })
-        }
+        },
     }
 }
-export const toCreateBookmark = (user: User, post: PostWithoutDetail ): CreateBookmark => {
+export const toCreateBookmark = (user: User, post: PostWithoutDetail): CreateBookmark => {
     const createBookmarkEntity: CreateBookmark = { user: user, post: post }
     return createBookmarkEntity
 }

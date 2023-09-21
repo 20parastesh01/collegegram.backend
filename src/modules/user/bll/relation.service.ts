@@ -12,11 +12,14 @@ import { UserService } from './user.service'
 export type accessToUser = 'FullAccess' | 'JustProfile' | 'Denied'
 export interface IRelationService {
     getTargetUser(userId: UserId, targetUserId: UserId): Promise<UserWithStatus | NotFoundError>
-    getRelations(userId: UserId, targetId: UserId): Promise<{
-        relation: Relation | undefined;
-        reverseRelation: Relation | undefined;
+    getRelations(
+        userId: UserId,
+        targetId: UserId
+    ): Promise<{
+        relation: Relation | undefined
+        reverseRelation: Relation | undefined
     }>
-    checkAccessAuth (userId: UserId , targetUser: User , status: RelationStatus): Promise<accessToUser>
+    checkAccessAuth(userId: UserId, targetUser: User, status: RelationStatus): Promise<accessToUser>
     getFollowing(id: UserId): Promise<UserId[]>
 }
 
@@ -27,11 +30,11 @@ export class RelationService implements IRelationService {
         private userService: UserService,
         private notifService: NotificationService
     ) {}
-    async checkAccessAuth (userId: UserId , targetUser: User , status: RelationStatus) {
-        const relation = (await this.getRelations(userId,targetUser.id)).relation
+    async checkAccessAuth(userId: UserId, targetUser: User, status: RelationStatus) {
+        const relation = (await this.getRelations(userId, targetUser.id)).relation
         if (targetUser.private === false || (relation && relation.status === 'Following')) {
             return 'FullAccess'
-        }else if (relation && relation.status === 'Following') return 'JustProfile'
+        } else if (relation && relation.status === 'Following') return 'JustProfile'
         return 'Denied'
     }
 
@@ -137,10 +140,9 @@ export class RelationService implements IRelationService {
         return { user: target, status, reverseStatus }
     }
     async getFollowing(id: UserId) {
-        const relations = (await this.relationRepo.findByRelation(id , 'Following')).toRelationList()
-        if(relations.length < 1)
-            return[]
-        const users = relations.map((relation)=>(relation.userB))
+        const relations = (await this.relationRepo.findByRelation(id, 'Following')).toRelationList()
+        if (relations.length < 1) return []
+        const users = relations.map((relation) => relation.userB)
         return users
     }
 }

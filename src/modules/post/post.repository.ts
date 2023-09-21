@@ -35,53 +35,49 @@ export class PostRepository implements IPostRepository {
     }
     async findAllByAuthor(userId: UserId) {
         const posts: PostEntity[] = await this.PostRepo.createQueryBuilder('post')
-        .loadRelationCountAndMap('post.likeCount', 'post.likes')
-        .loadRelationCountAndMap('post.bookmarkCount', 'post.bookmarks')
-        .loadRelationCountAndMap('post.commentCount', 'post.comments')
-        .where('post.author = :userId', { userId })
-        .groupBy('post.id')
-        .orderBy("createdAt", "DESC")
-        .getMany();
+            .loadRelationCountAndMap('post.likeCount', 'post.likes')
+            .loadRelationCountAndMap('post.bookmarkCount', 'post.bookmarks')
+            .loadRelationCountAndMap('post.commentCount', 'post.comments')
+            .where('post.author = :userId', { userId })
+            .groupBy('post.id')
+            .orderBy('createdAt', 'DESC')
+            .getMany()
         return postArrayDao(posts)
     }
     async findAllByAuthorList(usersId: UserId[]) {
         const posts: PostEntity[] = await this.PostRepo.createQueryBuilder('post')
-        .loadRelationCountAndMap('post.likeCount', 'post.likes')
-        .loadRelationCountAndMap('post.bookmarkCount', 'post.bookmarks')
-        .loadRelationCountAndMap('post.commentCount', 'post.comments')
-        .where('post.author IN (:...usersId)', { usersId })
-        .orderBy("createdAt", "DESC")
-        .getMany();
+            .loadRelationCountAndMap('post.likeCount', 'post.likes')
+            .loadRelationCountAndMap('post.bookmarkCount', 'post.bookmarks')
+            .loadRelationCountAndMap('post.commentCount', 'post.comments')
+            .where('post.author IN (:...usersId)', { usersId })
+            .orderBy('createdAt', 'DESC')
+            .getMany()
         return postArrayDao(posts)
     }
     async findWithoutDetailByID(postId: PostId) {
-        const postEntity : PostEntity | null = await this.PostRepo.createQueryBuilder('post')
-        .where('post.id = :postId', { postId })
-        .groupBy('post.id')
-        .setLock("pessimistic_read")
-        .getOne();
+        const postEntity: PostEntity | null = await this.PostRepo.createQueryBuilder('post').where('post.id = :postId', { postId }).groupBy('post.id').setLock('pessimistic_read').getOne()
         return postWithoutDetailOrNullDao(postEntity)
     }
-    
+
     async create(data: CreatePost) {
-        const postEntity : PostEntity = await this.PostRepo.save(data)
+        const postEntity: PostEntity = await this.PostRepo.save(data)
         return postWithoutDetailDao(postEntity)
     }
 
     async edit(data: PostWithoutDetail) {
-        const postEntity : PostEntity = await this.PostRepo.save(data)
+        const postEntity: PostEntity = await this.PostRepo.save(data)
         return postWithoutDetailDao(postEntity)
     }
 
     async findWithDetailByID(postId: PostId) {
-        const output : PostEntity | null = await this.PostRepo.createQueryBuilder('post')
-        .loadRelationCountAndMap('post.likeCount', 'post.likes')
-        .loadRelationCountAndMap('post.bookmarkCount', 'post.bookmarks')
-        .loadRelationCountAndMap('post.commentCount', 'post.comments')
-        .where('post.id = :postId', { postId })
-        .groupBy('post.id')
-        .getOne();
-        
-        return postWithDetailOrNullDao(output);
+        const output: PostEntity | null = await this.PostRepo.createQueryBuilder('post')
+            .loadRelationCountAndMap('post.likeCount', 'post.likes')
+            .loadRelationCountAndMap('post.bookmarkCount', 'post.bookmarks')
+            .loadRelationCountAndMap('post.commentCount', 'post.comments')
+            .where('post.id = :postId', { postId })
+            .groupBy('post.id')
+            .getOne()
+
+        return postWithDetailOrNullDao(output)
     }
 }

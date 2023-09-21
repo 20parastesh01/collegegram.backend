@@ -22,14 +22,14 @@ export const commentLikeOrNullDao = (input: CommentLikeEntity | null) => {
             else {
                 return ToBasicCommentLike(input)
             }
-        }
+        },
     }
 }
 export const commentLikeDao = (input: CommentLikeEntity) => {
     return {
         toCommentLike(): BasicCommentLike {
             return ToBasicCommentLike(input)
-        }
+        },
     }
 }
 export const commentLikeArrayDao = (input: CommentLikeEntity[]) => {
@@ -38,10 +38,10 @@ export const commentLikeArrayDao = (input: CommentLikeEntity[]) => {
             return input.map((entity) => {
                 return ToBasicCommentLike(entity)
             })
-        }
+        },
     }
 }
-export const toCreateCommentLike = (user: UserId, comment: Comment ): CreateCommentLike => {
+export const toCreateCommentLike = (user: UserId, comment: Comment): CreateCommentLike => {
     const createCommentLikeEntity: CreateCommentLike = { user: user, comment: comment }
     return createCommentLikeEntity
 }

@@ -1,7 +1,7 @@
-import { Brand } from "./brand"
+import { Brand } from './brand'
 
-export type ErrMsg = Brand<string,'Error Message'>
-export type Msg = Brand<string,'Message'>
+export type ErrMsg = Brand<string, 'Error Message'>
+export type Msg = Brand<string, 'Message'>
 
 export const PersianErrors = {
     BadRequest: 'درخواست نامعتبر است.' as ErrMsg,
@@ -17,29 +17,29 @@ export const PersianErrors = {
 }
 
 export const messages = {
-    alreadyRequested: { persian: 'شما قبلا به این کاربر درخواست داده اید' as Msg},
-    cantRequest: { persian: 'شما نمیتوانید به این کاربر درخواست بدهید' as Msg},
-    alreadyFollowed: { persian: 'شما این کاربر را قبلا دنبال کرده اید' as Msg},
-    userNotFound: { persian: 'کاربر مورد نظر یافت نشد' as Msg},
-    followSuccess: { persian: 'شما کاربر مورد نظر را دنبال کردید' as Msg},
-    requested: { persian: 'درخواست شما ثبت شد' as Msg},
-    notFollowing: { persian: 'شما این کاربر را دنبال نمیکردید' as Msg},
-    unfollowSuccess: { persian: 'کاربر مورد نظر آنفالو شد' as Msg},
-    requestDeleted: { persian: 'درخواست دوستی به کاربر مورد نظر حذف شد' as Msg},
-    requestNotFound: { persian: 'درخواست مورد نظر وجود ندارد' as Msg},
-    accepted: { persian: 'درخواست مورد نظر قبول شد' as Msg},
-    rejected: { persian: 'درخواست مورد نظر حذف شد' as Msg},
-    failed: { persian: 'درخواست مورد نظر موفقیت‌آمیز اجرا نشد' as Msg},
-    succeeded: { persian: 'درخواست مورد نظر با موفقیت‌ اجرا شد' as Msg},
-    blocked: { persian: 'کاربر مورد نظر بلاک شد' as Msg},
-    liked: { persian: 'محتوا مورد نظر لایک شد' as Msg},
-    unliked: { persian: 'محتوا مورد نظر آنلایک شد' as Msg},
-    notLikedYet: { persian: 'شما محتوا مورد نظر را قبلا لایک نکرده‌اید' as Msg},
-    alreadyLiked: { persian: 'شما محتوا مورد نظر را قبلا لایک کرده‌اید' as Msg},
-    postNotFound: { persian: 'پست مورد نظر یافت نشد' as Msg},
-    bookmarked: { persian: 'پست مورد نظر ذخیره شد' as Msg},
-    unbookmarked: { persian: 'پست مورد نظر از پست‌های ذخیره‌شده حذف شد شد' as Msg},
-    notBookmarkedYet: { persian: 'شما پست مورد نظر را قبلا ذخیره نکرده‌اید' as Msg},
-    alreadyBookmarked: { persian: 'شما پست مورد نظر را قبلا ذخیره کرده‌اید' as Msg},
-    postAccessDenied: { persian: 'شما به پست‌های این کاربر دسترسی ندارید' as Msg},
+    alreadyRequested: { persian: 'شما قبلا به این کاربر درخواست داده اید' as Msg },
+    cantRequest: { persian: 'شما نمیتوانید به این کاربر درخواست بدهید' as Msg },
+    alreadyFollowed: { persian: 'شما این کاربر را قبلا دنبال کرده اید' as Msg },
+    userNotFound: { persian: 'کاربر مورد نظر یافت نشد' as Msg },
+    followSuccess: { persian: 'شما کاربر مورد نظر را دنبال کردید' as Msg },
+    requested: { persian: 'درخواست شما ثبت شد' as Msg },
+    notFollowing: { persian: 'شما این کاربر را دنبال نمیکردید' as Msg },
+    unfollowSuccess: { persian: 'کاربر مورد نظر آنفالو شد' as Msg },
+    requestDeleted: { persian: 'درخواست دوستی به کاربر مورد نظر حذف شد' as Msg },
+    requestNotFound: { persian: 'درخواست مورد نظر وجود ندارد' as Msg },
+    accepted: { persian: 'درخواست مورد نظر قبول شد' as Msg },
+    rejected: { persian: 'درخواست مورد نظر حذف شد' as Msg },
+    failed: { persian: 'درخواست مورد نظر موفقیت‌آمیز اجرا نشد' as Msg },
+    succeeded: { persian: 'درخواست مورد نظر با موفقیت‌ اجرا شد' as Msg },
+    blocked: { persian: 'کاربر مورد نظر بلاک شد' as Msg },
+    liked: { persian: 'محتوا مورد نظر لایک شد' as Msg },
+    unliked: { persian: 'محتوا مورد نظر آنلایک شد' as Msg },
+    notLikedYet: { persian: 'شما محتوا مورد نظر را قبلا لایک نکرده‌اید' as Msg },
+    alreadyLiked: { persian: 'شما محتوا مورد نظر را قبلا لایک کرده‌اید' as Msg },
+    postNotFound: { persian: 'پست مورد نظر یافت نشد' as Msg },
+    bookmarked: { persian: 'پست مورد نظر ذخیره شد' as Msg },
+    unbookmarked: { persian: 'پست مورد نظر از پست‌های ذخیره‌شده حذف شد شد' as Msg },
+    notBookmarkedYet: { persian: 'شما پست مورد نظر را قبلا ذخیره نکرده‌اید' as Msg },
+    alreadyBookmarked: { persian: 'شما پست مورد نظر را قبلا ذخیره کرده‌اید' as Msg },
+    postAccessDenied: { persian: 'شما به پست‌های این کاربر دسترسی ندارید' as Msg },
 }

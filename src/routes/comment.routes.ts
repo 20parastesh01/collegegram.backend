@@ -10,8 +10,10 @@ import { zodJustId } from '../data/just-id'
 
 @Route('/comment', CommentService, CommentLikeService)
 export class CommentRouter {
-    constructor(private commentService: CommentService,
-        private commentLikeService: CommentLikeService) {}
+    constructor(
+        private commentService: CommentService,
+        private commentLikeService: CommentLikeService
+    ) {}
 
     @Post('/')
     @Auth()

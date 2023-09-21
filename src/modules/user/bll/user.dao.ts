@@ -27,9 +27,8 @@ export const userDao = (input: UserEntity | null) => {
 export const userListDao = (input: UserEntity[]) => {
     return {
         toUserList(): User[] {
-            const users = input.map(({createdAt, updatedAt, password, bookmarks, likes, ...rest}) => ({...rest, photo: ''}))
+            const users = input.map(({ createdAt, updatedAt, password, bookmarks, likes, ...rest }) => ({ ...rest, photo: '' }))
             return users
         },
     }
 }
-

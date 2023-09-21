@@ -26,7 +26,7 @@ export interface IRelationRepository {
     createRelation(payload: CreateRelation): Promise<ReturnType<typeof relationDao>>
     deleteRelation(payload: DeleteRelation): Promise<void>
     updateRelation(payload: EditRelation): Promise<ReturnType<typeof relationDao>>
-    findByRelation(userId: UserId, status: RelationStatus): Promise<ReturnType<typeof relationListDao>> 
+    findByRelation(userId: UserId, status: RelationStatus): Promise<ReturnType<typeof relationListDao>>
 }
 
 @Repo()
@@ -57,12 +57,8 @@ export class RelationRepository implements IRelationRepository {
     }
 
     async findByRelation(userId: UserId, status: RelationStatus) {
-        const result: RelationEntity[]= await this.relationRepo.createQueryBuilder('relation')
-        .where('relation.userA = :userId', { userId })
-        .andWhere('relation.status = :status', { status })
-        .groupBy('relation.userA')
-        .getMany()
-        
+        const result: RelationEntity[] = await this.relationRepo.createQueryBuilder('relation').where('relation.userA = :userId', { userId }).andWhere('relation.status = :status', { status }).groupBy('relation.userA').getMany()
+
         return relationListDao(result)
     }
 }

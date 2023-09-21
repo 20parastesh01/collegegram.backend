@@ -19,12 +19,12 @@ export interface CreateUser {
 }
 
 export interface EditUser {
-    email?: Email,
-    name?: string,
-    lastname?: string,
-    password?: Password,
-    private?: boolean,
-    bio?: string,
+    email?: Email
+    name?: string
+    lastname?: string
+    password?: Password
+    private?: boolean
+    bio?: string
     followers?: WholeNumber
     following?: WholeNumber
 }
@@ -34,7 +34,7 @@ export interface IUserRepository {
     findByUsername(username: Username): Promise<ReturnType<typeof userDao>>
     findByEmail(email: Email): Promise<ReturnType<typeof userDao>>
     findById(userId: UserId): Promise<ReturnType<typeof userDao>>
-    findListById(userIds:{id: UserId}[]): Promise<ReturnType<typeof userListDao>>
+    findListById(userIds: { id: UserId }[]): Promise<ReturnType<typeof userListDao>>
     changePassword(userId: UserId, newPassword: Password): Promise<ReturnType<typeof userDao>>
     edit(userId: UserId, data: EditUser): Promise<ReturnType<typeof userDao>>
 }
@@ -66,7 +66,7 @@ export class UserRepository implements IUserRepository {
         const userEntity = await this.userRepo.findOneBy({ id: userId })
         return userDao(userEntity)
     }
-    async findListById(userIds:{id: UserId}[]): Promise<ReturnType<typeof userListDao>> {
+    async findListById(userIds: { id: UserId }[]): Promise<ReturnType<typeof userListDao>> {
         const userEntities = await this.userRepo.findBy(userIds)
         return userListDao(userEntities)
     }
