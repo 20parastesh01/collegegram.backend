@@ -9,9 +9,13 @@ import { LikeService } from '../modules/postAction/bll/like.service'
 import { BookmarkService } from '../modules/postAction/bll/bookmark.service'
 import { zodEditPostDTO } from '../modules/post/dto/editPost.dto'
 
-@Route('/post', PostService,LikeService,BookmarkService)
+@Route('/post', PostService, LikeService, BookmarkService)
 export class PostRouter {
-    constructor(private postService: PostService,private likeService: LikeService, private bookmarkService: BookmarkService) {}
+    constructor(
+        private postService: PostService,
+        private likeService: LikeService,
+        private bookmarkService: BookmarkService
+    ) {}
 
     @Post()
     @RequestBody('CreatePostDTO')
@@ -23,14 +27,20 @@ export class PostRouter {
         handleExpress(res, () => this.postService.createPost(data, files, req.user.userId))
     }
 
+    @Get('/explore')
+    @Auth()
+    explore(req: Request, res: Response) {
+        handleExpress(res, () => this.postService.explore(req.user.userId))
+    }
+
     @Patch('/:postId')
     @RequestBody('EditPostDTO')
     @Auth()
     editPost(req: Request, res: Response) {
-        const input = {...req.body}
+        const input = { ...req.body }
         const data = zodEditPostDTO.parse(input)
         const id = zodJustId.parse(req.params.postId)
-        handleExpress(res, () => this.postService.editPost(data, id , req.user.userId))
+        handleExpress(res, () => this.postService.editPost(data, id, req.user.userId))
     }
 
     @Get('/:postId')
@@ -50,7 +60,7 @@ export class PostRouter {
     @Auth()
     getAllPost(req: Request, res: Response) {
         const data = zodJustId.parse(req.params.userId)
-        handleExpress(res, () => this.postService.getAllPosts(req.user.userId,  data))
+        handleExpress(res, () => this.postService.getAllPosts(req.user.userId, data))
     }
 
     @Get('/MyTimeline')
@@ -58,7 +68,6 @@ export class PostRouter {
     getMyTimeline(req: Request, res: Response) {
         handleExpress(res, () => this.postService.getMyTimeline(req.user.userId))
     }
-
 
     @Post('/:id/like')
     @Auth()
