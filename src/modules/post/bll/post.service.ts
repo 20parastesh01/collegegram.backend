@@ -78,7 +78,7 @@ export class PostService implements IPostService {
     }
     
     async getMyPosts(userId: UserId) {
-
+        console.log(userId)
         const posts = (await this.postRepo.findAllByAuthor(userId)).toPostList()
         if (posts.length < 1)
             return { msg: messages.postNotFound.persian }

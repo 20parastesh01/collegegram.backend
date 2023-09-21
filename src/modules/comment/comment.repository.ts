@@ -15,9 +15,6 @@ export interface CreateComment {
     postId: PostId
     parentId?: CommentId
 }
-export interface CommentWithDetail extends CommentEntity {
-    likeCount: WholeNumber
-}
 
 export interface ICommentRepository {
     create(data: CreateComment): Promise<ReturnType<typeof commentDao>>
@@ -33,15 +30,15 @@ export class CommentRepository implements ICommentRepository {
         this.CommentRepo = appDataSource.getRepository(CommentEntity)
     }
     async findAllByPost(postId: PostId) {
-        const comments : CommentWithDetail[] = await this.CommentRepo.createQueryBuilder('comment')
-            .loadRelationCountAndMap('comment.likes', 'comment.likeCount')
+        const comments : CommentEntity[] = await this.CommentRepo.createQueryBuilder('comment')
+            .loadRelationCountAndMap('comment.likeCount', 'comment.likes')
             .where('comment.postId = :postId', { postId })
             .leftJoinAndSelect('comment.author', 'user')
             .leftJoinAndSelect('comment.postId', 'postId')
             .leftJoinAndSelect('comment.parentId', 'commentId')
             .groupBy('comment.id')
             .orderBy('comment.createdAt', 'DESC')
-            .getRawMany()
+            .getMany()
         return commentListDao(comments)
     }
     // async findByauthor(userID: UserId): Promise<PostEntity[] | null> {
@@ -49,14 +46,14 @@ export class CommentRepository implements ICommentRepository {
     // }
     async findByID(commentId: CommentId) {
         const commentEntity = await this.CommentRepo.createQueryBuilder('comment')
-        .loadRelationCountAndMap('comment.likes', 'comment.likeCount')
+        .loadRelationCountAndMap('comment.likeCount', 'comment.likes')
         .where('comment.id = :commentId', { commentId })
         .leftJoinAndSelect('comment.author', 'user')
         .leftJoinAndSelect('comment.postId', 'postId')
         .leftJoinAndSelect('comment.parentId', 'commentId')
         .groupBy('comment.id')
         .orderBy('comment.createdAt', 'DESC')
-        .getRawOne()
+        .getOne()
         return commentOrNullDao(commentEntity)
     }
     async create(data: CreateComment) {

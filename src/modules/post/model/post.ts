@@ -34,7 +34,6 @@ export const zodStrictPost = z.object({
 
 })
 
-export type Post = z.infer<typeof zodPost>
 
 
 export interface PostWithDetail extends PostWithoutDetail {

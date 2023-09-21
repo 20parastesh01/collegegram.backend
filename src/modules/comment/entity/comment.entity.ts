@@ -25,6 +25,9 @@ export class CommentEntity {
     @JoinColumn()
     parentId?: CommentId
 
+    @Column('integer', { name: 'likeCount', default: 0 })
+    likeCount!: WholeNumber
+
     @ManyToOne(() => UserEntity, { eager: true, cascade : true, onDelete: 'CASCADE' })
     @JoinColumn({ name: 'user_id' })
     author!: UserEntity;

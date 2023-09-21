@@ -1,6 +1,5 @@
-import { CommentWithDetail } from '../../comment/comment.repository'
 import { Comment } from '../../comment/model/comment'
-import { BasicPost, Post } from '../../post/model/post'
+import { BasicPost } from '../../post/model/post'
 import { RelationStatus } from '../../user/model/relation'
 import { User, UserShort } from '../../user/model/user'
 import { NotificationId } from './notification-id'

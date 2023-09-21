@@ -1,7 +1,7 @@
 import { MinioRepo } from '../../../data-source'
 import { Service, services } from '../../../registry/layer-decorators'
 import { Comment } from '../../comment/model/comment'
-import { Post } from '../../post/model/post'
+import { BasicPost } from '../../post/model/post'
 import type { RelationService } from '../../user/bll/relation.service'
 import { UserId } from '../../user/model/user-id'
 import { NotificationType, NotificationWithRelation } from '../model/notification'
@@ -20,7 +20,7 @@ export class NotificationService {
         return notification
     }
 
-    async createLikeNotification(user: UserId, actor: UserId, post: Post) {
+    async createLikeNotification(user: UserId, actor: UserId, post: BasicPost) {
         const notification = await this.notifRepo.create({
             actorId: actor,
             userId: user,
