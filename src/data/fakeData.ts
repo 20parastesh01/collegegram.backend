@@ -107,9 +107,7 @@ export const mockCreatePost : CreatePost = {
     tags: ['a', 'b'] as Tag[],
     
     author: mockUserId.userId1,
-    closeFriend: false,
-    likeCount: 0 as WholeNumber,
-    commentCount: 0 as WholeNumber,
+    closeFriend: false
 }
 
 export const mockCreatedPost: PostWithDetail[] = [{

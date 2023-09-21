@@ -20,12 +20,17 @@ export class PostEntity {
     @Column({ type: 'text', array: true, default: [], nullable:true })
     tags?: Tag[]
 
-    @ManyToOne(() => UserEntity , { eager: true, onDelete: 'CASCADE' })
-    @JoinColumn()
+    @Column()
     author!: UserId
 
-    @Column('integer', { default: 0 })
+    @Column('integer', { name: 'commentCount', default: 0 })
     commentCount!: WholeNumber
+    
+    @Column('integer', { name: 'likeCount', default: 0 })
+    likeCount!: WholeNumber
+    
+    @Column('integer', { name: 'bookmarkCount', default: 0 })
+    bookmarkCount!: WholeNumber
 
     @Column('boolean', { default: false })
     closeFriend!: boolean
@@ -39,7 +44,7 @@ export class PostEntity {
     bookmarks: BookmarkEntity[] | undefined
     
     @OneToMany((type) => CommentEntity, (comment)=>comment.postId , { lazy: true })
-    @JoinColumn({ name: 'like_id' })
+    @JoinColumn({ name: 'comment_id' })
     comments: CommentEntity[] | undefined
 
     @CreateDateColumn()
