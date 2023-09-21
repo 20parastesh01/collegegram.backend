@@ -12,6 +12,7 @@ import { RelationService } from '../modules/user/bll/relation.service'
 import { zodUserId } from '../modules/user/model/user-id'
 import { NotificationService } from '../modules/notification/bll/notification.service'
 import { BookmarkService } from '../modules/postAction/bll/bookmark.service'
+import { PostService } from '../modules/post/bll/post.service'
 
 @Route('/user', UserService, RelationService, BookmarkService, NotificationService)
 export class UserRouter {

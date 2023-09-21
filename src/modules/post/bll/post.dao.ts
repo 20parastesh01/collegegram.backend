@@ -9,31 +9,30 @@ import { zodPostId } from '../model/post-id'
 import { zodBooleanOrBooleanString } from '../../../data/boolean-stringBoolean'
 
 const postEntityWithDetailToPost = (input: PostEntity) => {
-
     console.log(input)
     const { createdAt, updatedAt, ...rest } = input
-        const output: PostWithDetail = {
-            id: zodPostId.parse(rest.id),
-            caption: zodCaption.parse(rest.caption),
-            author: zodUserId.parse(rest.author),
-            closeFriend: zodBooleanOrBooleanString.parse(rest.closeFriend),
-            tags: zodTags.optional().parse(rest.tags),
-            commentCount: zodWholeNumber.parse(rest.commentCount),
-            likeCount: zodWholeNumber.parse(rest.likeCount),
-            bookmarkCount: zodWholeNumber.parse(rest.bookmarkCount)
-        }
-        return output
+    const output: PostWithDetail = {
+        id: zodPostId.parse(rest.id),
+        caption: zodCaption.parse(rest.caption),
+        author: zodUserId.parse(rest.author),
+        closeFriend: zodBooleanOrBooleanString.parse(rest.closeFriend),
+        tags: zodTags.optional().parse(rest.tags),
+        commentCount: zodWholeNumber.parse(rest.commentCount),
+        likeCount: zodWholeNumber.parse(rest.likeCount),
+        bookmarkCount: zodWholeNumber.parse(rest.bookmarkCount),
+    }
+    return output
 }
-const postEntityWithoutDetailToPost = (input: PostEntity ) => {
-        const { createdAt, updatedAt, ...rest } = input
-        const output: PostWithoutDetail = {
-            id: zodPostId.parse(rest.id),
-            caption: zodCaption.parse(rest.caption),
-            author: zodUserId.parse(rest.author),
-            closeFriend: zodBooleanOrBooleanString.parse(rest.closeFriend),
-            tags: zodTags.optional().parse(rest.tags)
-        }
-        return output
+const postEntityWithoutDetailToPost = (input: PostEntity) => {
+    const { createdAt, updatedAt, ...rest } = input
+    const output: PostWithoutDetail = {
+        id: zodPostId.parse(rest.id),
+        caption: zodCaption.parse(rest.caption),
+        author: zodUserId.parse(rest.author),
+        closeFriend: zodBooleanOrBooleanString.parse(rest.closeFriend),
+        tags: zodTags.optional().parse(rest.tags),
+    }
+    return output
 }
 const postEntityToPostThumbnail = (input: PostEntity | PostEntity) => {
     const { createdAt, updatedAt, ...rest } = input
@@ -46,11 +45,10 @@ const postEntityToPostThumbnail = (input: PostEntity | PostEntity) => {
 }
 export const postWithoutDetailOrNullDao = (input: PostEntity | null) => {
     return {
-        toPost():  undefined | PostWithoutDetail {
-            if (input === null ) return undefined
+        toPost(): undefined | PostWithoutDetail {
+            if (input === null) return undefined
 
             return postEntityWithoutDetailToPost(input)
-        
         },
         toThumbnail(): BasicPost | undefined {
             if (input === null) return undefined
@@ -60,13 +58,12 @@ export const postWithoutDetailOrNullDao = (input: PostEntity | null) => {
 }
 export const postWithDetailOrNullDao = (input: PostEntity | null) => {
     return {
-        toPost(): PostWithDetail | undefined  {
-            if (input === null ) return undefined
+        toPost(): PostWithDetail | undefined {
+            if (input === null) return undefined
             return postEntityWithDetailToPost(input)
-        
         },
         toThumbnail(): BasicPost | undefined {
-            if (input === null ) return undefined
+            if (input === null) return undefined
             return postEntityToPostThumbnail(input)
         },
     }
@@ -74,13 +71,13 @@ export const postWithDetailOrNullDao = (input: PostEntity | null) => {
 export const postWithoutDetailDao = (input: PostEntity) => {
     return {
         toPost(): PostWithDetail {
-            const rest  = postEntityWithoutDetailToPost(input)
-            const output : PostWithDetail = { likeCount:zodWholeNumber.parse(0),bookmarkCount: zodWholeNumber.parse(0),commentCount: zodWholeNumber.parse(0),...rest}
+            const rest = postEntityWithoutDetailToPost(input)
+            const output: PostWithDetail = { likeCount: zodWholeNumber.parse(0), bookmarkCount: zodWholeNumber.parse(0), commentCount: zodWholeNumber.parse(0), ...rest }
             return output
         },
         toPostWithoutDetail(): PostWithoutDetail {
-            const rest  = postEntityWithoutDetailToPost(input)
-            const output : PostWithoutDetail = {...rest}
+            const rest = postEntityWithoutDetailToPost(input)
+            const output: PostWithoutDetail = { ...rest }
             return output
         },
     }
@@ -90,7 +87,24 @@ export const postArrayDao = (input: PostEntity[]) => {
         toPostList(): PostWithDetail[] {
             return input.map((entity) => {
                 const rest = postEntityWithDetailToPost(entity)
-                const output : PostWithDetail = {...rest}
+                const output: PostWithDetail = { ...rest }
+                return output
+            })
+        },
+        toThumbnailList(): BasicPost[] {
+            return input.map((entity) => {
+                const rest = postEntityToPostThumbnail(entity)
+                return rest
+            })
+        },
+    }
+}
+export const postDaoList = (input: PostEntity[]) => {
+    return {
+        toPostList(): PostWithoutDetail[] {
+            return input.map((entity) => {
+                const rest = postEntityWithoutDetailToPost(entity)
+                const output: PostWithoutDetail = { ...rest }
                 return output
             })
         },
@@ -103,7 +117,7 @@ export const postArrayDao = (input: PostEntity[]) => {
     }
 }
 export const toCreatePost = (post: NewPost): CreatePost => {
-    const createPostEntity: CreatePost = {...post}
+    const createPostEntity: CreatePost = { ...post }
 
     return createPostEntity
 }

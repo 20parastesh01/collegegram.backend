@@ -2,8 +2,7 @@ import { Brand } from '../../../utility/brand'
 import { UserEntity } from '../entity/user.entity'
 import { User, UserBasic, UserShort, UserWithPassword } from '../model/user'
 
-export const userDao = (input: UserEntity | null) => {
-    if (!input) return null
+const convert = (input: UserEntity) => {
     return {
         toUser(): User {
             const { createdAt, updatedAt, password, ...rest } = input
@@ -24,12 +23,11 @@ export const userDao = (input: UserEntity | null) => {
     }
 }
 
-export const userListDao = (input: UserEntity[]) => {
-    return {
-        toUserList(): User[] {
-            const users = input.map(({createdAt, updatedAt, password, bookmarks, likes, ...rest}) => ({...rest, photo: ''}))
-            return users
-        },
-    }
+export const userDao = (input: UserEntity | null) => {
+    if (!input) return null
+    return convert(input)
 }
 
+export const userDaoList = (input: UserEntity[]) => {
+    return input.map((entity) => convert(entity))
+}
