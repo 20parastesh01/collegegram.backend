@@ -36,6 +36,11 @@ export class UserRouter {
         handleExpress(res, () => this.userService.login(data))
     }
 
+    @Delete('/logout')
+    logout(req: Request, res: Response) {
+        handleExpress(res, () => this.userService.logout(req.user.userId))
+    }
+
     @Get('/me')
     @Auth()
     getCurrentUser(req: Request, res: Response) {
@@ -60,6 +65,12 @@ export class UserRouter {
         handleExpress(res, () => this.userService.forgetPassSetPass(data))
     }
 
+    @Get('/myBookmarkeds')
+    @Auth()
+    getMyBookmarkeds(req: Request, res: Response) {
+        handleExpress(res, () => this.bookmarkService.getMyBookmarkeds(req.user.userId))
+    }
+
     @Patch('/me')
     @Auth()
     @File('profile')
@@ -80,12 +91,6 @@ export class UserRouter {
     @Auth()
     followOrRequestForFollow(req: Request, res: Response) {
         handleExpress(res, () => this.relationService.follow(req.user.userId, zodUserId.parse(req.params.id)))
-    }
-
-    @Get('/myBookmarkeds')
-    @Auth()
-    getMyBookmarkeds(req: Request, res: Response) {
-        handleExpress(res, () => this.bookmarkService.getMyBookmarkeds(req.user.userId))
     }
 
     @Delete('/:id/unfollow')
@@ -116,10 +121,5 @@ export class UserRouter {
     @Auth()
     getTargetUser(req: Request, res: Response) {
         handleExpress(res, () => this.relationService.getTargetUser(req.user.userId, zodUserId.parse(req.params.id)))
-    }
-
-    @Delete('/logout')
-    logout(req: Request, res: Response) {
-        handleExpress(res, () => this.userService.logout(req.user.userId))
     }
 }
