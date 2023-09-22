@@ -42,7 +42,7 @@ export async function scan(app: Express) {
         const swaggerFilePath = path.join(process.cwd(), 'src', 'registry', 'swagger.json')
         if (process.env.SWAGGER) fs.writeFileSync(swaggerFilePath, JSON.stringify(swaggerObject))
         const filePath = swaggerUi.getAbsoluteFSPath() + '/swagger-initializer.js'
-        fs.writeFileSync(filePath, fs.readFileSync(filePath).toString().replace('https://petstore.swagger.io/v2/swagger.json', '/swagger'))
+        fs.writeFileSync(filePath, fs.readFileSync(filePath).toString().replace('https://petstore.swagger.io/v2/swagger.json', '/api/swagger'))
         app.use('/api/api-docs', express.static(swaggerUi.getAbsoluteFSPath()))
         app.use('/api/swagger', (req, res) => res.sendFile(swaggerFilePath))
     } catch (error) {
