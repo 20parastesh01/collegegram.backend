@@ -43,7 +43,7 @@ export class CommentLikeService implements ICommentLikeService {
         const comment = await this.commentService.getComment(id)
         if (user === null || comment === null) return { msg: messages.postNotFound.persian }
 
-        const input = toCreateCommentLike(userId, comment)
+        const input = toCreateCommentLike(user, comment)
         const createdCommentLike = (await this.commentLikeRepo.create(input)).toCommentLike()
         return { msg: messages.liked.persian }
     }

@@ -55,7 +55,7 @@ export class PostRepository implements IPostRepository {
             .where('post.author = :userId', { userId })
             .orderBy('post.createdAt', 'DESC')
             .getMany()
-            console.log(posts)
+
         return postArrayDao(posts)
     }
     async findAllByAuthorList(usersId: UserId[]) {
@@ -69,9 +69,7 @@ export class PostRepository implements IPostRepository {
         return postArrayDao(posts)
     }
     async findWithoutDetailByID(postId: PostId) {
-        const postEntity: PostEntity | null = await this.PostRepo.createQueryBuilder('post')
-        .where('post.id = :postId', { postId })
-        .getOne()
+        const postEntity: PostEntity | null = await this.PostRepo.createQueryBuilder('post').where('post.id = :postId', { postId }).getOne()
         return postWithoutDetailOrNullDao(postEntity)
     }
 

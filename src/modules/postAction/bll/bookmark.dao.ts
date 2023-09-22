@@ -9,7 +9,6 @@ import { zodPostId } from '../../post/model/post-id'
 
 const bookmarkEntityToBookmark = (input: BookmarkEntity) => {
     const { id, post, user } = input
-    console.log(input)
     const ID = id ?? (0 as BookmarkId)
     const output: BookmarkWithPost = {
         id: zodBookmarkId.parse(ID),
@@ -56,7 +55,7 @@ export const bookmarkArrayDao = (input: BookmarkEntity[]) => {
     }
 }
 export const toCreateBookmark = (user: User, post: PostWithDetail): CreateBookmark => {
-    const {photos , ...rest } = post
+    const { photos, ...rest } = post
     const createBookmarkEntity: CreateBookmark = { user: user, post: rest }
     return createBookmarkEntity
 }

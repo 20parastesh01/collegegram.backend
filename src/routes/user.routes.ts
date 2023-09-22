@@ -86,12 +86,6 @@ export class UserRouter {
     getProfilePhoto(req: Request, res: Response) {
         handleExpress(res, () => this.userService.getProfilePhoto(req.user))
     }
-    
-    @Get('/myBookmarkeds')
-    @Auth()
-    getMyBookmarkeds(req: Request, res: Response) {
-        handleExpress(res, () => this.bookmarkService.getMyBookmarkeds(req.user.userId))
-    }
 
     @Post('/:id/follow')
     @Auth()

@@ -29,30 +29,15 @@ export class BookmarkRepository implements IBookmarkRepository {
         this.BookmarkRepo = appDataSource.getRepository(BookmarkEntity)
     }
     async findAllByUser(userId: UserId) {
-        const bookmark: BookmarkEntity[] = await this.BookmarkRepo.createQueryBuilder('bookmark')
-        .leftJoinAndSelect('bookmark.user', 'user')
-        .leftJoinAndSelect('bookmark.post', 'post')
-        .where('bookmark.user.id = :userId', { userId })
-        .orderBy('bookmark.createdAt', 'DESC')
-        .getMany()
+        const bookmark: BookmarkEntity[] = await this.BookmarkRepo.createQueryBuilder('bookmark').leftJoinAndSelect('bookmark.user', 'user').leftJoinAndSelect('bookmark.post', 'post').where('bookmark.user.id = :userId', { userId }).orderBy('bookmark.createdAt', 'DESC').getMany()
         return bookmarkArrayDao(bookmark)
     }
     async findAllByPost(postId: PostId) {
-        const bookmark: BookmarkEntity[] = await this.BookmarkRepo.createQueryBuilder('bookmark')
-        .leftJoinAndSelect('bookmark.user', 'user')
-        .leftJoinAndSelect('bookmark.post', 'post')
-        .where('bookmark.post.id = :postId', { postId })
-        .orderBy('bookmark.createdAt', 'DESC')
-        .getMany()
+        const bookmark: BookmarkEntity[] = await this.BookmarkRepo.createQueryBuilder('bookmark').leftJoinAndSelect('bookmark.user', 'user').leftJoinAndSelect('bookmark.post', 'post').where('bookmark.post.id = :postId', { postId }).orderBy('bookmark.createdAt', 'DESC').getMany()
         return bookmarkArrayDao(bookmark)
     }
     async findByUserAndPost(userId: UserId, postId: PostId) {
-        const output = await this.BookmarkRepo.createQueryBuilder('bookmark')
-        .leftJoinAndSelect('bookmark.user', 'user')
-        .leftJoinAndSelect('bookmark.post', 'post')
-        .where('bookmark.user.id = :userId', { userId })
-        .andWhere('bookmark.post.id = :postId', { postId })
-        .getOne()
+        const output = await this.BookmarkRepo.createQueryBuilder('bookmark').leftJoinAndSelect('bookmark.user', 'user').leftJoinAndSelect('bookmark.post', 'post').where('bookmark.user.id = :userId', { userId }).andWhere('bookmark.post.id = :postId', { postId }).getOne()
         return bookmarkOrNullDao(output)
     }
     async create(data: CreateBookmark) {
@@ -65,7 +50,6 @@ export class BookmarkRepository implements IBookmarkRepository {
             return bookmarkOrNullDao(null)
         }
         const result = await this.BookmarkRepo.remove(bookmark)
-        console.log(result)
         return bookmarkOrNullDao(result)
     }
 }

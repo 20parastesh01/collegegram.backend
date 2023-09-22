@@ -29,21 +29,11 @@ export class LikeRepository implements ILikeRepository {
         this.LikeRepo = appDataSource.getRepository(LikeEntity)
     }
     async findAllByUser(userId: UserId) {
-        const like: LikeEntity[] = await this.LikeRepo.createQueryBuilder('like')
-        .leftJoinAndSelect('like.user', 'user')
-        .leftJoinAndSelect('like.post', 'post')
-        .where('like.user.id = :userId', { userId })
-        .orderBy('like.createdAt', 'DESC')
-        .getMany()
+        const like: LikeEntity[] = await this.LikeRepo.createQueryBuilder('like').leftJoinAndSelect('like.user', 'user').leftJoinAndSelect('like.post', 'post').where('like.user.id = :userId', { userId }).orderBy('like.createdAt', 'DESC').getMany()
         return likeArrayDao(like)
     }
     async findAllByPost(postId: PostId) {
-        const like: LikeEntity[] = await this.LikeRepo.createQueryBuilder('like')
-        .leftJoinAndSelect('like.user', 'user')
-        .leftJoinAndSelect('like.post', 'post')
-        .where('like.post.id = :postId', { postId })
-        .orderBy('like.createdAt', 'DESC')
-        .getMany()
+        const like: LikeEntity[] = await this.LikeRepo.createQueryBuilder('like').leftJoinAndSelect('like.user', 'user').leftJoinAndSelect('like.post', 'post').where('like.post.id = :postId', { postId }).orderBy('like.createdAt', 'DESC').getMany()
         return likeArrayDao(like)
     }
     async findByUserAndPost(userId: UserId, postId: PostId) {
@@ -56,12 +46,10 @@ export class LikeRepository implements ILikeRepository {
     }
     async remove(likeId: LikeId) {
         const like = await this.LikeRepo.findOneBy({ id: likeId })
-        console.log(like)
         if (like === null) {
             return likeOrNullDao(null)
         }
         const result = await this.LikeRepo.remove(like)
-        console.log(result)
         return likeOrNullDao(result)
     }
 }

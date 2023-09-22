@@ -76,7 +76,6 @@ export class PostService implements IPostService {
     }
 
     async getMyPosts(userId: UserId) {
-        
         const posts = (await this.postRepo.findAllByAuthor(userId)).toPostList()
         if (posts.length < 1) return { msg: messages.postNotFound.persian }
 
@@ -87,10 +86,8 @@ export class PostService implements IPostService {
     }
 
     async getMyTimeline(userId: UserId) {
-        console.log('getMyTimeline')
         const usersId = (await this.relationService.getFollowing(userId)).concat(userId)
         const users = await this.userService.getUserListById(usersId)
-        console.log(users)
         if (users.length < usersId.length) return new ServerError(PersianErrors.ServerError)
 
         const posts = (await this.postRepo.findAllByAuthorList(usersId)).toPostList()

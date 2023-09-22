@@ -6,9 +6,10 @@ import { CommentId } from './model/comment-id'
 import { LikeId } from '../postAction/model/like-id'
 import { commentLikeDao, commentLikeArrayDao, commentLikeOrNullDao } from './bll/commentLike.dao'
 import { Comment } from './model/comment'
+import { User } from '../user/model/user'
 
 export interface CreateCommentLike {
-    user: UserId
+    user: User
     comment: Comment
 }
 
@@ -39,8 +40,8 @@ export class CommentLikeRepository implements ICommentLikeRepository {
         const output = await this.CommentLikeRepo.createQueryBuilder('commentLike')
             .leftJoinAndSelect('commentLike.user', 'user')
             .leftJoinAndSelect('commentLike.comment', 'comment')
-            .where('commentLike.user.id = :userId', { userId })
-            .andWhere('commentLike.comment.id = :commentId', { commentId })
+            .where('commentLike.user_id = :userId', { userId })
+            .andWhere('commentLike.comment_id = :commentId', { commentId })
             .getOne()
         return commentLikeOrNullDao(output)
     }
@@ -50,6 +51,10 @@ export class CommentLikeRepository implements ICommentLikeRepository {
     }
     async remove(commentLikeId: LikeId) {
         const commentLike = await this.CommentLikeRepo.findOneBy({ id: commentLikeId })
-        return commentLike === null ? commentLikeOrNullDao(null) : commentLikeOrNullDao(await this.CommentLikeRepo.remove(commentLike))
+        if (commentLike === null) {
+            return commentLikeOrNullDao(null)
+        }
+        const result = await this.CommentLikeRepo.remove(commentLike)
+        return commentLikeOrNullDao(result)
     }
 }

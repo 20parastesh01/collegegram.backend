@@ -55,7 +55,7 @@ export const likeArrayDao = (input: LikeEntity[]) => {
     }
 }
 export const toCreateLike = (user: User, post: PostWithDetail): CreateLike => {
-    const {photos , ...rest } = post
+    const { photos, ...rest } = post
     const createLikeEntity: CreateLike = { user: user, post: rest }
     return createLikeEntity
 }

@@ -41,7 +41,6 @@ export class LikeService implements ILikeService {
     async likePost(userId: UserId, id: JustId) {
         const postId = zodPostId.parse(id)
         const like = (await this.likeRepo.findByUserAndPost(userId, postId)).toLike()
-        console.log(like)
         if (like) return { msg: messages.alreadyLiked.persian }
 
         const user = await this.userService.getUserById(userId)
@@ -49,7 +48,6 @@ export class LikeService implements ILikeService {
         if (user === null || 'msg' in post) return { msg: messages.postNotFound.persian }
 
         const input = toCreateLike(user, post)
-        console.log(input)
         const createdLike = (await this.likeRepo.create(input)).toLike()
         const updatedPost = createdLike.post
         return { msg: messages.liked.persian }
@@ -57,7 +55,6 @@ export class LikeService implements ILikeService {
     async unlikePost(userId: UserId, id: JustId) {
         const postId = zodPostId.parse(id)
         const like = (await this.likeRepo.findByUserAndPost(userId, postId)).toLike()
-        console.log(like)
         if (!like) return { msg: messages.notLikedYet.persian }
 
         const createdLike = (await this.likeRepo.remove(like.id)).toLike()
