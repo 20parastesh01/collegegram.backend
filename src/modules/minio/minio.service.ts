@@ -98,7 +98,7 @@ export class Minio {
         const result: any = []
         const objectList: string[] = await this.getObjectListByPrefix(postId + '-')
         for (let i = 1; i <= objectList.length; i++) {
-            const minioUrl = await this.client.presignedUrl('GET', postPhotoBucket, postId + '')
+            const minioUrl = await this.client.presignedUrl('GET', postPhotoBucket, postId + '-' + i)
             result.push('/file' + minioUrl.split(this.config.endPoint + ':' + this.config.port)[1])
         }
         return result
