@@ -32,7 +32,7 @@ export const prepare = async () => {
             private: true,
             email: 'email3@gmail.com',
             password: await hash('password3'),
-        }
+        },
     ]
     await userRepo.save(mockUsers)
 

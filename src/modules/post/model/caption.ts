@@ -1,4 +1,4 @@
-import {z} from 'zod'
+import { z } from 'zod'
 import { Brand } from '../../../utility/brand'
 import { NonEmptyString } from '../../../data/non-empty-string'
 

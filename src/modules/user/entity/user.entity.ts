@@ -1,9 +1,11 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from 'typeorm'
+import { Column, CreateDateColumn, Entity, JoinColumn, OneToMany, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from 'typeorm'
 import { Email } from '../../../data/email'
 import { WholeNumber } from '../../../data/whole-number'
 import { Password } from '../model/password'
 import { UserId } from '../model/user-id'
 import { Username } from '../model/username'
+import { BookmarkEntity } from '../../postAction/entity/bookmark.entity'
+import { LikeEntity } from '../../postAction/entity/like.entity'
 
 @Entity('users')
 @Unique(['username'])
@@ -41,6 +43,14 @@ export class UserEntity {
 
     @Column('boolean', { default: false })
     private!: boolean
+
+    @OneToMany(() => LikeEntity, (like) => like.user, { lazy: true })
+    @JoinColumn({ name: 'like_id' })
+    likes: LikeEntity[] | undefined
+
+    @OneToMany(() => BookmarkEntity, (bookmark) => bookmark.user, { lazy: true })
+    @JoinColumn({ name: 'bookmark_id' })
+    bookmarks: BookmarkEntity[] | undefined
 
     @CreateDateColumn()
     createdAt!: Date

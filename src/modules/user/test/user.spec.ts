@@ -1,7 +1,6 @@
 import { QueryFailedError } from 'typeorm'
 import { Email } from '../../../data/email'
 import { WholeNumber } from '../../../data/whole-number'
-import { IRedis, Redis } from '../../../redis'
 import { BadRequestError, UnauthorizedError } from '../../../utility/http-error'
 import { LoginSignUp, UserService } from '../bll/user.service'
 import { LoginDto } from '../dto/login.dto'
@@ -16,29 +15,29 @@ import { Hashed } from '../../../data/hashed'
 import { SendEmailDto } from '../dto/send-email.dto'
 import { isSimpleMessage } from '../../../data/simple-message'
 import { RedisRepo } from '../../../data-source'
-import { userDao } from '../bll/user.dao'
+import { userDao, userDaoList } from '../bll/user.dao'
 import * as emailUtils from '../../../utility/send-email'
 import { User, UserShort } from '../model/user'
 
-class MockRedis implements IRedis {
-    repo: any = {}
-    async setSession(session: Hashed, userId: UserId): Promise<void> {
-        this.repo[session] = userId
-    }
-    async setNewExpire(session: Hashed): Promise<void> {}
-    async getSession(userId: UserId): Promise<Hashed | null> {
-        return this.repo[userId]
-    }
-    async getUserId(session: Hashed): Promise<UserId | null> {
-        return this.repo[session]
-    }
-    async setResetPasswordToken(uuId: string, userId: UserId): Promise<void> {
-        this.repo[uuId] = userId
-    }
-    async getResetPasswordUserId(uuId: string): Promise<UserId | null> {
-        return this.repo[uuId]
-    }
-}
+// class MockRedis implements IRedis {
+//     repo: any = {}
+//     async setSession(session: Hashed, userId: UserId): Promise<void> {
+//         this.repo[session] = userId
+//     }
+//     async setNewExpire(session: Hashed): Promise<void> {}
+//     async getSession(userId: UserId): Promise<Hashed | null> {
+//         return this.repo[userId]
+//     }
+//     async getUserId(session: Hashed): Promise<UserId | null> {
+//         return this.repo[session]
+//     }
+//     async setResetPasswordToken(uuId: string, userId: UserId): Promise<void> {
+//         this.repo[uuId] = userId
+//     }
+//     async getResetPasswordUserId(uuId: string): Promise<UserId | null> {
+//         return this.repo[uuId]
+//     }
+// }
 
 class MockUserRepository implements IUserRepository {
     public users: UserEntity[] = []
@@ -55,14 +54,18 @@ class MockUserRepository implements IUserRepository {
             following: 0 as WholeNumber,
             postsCount: 0 as WholeNumber,
             private: false,
+            likes: [],
+            bookmarks: [],
             createdAt: new Date(),
             updatedAt: new Date(),
         })
     }
-    edit(userId: UserId, data: EditUser): Promise<{ toUser(): User; toUserBasic(): { userId: UserId; username: Username; name: string; lastname: string }; toUserWithPassword(): { id: UserId; username: Username; password: Password; email: Email; name: string; lastname: string; followers: WholeNumber; following: WholeNumber; bio: string; postsCount: WholeNumber; private: boolean }; toUserShort(): UserShort } | null> {
+    findListById(userIds: { id: UserId }[]): Promise<ReturnType<typeof userDaoList>> {
         throw new Error('Method not implemented.')
     }
-   
+    edit(userId: UserId, data: EditUser): Promise<ReturnType<typeof userDao>> {
+        throw new Error('Method not implemented.')
+    }
 
     async changePassword(userId: UserId, newPassword: Password): Promise<ReturnType<typeof userDao>> {
         let userEntity = this.users.find((a) => a.id == userId)
@@ -92,6 +95,8 @@ class MockUserRepository implements IUserRepository {
             following: 0 as WholeNumber,
             postsCount: 0 as WholeNumber,
             private: false,
+            likes: [],
+            bookmarks: [],
             createdAt: new Date(),
             updatedAt: new Date(),
         })
@@ -105,6 +110,8 @@ class MockUserRepository implements IUserRepository {
             following: 0 as WholeNumber,
             postsCount: 0 as WholeNumber,
             private: false,
+            likes: [],
+            bookmarks: [],
             createdAt: new Date(),
             updatedAt: new Date(),
         })
@@ -118,6 +125,9 @@ class MockUserRepository implements IUserRepository {
     }
     async findByEmail(email: Email): Promise<ReturnType<typeof userDao>> {
         return userDao(this.users.find((user) => user.email === email) || null)
+    }
+    async findUsersNotInIds(userId: UserId, userIds: UserId[], offset: number, limit: number): Promise<ReturnType<typeof userDaoList>> {
+        throw new Error('Method not implemented.')
     }
 }
 

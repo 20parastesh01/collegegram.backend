@@ -21,7 +21,7 @@ import { userDao } from './user.dao'
 import { Service } from '../../../registry/layer-decorators'
 import { EditProfileDto, editProfileDto } from '../dto/edit-profile.dto'
 import { Token } from '../../../data/token'
-import { PersianErrors } from '../../../utility/persian-messages'
+import { PersianErrors, messages } from '../../../utility/persian-messages'
 import { zodWholeNumber } from '../../../data/whole-number'
 
 export type LoginSignUp = UserWithToken | BadRequestError | ServerError
@@ -30,9 +30,13 @@ export interface IUserService {
     signup(data: SignUpDto): Promise<LoginSignUp>
     login(data: LoginDto): Promise<LoginSignUp>
     getUserById(userId: UserId): Promise<User | null>
+    getProfilePhoto(user: UserBasic): Promise<string>
+    getUserListById(userIds: UserId[]): Promise<User[]>
     forgetPassSendEmail(data: SendEmailDto): Promise<SimpleMessage | BadRequestError>
     forgetPassSetPass(data: SetPasswordDto): Promise<LoginSignUp>
     editProfile(user: UserBasic, data: EditProfileDto, file?: Express.Multer.File): Promise<{ user: User; token: Token } | ServerError>
+    getUnrelatedUsers(userId: UserId, userIds: UserId[]): Promise<User[]>
+    logout(userId: UserId): Promise<SimpleMessage | BadRequestError>
 }
 
 export const hash = async (input: string): Promise<Password> => {
@@ -194,5 +198,54 @@ export class UserService implements IUserService {
         const profile = await MinioRepo.getProfileUrl(id)
         user.photo = profile || ''
         return user
+    }
+
+    async increaseFollower(id: UserId): Promise<User | null> {
+        const userDao = await this.userRepo.findById(id)
+        if (!userDao) return null
+        const followers = userDao.toUser().followers
+        const editedDao = (await this.userRepo.edit(id, { followers: zodWholeNumber.parse(followers + 1) }))!
+        return editedDao.toUser()
+    }
+
+    async decreaseFollower(id: UserId): Promise<User | null> {
+        const userDao = await this.userRepo.findById(id)
+        if (!userDao) return null
+        const followers = userDao.toUser().followers
+        const editedDao = (await this.userRepo.edit(id, { followers: zodWholeNumber.parse(followers - 1) }))!
+        return editedDao.toUser()
+    }
+
+    async increaseFollowing(id: UserId): Promise<User | null> {
+        const userDao = await this.userRepo.findById(id)
+        if (!userDao) return null
+        const following = userDao.toUser().following
+        const editedDao = (await this.userRepo.edit(id, { following: zodWholeNumber.parse(following + 1) }))!
+        return editedDao.toUser()
+    }
+
+    async decreaseFollowing(id: UserId): Promise<User | null> {
+        const userDao = await this.userRepo.findById(id)
+        if (!userDao) return null
+        const following = userDao.toUser().following
+        const editedDao = (await this.userRepo.edit(id, { following: zodWholeNumber.parse(following - 1) }))!
+        return editedDao.toUser()
+    }
+
+    async getUnrelatedUsers(userId: UserId, userIds: UserId[]): Promise<User[]> {
+        const usersDao = await this.userRepo.findUsersNotInIds(userId, userIds, 0, 25)
+        let users = usersDao.map((a) => a.toUser())
+        return users
+    }
+    async getUserListById(userIds: UserId[]) {
+        const userList = userIds.map((userId) => ({ id: userId }))
+        const usersDao = await this.userRepo.findListById(userList)
+        const users = usersDao.map((a) => a.toUser())
+        return users
+    }
+
+    async logout(userId: UserId): Promise<SimpleMessage> {
+        await RedisRepo.deleteSession(userId)
+        return { msg: 'User Logged Out' }
     }
 }

@@ -1,5 +1,5 @@
 import { Comment } from '../../comment/model/comment'
-import { Post } from '../../post/model/post'
+import { BasicPost } from '../../post/model/post'
 import { RelationStatus } from '../../user/model/relation'
 import { User, UserShort } from '../../user/model/user'
 import { NotificationId } from './notification-id'
@@ -15,7 +15,7 @@ export interface Notification {
 
     type: NotificationType
 
-    post: Post | null
+    post?: BasicPost
 
     comment?: Comment
 }

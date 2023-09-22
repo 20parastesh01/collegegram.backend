@@ -7,16 +7,6 @@ let title = 'CollegeGram API'
 let version = '1.0.0'
 export const swaggerObject: any = {
     openapi: '3.0.1',
-    servers: [
-        {
-            url: 'https://murphyteam.ir/api',
-            description: 'Server',
-        },
-        {
-            url: 'http://localhost:8080/api',
-            description: 'Local',
-        },
-    ],
     info: {
         title,
         version,

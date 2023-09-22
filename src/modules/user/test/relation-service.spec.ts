@@ -199,4 +199,20 @@ describe('Relation Service', () => {
             expect((result as SimpleMessage).msg).toBe(messages.blocked.persian)
         })
     })
+
+    describe('Get Target User', () => {
+        it('should fail if user not found', async () => {
+            resolvesHandler = createHandler([null], [null])
+            const result = await relationService.getTargetUser(5 as UserId, 6 as UserId)
+            expect(result).toBeInstanceOf(NotFoundError)
+            expect((result as NotFoundError).message).toBe(messages.userNotFound.persian)
+        })
+        it('should get target user successfully', async () => {
+            resolvesHandler = createHandler([{ id: 6 as UserId }], [null])
+            const result = await relationService.getTargetUser(5 as UserId, 6 as UserId)
+            expect(result).toHaveProperty('user')
+            expect(result).toHaveProperty('status')
+            expect(result).toHaveProperty('reverseStatus')
+        })
+    })
 })

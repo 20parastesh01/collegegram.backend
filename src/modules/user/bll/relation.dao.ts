@@ -10,3 +10,10 @@ export const relationDao = (input: RelationEntity | null) => {
         },
     }
 }
+export const relationListDao = (input: RelationEntity[]) => {
+    return {
+        toRelationList(): Relation[] {
+            return input.map((relation) => relation)
+        },
+    }
+}

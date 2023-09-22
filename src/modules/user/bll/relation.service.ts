@@ -1,19 +1,43 @@
+import { MinioRepo } from '../../../data-source'
 import { Service } from '../../../registry/layer-decorators'
 import { ForbiddenError, NotFoundError } from '../../../utility/http-error'
 import { messages } from '../../../utility/persian-messages'
 import { NotificationService } from '../../notification/bll/notification.service'
+import { resMessage } from '../../post/bll/post.service'
+import { Relation, RelationStatus } from '../model/relation'
+import { User, UserWithStatus } from '../model/user'
 import { UserId } from '../model/user-id'
 import { CreateRelation, IRelationRepository, RelationRepository } from '../relation.repository'
-import { IUserRepository, UserRepository } from '../user.repository'
 import { UserService } from './user.service'
+export type accessToUser = 'FullAccess' | 'JustProfile' | 'Denied'
+export interface IRelationService {
+    getTargetUser(userId: UserId, targetUserId: UserId): Promise<UserWithStatus | NotFoundError>
+    getRelations(
+        userId: UserId,
+        targetId: UserId
+    ): Promise<{
+        relation: Relation | undefined
+        reverseRelation: Relation | undefined
+    }>
+    checkAccessAuth(userId: UserId, targetUser: User, status: RelationStatus): Promise<accessToUser>
+    getRealtedUsers(userId: UserId): Promise<UserId[]>
+    getFollowing(id: UserId): Promise<UserId[]>
+}
 
 @Service(RelationRepository, UserService, NotificationService)
-export class RelationService {
+export class RelationService implements IRelationService {
     constructor(
         private relationRepo: IRelationRepository,
         private userService: UserService,
         private notifService: NotificationService
     ) {}
+    async checkAccessAuth(userId: UserId, targetUser: User, status: RelationStatus) {
+        const relation = (await this.getRelations(userId, targetUser.id)).relation
+        if (targetUser.private === false || (relation && relation.status === 'Following')) {
+            return 'FullAccess'
+        } else if (relation && relation.status === 'Following') return 'JustProfile'
+        return 'Denied'
+    }
 
     async getRelations(userId: UserId, targetId: UserId) {
         const relationDao = await this.relationRepo.getRelation(userId, targetId)
@@ -100,5 +124,40 @@ export class RelationService {
         }
         await this.relationRepo.updateRelation({ userA: userId, userB: targetId, status: 'Blocked' })
         return { msg: messages.blocked.persian }
+    }
+
+    async getTargetUser(userId: UserId, targetUserId: UserId): Promise<UserWithStatus | NotFoundError> {
+        const target = await this.userService.getUserById(targetUserId)
+        if (!target) return new NotFoundError(messages.userNotFound.persian)
+        const dao = await this.relationRepo.getRelation(target.id, userId)
+        let status = null
+        const status1 = dao ? dao.toRelation().status : null
+        if (dao) {
+            status = dao.toRelation().status
+        }
+        const reverseRelationDao = await this.relationRepo.getRelation(userId, target.id)
+        let reverseStatus = null
+        if (reverseRelationDao) reverseStatus = reverseRelationDao.toRelation().status
+        return { user: target, status, reverseStatus }
+    }
+
+    async getRealtedUsers(userId: UserId): Promise<UserId[]> {
+        const relations = (await this.relationRepo.findRelations(userId)).toRelationList()
+        const relatedUsers = new Set<UserId>()
+        relations.forEach((relation) => {
+            if (relation.userA !== userId) {
+                relatedUsers.add(relation.userA)
+            }
+            if (relation.userB !== userId) {
+                relatedUsers.add(relation.userB)
+            }
+        })
+        return Array.from(relatedUsers)
+    }
+    async getFollowing(id: UserId) {
+        const relations = (await this.relationRepo.findByRelation(id, 'Following')).toRelationList()
+        if (relations.length < 1) return []
+        const users = relations.map((relation) => relation.userB)
+        return users
     }
 }
