@@ -100,6 +100,7 @@ export class RelationService implements IRelationService {
         const status = dao.toRelation().status
         if (status !== 'Pending') return { msg: messages.requestNotFound.persian }
         await this.relationRepo.updateRelation({ userA: target.id, userB: userId, status: 'Following' })
+        this.notifService.createAcceptNotification(userId, target.id)
         return { msg: messages.accepted.persian }
     }
 
