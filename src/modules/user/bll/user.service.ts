@@ -18,11 +18,12 @@ import { UserId } from '../model/user-id'
 import { isUsername } from '../model/username'
 import { EditUser, IUserRepository, UserRepository } from '../user.repository'
 import { userDao } from './user.dao'
-import { Service } from '../../../registry/layer-decorators'
+import { Service, services } from '../../../registry/layer-decorators'
 import { EditProfileDto, editProfileDto } from '../dto/edit-profile.dto'
 import { Token } from '../../../data/token'
 import { PersianErrors, messages } from '../../../utility/persian-messages'
 import { zodWholeNumber } from '../../../data/whole-number'
+import { PostService } from '../../post/bll/post.service'
 
 export type LoginSignUp = UserWithToken | BadRequestError | ServerError
 
@@ -197,6 +198,8 @@ export class UserService implements IUserService {
         const user = dao.toUser()
         const profile = await MinioRepo.getProfileUrl(id)
         user.photo = profile || ''
+        const postCount = await (services['PostService'] as PostService).getUserPostCount(id)
+        user.postsCount = zodWholeNumber.parse(postCount)
         return user
     }
 

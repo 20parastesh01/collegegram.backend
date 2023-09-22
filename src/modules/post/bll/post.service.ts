@@ -123,6 +123,10 @@ export class PostService implements IPostService {
         return result
     }
 
+    async getUserPostCount(id: UserId) {
+        return this.postRepo.countByAuthor(id)
+    }
+
     async getPost(id: JustId) {
         const postId = zodPostId.parse(id)
         const post = (await this.postRepo.findWithDetailByID(postId)).toPost()
