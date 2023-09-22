@@ -12,6 +12,7 @@ import { RelationService } from '../modules/user/bll/relation.service'
 import { zodUserId } from '../modules/user/model/user-id'
 import { NotificationService } from '../modules/notification/bll/notification.service'
 import { BookmarkService } from '../modules/postAction/bll/bookmark.service'
+import { PostService } from '../modules/post/bll/post.service'
 
 @Route('/user', UserService, RelationService, BookmarkService, NotificationService)
 export class UserRouter {
@@ -33,6 +34,11 @@ export class UserRouter {
     login(req: Request, res: Response) {
         const data = loginDto.parse(req.body)
         handleExpress(res, () => this.userService.login(data))
+    }
+
+    @Delete('/logout')
+    logout(req: Request, res: Response) {
+        handleExpress(res, () => this.userService.logout(req.user.userId))
     }
 
     @Get('/me')
@@ -57,6 +63,12 @@ export class UserRouter {
     setNewPassword(req: Request, res: Response) {
         const data = setPasswordDto.parse(req.body)
         handleExpress(res, () => this.userService.forgetPassSetPass(data))
+    }
+
+    @Get('/myBookmarkeds')
+    @Auth()
+    getMyBookmarkeds(req: Request, res: Response) {
+        handleExpress(res, () => this.bookmarkService.getMyBookmarkeds(req.user.userId))
     }
 
     @Patch('/me')
@@ -115,10 +127,5 @@ export class UserRouter {
     @Auth()
     getTargetUser(req: Request, res: Response) {
         handleExpress(res, () => this.relationService.getTargetUser(req.user.userId, zodUserId.parse(req.params.id)))
-    }
-
-    @Delete('/logout')
-    logout(req: Request, res: Response) {
-        handleExpress(res, () => this.userService.logout(req.user.userId))
     }
 }

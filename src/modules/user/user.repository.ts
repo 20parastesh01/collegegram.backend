@@ -1,11 +1,11 @@
-import { DataSource, Repository } from 'typeorm'
+import { DataSource, In, Not, Repository } from 'typeorm'
 import { UserEntity } from './entity/user.entity'
 import { Username } from './model/username'
 import { Email } from '../../data/email'
 import { Password } from './model/password'
 import { UserId } from './model/user-id'
 import { Repo } from '../../registry/layer-decorators'
-import { userDao, userListDao } from './bll/user.dao'
+import { userDao, userDaoList } from './bll/user.dao'
 import { WholeNumber } from '../../data/whole-number'
 
 export interface CreateUser {
@@ -34,7 +34,8 @@ export interface IUserRepository {
     findByUsername(username: Username): Promise<ReturnType<typeof userDao>>
     findByEmail(email: Email): Promise<ReturnType<typeof userDao>>
     findById(userId: UserId): Promise<ReturnType<typeof userDao>>
-    findListById(userIds: { id: UserId }[]): Promise<ReturnType<typeof userListDao>>
+    findUsersNotInIds(userId: UserId, userIds: UserId[], offset: number, limit: number): Promise<ReturnType<typeof userDaoList>>
+    findListById(userIds: { id: UserId }[]): Promise<ReturnType<typeof userDaoList>>
     changePassword(userId: UserId, newPassword: Password): Promise<ReturnType<typeof userDao>>
     edit(userId: UserId, data: EditUser): Promise<ReturnType<typeof userDao>>
 }
@@ -66,9 +67,15 @@ export class UserRepository implements IUserRepository {
         const userEntity = await this.userRepo.findOneBy({ id: userId })
         return userDao(userEntity)
     }
-    async findListById(userIds: { id: UserId }[]): Promise<ReturnType<typeof userListDao>> {
+    async findUsersNotInIds(userId: UserId, userIds: UserId[], offset: number, limit: number): Promise<ReturnType<typeof userDaoList>> {
+        const userIdsList = userIds
+        userIdsList.push(userId)
+        const userEntities = await this.userRepo.find({ where: { id: Not(In(userIdsList)) }, skip: offset, take: limit })
+        return userDaoList(userEntities)
+    }
+    async findListById(userIds: { id: UserId }[]): Promise<ReturnType<typeof userDaoList>> {
         const userEntities = await this.userRepo.findBy(userIds)
-        return userListDao(userEntities)
+        return userDaoList(userEntities)
     }
     async edit(userId: UserId, data: EditUser): Promise<ReturnType<typeof userDao>> {
         const userEntity = await this.userRepo.save({ id: userId, ...data })

@@ -5,7 +5,7 @@ import { PostId } from './model/post-id'
 import { PostEntity } from './entity/post.entity'
 import { UserId } from '../user/model/user-id'
 import { WholeNumber } from '../../data/whole-number'
-import { postArrayDao, postWithDetailOrNullDao, postWithoutDetailDao, postWithoutDetailOrNullDao } from './bll/post.dao'
+import { postArrayDao, postDaoList, postWithDetailOrNullDao, postWithoutDetailDao, postWithoutDetailOrNullDao } from './bll/post.dao'
 import { Repo } from '../../registry/layer-decorators'
 import { PostWithoutDetail } from './model/post'
 
@@ -20,6 +20,7 @@ export type LikeCount = WholeNumber
 export interface IPostRepository {
     findWithDetailByID(postId: PostId): Promise<ReturnType<typeof postWithDetailOrNullDao>>
     create(data: CreatePost): Promise<ReturnType<typeof postWithoutDetailDao>>
+    findSomeByAuthor(userId: UserId, count: number): Promise<ReturnType<typeof postDaoList>>
     edit(data: PostWithoutDetail): Promise<ReturnType<typeof postWithoutDetailDao>>
     findAllByAuthor(userId: UserId): Promise<ReturnType<typeof postArrayDao>>
     findWithoutDetailByID(postId: PostId): Promise<ReturnType<typeof postWithoutDetailOrNullDao>>
@@ -32,6 +33,19 @@ export class PostRepository implements IPostRepository {
 
     constructor(appDataSource: DataSource) {
         this.PostRepo = appDataSource.getRepository(PostEntity)
+    }
+
+    async findSomeByAuthor(userId: UserId, count: number): Promise<ReturnType<typeof postDaoList>> {
+        const posts: PostEntity[] = await this.PostRepo.find({
+            where: {
+                author: userId,
+            },
+            order: {
+                createdAt: 'DESC',
+            },
+            take: count,
+        })
+        return postDaoList(posts)
     }
     async findAllByAuthor(userId: UserId) {
         const posts: PostEntity[] = await this.PostRepo.createQueryBuilder('post')

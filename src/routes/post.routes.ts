@@ -15,7 +15,7 @@ export class PostRouter {
         private postService: PostService,
         private likeService: LikeService,
         private bookmarkService: BookmarkService
-    ) { }
+    ) {}
 
     @Post()
     @RequestBody('CreatePostDTO')
@@ -26,6 +26,33 @@ export class PostRouter {
         const data = zodCreatePostDTO.parse(req.body)
         const files = (req.files && !Array.isArray(req.files) && req.files['photos']) || []
         handleExpress(res, () => this.postService.createPost(data, files, req.user.userId))
+    }
+
+    @Get('/explore')
+    @Auth()
+    explore(req: Request, res: Response) {
+        handleExpress(res, () => this.postService.explore(req.user.userId))
+    }
+
+    @Get('/MyPosts')
+    @Auth()
+    getMyPosts(req: Request, res: Response) {
+        console.log('getMyPosts')
+        handleExpress(res, () => this.postService.getMyPosts(req.user.userId))
+    }
+
+    @Get('/MyTimeline')
+    @Auth()
+    getMyTimeline(req: Request, res: Response) {
+        console.log('getMyTimeline')
+        handleExpress(res, () => this.postService.getMyTimeline(req.user.userId))
+    }
+
+    @Get('/user/:userId')
+    @Auth()
+    getAllPost(req: Request, res: Response) {
+        const data = zodJustId.parse(req.params.userId)
+        handleExpress(res, () => this.postService.getAllPosts(req.user.userId, data))
     }
 
     @Patch('/:postId')

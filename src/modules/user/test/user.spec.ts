@@ -15,7 +15,7 @@ import { Hashed } from '../../../data/hashed'
 import { SendEmailDto } from '../dto/send-email.dto'
 import { isSimpleMessage } from '../../../data/simple-message'
 import { RedisRepo } from '../../../data-source'
-import { userDao } from '../bll/user.dao'
+import { userDao, userDaoList } from '../bll/user.dao'
 import * as emailUtils from '../../../utility/send-email'
 import { User, UserShort } from '../model/user'
 
@@ -60,7 +60,7 @@ class MockUserRepository implements IUserRepository {
             updatedAt: new Date(),
         })
     }
-    findListById(userIds: { id: UserId }[]): Promise<{ toUserList(): User[] }> {
+    findListById(userIds: { id: UserId }[]): Promise<ReturnType<typeof userDaoList>> {
         throw new Error('Method not implemented.')
     }
     edit(userId: UserId, data: EditUser): Promise<ReturnType<typeof userDao>> {
@@ -125,6 +125,9 @@ class MockUserRepository implements IUserRepository {
     }
     async findByEmail(email: Email): Promise<ReturnType<typeof userDao>> {
         return userDao(this.users.find((user) => user.email === email) || null)
+    }
+    async findUsersNotInIds(userId: UserId, userIds: UserId[], offset: number, limit: number): Promise<ReturnType<typeof userDaoList>> {
+        throw new Error('Method not implemented.')
     }
 }
 

@@ -29,7 +29,7 @@ const postEntityWithoutDetailToPost = (input: PostEntity) => {
         caption: zodCaption.parse(rest.caption),
         author: zodUserId.parse(rest.author),
         closeFriend: zodBooleanOrBooleanString.parse(rest.closeFriend),
-        tags: zodTags.optional().parse(rest.tags)
+        tags: zodTags.optional().parse(rest.tags),
     }
     return output
 }
@@ -87,6 +87,23 @@ export const postArrayDao = (input: PostEntity[]) => {
             return input.map((entity) => {
                 const rest = postEntityWithDetailToPost(entity)
                 const output: PostWithDetail = { ...rest }
+                return output
+            })
+        },
+        toThumbnailList(): BasicPost[] {
+            return input.map((entity) => {
+                const rest = postEntityToPostThumbnail(entity)
+                return rest
+            })
+        },
+    }
+}
+export const postDaoList = (input: PostEntity[]) => {
+    return {
+        toPostList(): PostWithoutDetail[] {
+            return input.map((entity) => {
+                const rest = postEntityWithoutDetailToPost(entity)
+                const output: PostWithoutDetail = { ...rest }
                 return output
             })
         },

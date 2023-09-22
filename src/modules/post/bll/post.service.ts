@@ -1,8 +1,8 @@
 import { BadRequestError, ServerError } from '../../../utility/http-error'
 import { IPostRepository, PostRepository } from '../post.repository'
 import { CreatePostDTO } from '../dto/createPost.dto'
-import { PostWithDetail, PostWithoutDetail } from '../model/post'
-import { zodPostId } from '../model/post-id'
+import { BasicPost, PostWithDetail, PostWithoutDetail } from '../model/post'
+import { PostId, zodPostId } from '../model/post-id'
 import { toCreatePost } from './post.dao'
 import { UserId, zodUserId } from '../../user/model/user-id'
 import { Service } from '../../../registry/layer-decorators'
@@ -37,6 +37,8 @@ export interface IPostService {
     getAllPosts(userId: UserId, targetUserId: JustId): Promise<arrayResult | Message>
     getMyPosts(userId: UserId): Promise<arrayResult | Message>
     getMyTimeline(userId: UserId): Promise<timelineArrayResult | Message | ServerError>
+    getSomePosts(userId: UserId): Promise<BasicPost[]>
+    explore(userId: UserId): Promise<{ user: User; posts: BasicPost[] }[]>
 }
 
 @Service(PostRepository, UserService, RelationService)
@@ -138,5 +140,22 @@ export class PostService implements IPostService {
         if (!post) return { msg: messages.postNotFound.persian }
 
         return post
+    }
+
+    async getSomePosts(userId: UserId): Promise<BasicPost[]> {
+        const postsDao = await this.postRepo.findSomeByAuthor(userId, 4)
+        const posts = postsDao.toThumbnailList()
+        return posts
+    }
+
+    async explore(userId: UserId): Promise<{ user: User; posts: BasicPost[] }[]> {
+        const result: { user: User; posts: BasicPost[] }[] = []
+        const relatedUsers = await this.relationService.getRealtedUsers(userId)
+        const unrelatedUsers = await this.userService.getUnrelatedUsers(userId, relatedUsers)
+        for (const user of unrelatedUsers) {
+            const posts = await this.getSomePosts(user.id)
+            result.push({ user, posts })
+        }
+        return result
     }
 }

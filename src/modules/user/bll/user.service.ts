@@ -21,7 +21,7 @@ import { userDao } from './user.dao'
 import { Service } from '../../../registry/layer-decorators'
 import { EditProfileDto, editProfileDto } from '../dto/edit-profile.dto'
 import { Token } from '../../../data/token'
-import { PersianErrors } from '../../../utility/persian-messages'
+import { PersianErrors, messages } from '../../../utility/persian-messages'
 import { zodWholeNumber } from '../../../data/whole-number'
 
 export type LoginSignUp = UserWithToken | BadRequestError | ServerError
@@ -35,6 +35,7 @@ export interface IUserService {
     forgetPassSendEmail(data: SendEmailDto): Promise<SimpleMessage | BadRequestError>
     forgetPassSetPass(data: SetPasswordDto): Promise<LoginSignUp>
     editProfile(user: UserBasic, data: EditProfileDto, file?: Express.Multer.File): Promise<{ user: User; token: Token } | ServerError>
+    getUnrelatedUsers(userId: UserId, userIds: UserId[]): Promise<User[]>
     logout(userId: UserId): Promise<SimpleMessage | BadRequestError>
 }
 
@@ -231,9 +232,15 @@ export class UserService implements IUserService {
         return editedDao.toUser()
     }
 
+    async getUnrelatedUsers(userId: UserId, userIds: UserId[]): Promise<User[]> {
+        const usersDao = await this.userRepo.findUsersNotInIds(userId, userIds, 0, 25)
+        let users = usersDao.map((a) => a.toUser())
+        return users
+    }
     async getUserListById(userIds: UserId[]) {
         const userList = userIds.map((userId) => ({ id: userId }))
-        const users = (await this.userRepo.findListById(userList)).toUserList()
+        const usersDao = await this.userRepo.findListById(userList)
+        const users = usersDao.map((a) => a.toUser())
         return users
     }
 
