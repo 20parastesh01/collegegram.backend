@@ -1,40 +1,32 @@
-import {
-    Entity,
-    PrimaryGeneratedColumn,
-    ManyToOne,
-    JoinColumn,
-    UpdateDateColumn,
-    CreateDateColumn,
-    Column,
-  } from 'typeorm';
-import { BookmarkId} from '../model/bookmark-id';
-import { UserEntity } from '../../user/entity/user.entity';
-import { UserId } from '../../user/model/user-id';
-import { PostEntity } from '../../post/entity/post.entity';
-import { PostId } from '../../post/model/post-id';
-  
+import { Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, UpdateDateColumn, CreateDateColumn, Column } from 'typeorm'
+import { BookmarkId } from '../model/bookmark-id'
+import { UserEntity } from '../../user/entity/user.entity'
+import { UserId } from '../../user/model/user-id'
+import { PostEntity } from '../../post/entity/post.entity'
+import { PostId } from '../../post/model/post-id'
+
 @Entity('bookmarks')
 export class BookmarkEntity {
-  @PrimaryGeneratedColumn()
-  id!: BookmarkId;
-  
-  @Column()
-  user_id!: UserId
+    @PrimaryGeneratedColumn()
+    id!: BookmarkId
 
-  @ManyToOne(() => UserEntity, { eager: true, onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'user_id' })
-  user!: UserEntity;
-  
-  @Column()
-  post_id!: PostId
+    @Column()
+    user_id!: UserId
 
-  @ManyToOne(() => PostEntity, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'post_id' })
-  post!: PostEntity;
+    @ManyToOne(() => UserEntity, (post) => post.bookmarks, { eager: true, onDelete: 'CASCADE' })
+    @JoinColumn({ name: 'user_id' })
+    user!: UserEntity
 
-  @CreateDateColumn()
-  createdAt!: Date
+    @Column()
+    post_id!: PostId
 
-  @UpdateDateColumn()
-  updatedAt!: Date
+    @ManyToOne(() => PostEntity, (post) => post.bookmarks, { eager: true, onDelete: 'CASCADE' })
+    @JoinColumn({ name: 'post_id' })
+    post!: PostEntity
+
+    @CreateDateColumn()
+    createdAt!: Date
+
+    @UpdateDateColumn()
+    updatedAt!: Date
 }

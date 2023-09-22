@@ -30,13 +30,12 @@ export class CommentRepository implements ICommentRepository {
         this.CommentRepo = appDataSource.getRepository(CommentEntity)
     }
     async findAllByPost(postId: PostId) {
-        const comments : CommentEntity[] = await this.CommentRepo.createQueryBuilder('comment')
+        const comments: CommentEntity[] = await this.CommentRepo.createQueryBuilder('comment')
             .loadRelationCountAndMap('comment.likeCount', 'comment.likes')
             .where('comment.postId = :postId', { postId })
             .leftJoinAndSelect('comment.author', 'user')
             .leftJoinAndSelect('comment.postId', 'postId')
             .leftJoinAndSelect('comment.parentId', 'commentId')
-            .groupBy('comment.id')
             .orderBy('comment.createdAt', 'DESC')
             .getMany()
         return commentListDao(comments)
@@ -46,14 +45,13 @@ export class CommentRepository implements ICommentRepository {
     // }
     async findByID(commentId: CommentId) {
         const commentEntity = await this.CommentRepo.createQueryBuilder('comment')
-        .loadRelationCountAndMap('comment.likeCount', 'comment.likes')
-        .where('comment.id = :commentId', { commentId })
-        .leftJoinAndSelect('comment.author', 'user')
-        .leftJoinAndSelect('comment.postId', 'postId')
-        .leftJoinAndSelect('comment.parentId', 'commentId')
-        .groupBy('comment.id')
-        .orderBy('comment.createdAt', 'DESC')
-        .getOne()
+            .loadRelationCountAndMap('comment.likeCount', 'comment.likes')
+            .where('comment.id = :commentId', { commentId })
+            .leftJoinAndSelect('comment.author', 'user')
+            .leftJoinAndSelect('comment.postId', 'postId')
+            .leftJoinAndSelect('comment.parentId', 'commentId')
+            .orderBy('comment.createdAt', 'DESC')
+            .getOne()
         return commentOrNullDao(commentEntity)
     }
     async create(data: CreateComment) {

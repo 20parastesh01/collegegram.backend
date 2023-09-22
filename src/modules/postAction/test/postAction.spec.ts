@@ -1,4 +1,3 @@
-
 import { ILikeRepository } from '../like.repository'
 import { messages } from '../../../utility/persian-messages'
 import { bookmarkArrayDao, bookmarkDao, bookmarkOrNullDao, likeDao, likeOrNullDao, mockCreatedBookmark, mockCreatedLike, mockCreatedPost, mockJustId, mockLikeDto, mockPostWithoutDetail, mockUser, postWithoutDetailOrNullDao, userDao } from '../../../data/fakeData'
@@ -7,9 +6,6 @@ import { IPostService, PostService } from '../../post/bll/post.service'
 import { LikeService } from '../bll/like.service'
 import { BookmarkService } from '../bll/bookmark.service'
 import { IUserService } from '../../user/bll/user.service'
-
-
-
 
 describe('PostActionService', () => {
     let postService: PostService
@@ -22,82 +18,77 @@ describe('PostActionService', () => {
 
     beforeEach(() => {
         mockPostService = {
-            getPostWitoutDetail: jest.fn()
+            getPostWitoutDetail: jest.fn(),
         } as any
         mockLikeRepository = {
-            create : jest.fn(),
+            create: jest.fn(),
             findByUserAndPost: jest.fn(),
-            remove : jest.fn(),
+            remove: jest.fn(),
         } as any
         mockBookmarkRepository = {
-            create : jest.fn(),
+            create: jest.fn(),
             findByUserAndPost: jest.fn(),
-            remove : jest.fn(),
-            findAllByUser : jest.fn(),
+            remove: jest.fn(),
+            findAllByUser: jest.fn(),
         } as any
         mockUserService = {
-            getUserById: jest.fn()
+            getUserById: jest.fn(),
         } as any
         bookmarkService = new BookmarkService(mockBookmarkRepository, mockPostService, mockUserService)
-        likeService = new LikeService(mockLikeRepository, mockPostService,mockUserService)
+        likeService = new LikeService(mockLikeRepository, mockPostService, mockUserService)
     })
-    
+
     it('should like a post', async () => {
-        
         mockLikeRepository.create.mockResolvedValue(likeDao(mockCreatedLike))
         mockLikeRepository.findByUserAndPost.mockResolvedValue(likeOrNullDao(null))
         mockPostService.getPostWitoutDetail.mockResolvedValue(mockPostWithoutDetail)
         mockUserService.getUserById.mockResolvedValue(mockUser[1])
-        const result = await likeService.likePost(mockLikeDto.user.id,mockJustId.id2)
+        const result = await likeService.likePost(mockLikeDto.user.id, mockJustId.id2)
 
         expect(result.msg).toEqual(messages.liked.persian)
         //expect(result).toEqual(mockCreatedPost[1])
-        expect(mockLikeRepository.create).toHaveBeenCalledWith(expect.objectContaining({post:mockPostWithoutDetail,user:mockUser[1]}))
+        expect(mockLikeRepository.create).toHaveBeenCalledWith(expect.objectContaining({ post: mockPostWithoutDetail, user: mockUser[1] }))
     })
     it('should unlike a post', async () => {
-        
         mockLikeRepository.remove.mockResolvedValue(likeOrNullDao(mockCreatedLike))
         mockLikeRepository.findByUserAndPost.mockResolvedValue(likeOrNullDao(mockCreatedLike))
         mockPostService.getPostWitoutDetail.mockResolvedValue(mockPostWithoutDetail)
         mockUserService.getUserById.mockResolvedValue(mockUser[1])
         const result = await likeService.unlikePost(mockLikeDto.user.id, mockJustId.id2)
 
-        expect(result).toEqual({msg:messages.unliked.persian})
+        expect(result).toEqual({ msg: messages.unliked.persian })
         //expect(result.data[0]).toEqual(mockCreatedPost[1])
         expect(mockLikeRepository.remove).toHaveBeenCalledWith(mockCreatedLike.id)
     })
 
     it('should bookmark a post', async () => {
-        
         mockBookmarkRepository.create.mockResolvedValue(bookmarkDao(mockCreatedBookmark))
         mockBookmarkRepository.findByUserAndPost.mockResolvedValue(bookmarkOrNullDao(null))
         mockPostService.getPostWitoutDetail.mockResolvedValue(mockPostWithoutDetail)
         mockUserService.getUserById.mockResolvedValue(mockUser[1])
-        const result = await bookmarkService.bookmarkPost(mockLikeDto.user.id,mockJustId.id1)
+        const result = await bookmarkService.bookmarkPost(mockLikeDto.user.id, mockJustId.id1)
 
-        expect(result).toEqual({msg:messages.bookmarked.persian})
+        expect(result).toEqual({ msg: messages.bookmarked.persian })
         //expect(result).toEqual(mockCreatedPost[1])
-        expect(mockBookmarkRepository.create).toHaveBeenCalledWith(expect.objectContaining({post:mockPostWithoutDetail,user:mockUser[1]}))
+        expect(mockBookmarkRepository.create).toHaveBeenCalledWith(expect.objectContaining({ post: mockPostWithoutDetail, user: mockUser[1] }))
     })
 
     it('should unbookmark a post', async () => {
-        
         mockBookmarkRepository.remove.mockResolvedValue(bookmarkDao(mockCreatedBookmark))
         mockBookmarkRepository.findByUserAndPost.mockResolvedValue(bookmarkOrNullDao(mockCreatedBookmark))
         mockPostService.getPostWitoutDetail.mockResolvedValue(mockPostWithoutDetail)
         mockUserService.getUserById.mockResolvedValue(mockUser[1])
-        const result = await bookmarkService.unbookmarkPost(mockLikeDto.user.id,mockJustId.id1)
+        const result = await bookmarkService.unbookmarkPost(mockLikeDto.user.id, mockJustId.id1)
 
-        expect(result).toEqual({msg:messages.unbookmarked.persian})
+        expect(result).toEqual({ msg: messages.unbookmarked.persian })
         //expect(result.data[0]).toEqual(mockCreatedPost[1])
         expect(mockBookmarkRepository.remove).toHaveBeenCalledWith(mockCreatedLike.id)
     })
     it('should get myBookmarkeds list of post', async () => {
-        
         mockBookmarkRepository.findAllByUser.mockResolvedValue(bookmarkArrayDao([mockCreatedBookmark]))
         const result = await bookmarkService.getMyBookmarkeds(mockLikeDto.user.id)
 
-        expect(result).toEqual({result:[mockCreatedPost[1]], total:1})
+        expect(result).toEqual({ result: [mockCreatedPost[1]], total: 1 })
         //expect(result.data[0]).toEqual(mockCreatedPost[1])
         expect(mockBookmarkRepository.findAllByUser).toHaveBeenCalledWith(mockCreatedLike.id)
     })

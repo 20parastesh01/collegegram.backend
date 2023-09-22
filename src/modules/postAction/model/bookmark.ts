@@ -1,4 +1,3 @@
-
 import { PostWithDetail } from '../../post/model/post'
 import { PostId } from '../../post/model/post-id'
 import { UserId } from '../../user/model/user-id'
@@ -8,7 +7,13 @@ export interface BookmarkWithPost extends BasicBookmark {
     post: PostWithDetail
 }
 export interface BasicBookmark {
-    id:BookmarkId
+    id: BookmarkId
     postId: PostId
     userId: UserId
+}
+export interface DeletedBookmark {
+    id: BookmarkId
+    postId: PostId
+    userId: UserId
+    post: PostWithDetail
 }

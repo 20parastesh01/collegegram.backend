@@ -17,7 +17,7 @@ type resComments = { result: Comment[]; total: number } | BadRequestError | Serv
 
 export interface ICommentService {
     createComment(data: CreateCommentDTO, userId: UserId): Promise<resComment>
-    getComment(id: JustId): Promise<Comment | null>;
+    getComment(id: JustId): Promise<Comment | null>
     getAllComments(postId: PostId): Promise<{ result: Comment[]; total: number }>
 }
 
@@ -25,8 +25,8 @@ export interface ICommentService {
 export class CommentService implements ICommentService {
     constructor(
         private commentRepo: ICommentRepository,
-        private userService: IUserService,
-        ) {}
+        private userService: IUserService
+    ) {}
 
     async getAllComments(postId: PostId) {
         const comments = (await this.commentRepo.findAllByPost(postId)).toCommentModelList()
@@ -39,8 +39,7 @@ export class CommentService implements ICommentService {
 
     async createComment(dto: CreateCommentDTO, userId: UserId) {
         const user = await this.userService.getUserById(userId)
-        if(user === null)
-            return new ServerError(PersianErrors.ServerError)
+        if (user === null) return new ServerError(PersianErrors.ServerError)
         const commentEntity = toCreateComment({
             author: user,
             ...dto,
@@ -51,7 +50,7 @@ export class CommentService implements ICommentService {
 
     async getComment(id: JustId) {
         const commentId = zodCommentId.parse(id)
-        const comment = (await this.commentRepo.findByID(commentId)).toCommentModel();
-        return comment ?? null;
+        const comment = (await this.commentRepo.findByID(commentId)).toCommentModel()
+        return comment ?? null
     }
 }

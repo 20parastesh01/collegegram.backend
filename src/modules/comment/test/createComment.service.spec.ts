@@ -45,13 +45,11 @@ describe('CommentService', () => {
     })
 
     it('should create a comment', async () => {
-        
-
         mockCommentRepository.create.mockResolvedValue(commentDao(mockCreatedComment))
 
         const result = await commentService.createComment(mockcreateCommentDto, userId)
 
         expect(result).toEqual(mockCreatedComment)
-        expect(mockCommentRepository.create).toHaveBeenCalledWith({...mockcreateCommentDto,likeCount:0 as WholeNumber,author:123 as UserId})
+        expect(mockCommentRepository.create).toHaveBeenCalledWith({ ...mockcreateCommentDto, likeCount: 0 as WholeNumber, author: 123 as UserId })
     })
 })

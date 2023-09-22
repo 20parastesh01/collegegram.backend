@@ -43,12 +43,12 @@ export class UserEntity {
 
     @Column('boolean', { default: false })
     private!: boolean
-    
-    @OneToMany(() => LikeEntity, (like)=>like.post , { lazy: true })
+
+    @OneToMany(() => LikeEntity, (like) => like.user, { lazy: true })
     @JoinColumn({ name: 'like_id' })
     likes: LikeEntity[] | undefined
 
-    @OneToMany(() => BookmarkEntity, (bookmark)=>bookmark.post , { lazy: true })
+    @OneToMany(() => BookmarkEntity, (bookmark) => bookmark.user, { lazy: true })
     @JoinColumn({ name: 'bookmark_id' })
     bookmarks: BookmarkEntity[] | undefined
 

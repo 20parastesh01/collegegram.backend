@@ -53,9 +53,9 @@ export class PostRepository implements IPostRepository {
             .loadRelationCountAndMap('post.bookmarkCount', 'post.bookmarks')
             .loadRelationCountAndMap('post.commentCount', 'post.comments')
             .where('post.author = :userId', { userId })
-            .groupBy('post.id')
-            .orderBy('createdAt', 'DESC')
+            .orderBy('post.createdAt', 'DESC')
             .getMany()
+
         return postArrayDao(posts)
     }
     async findAllByAuthorList(usersId: UserId[]) {
@@ -64,12 +64,12 @@ export class PostRepository implements IPostRepository {
             .loadRelationCountAndMap('post.bookmarkCount', 'post.bookmarks')
             .loadRelationCountAndMap('post.commentCount', 'post.comments')
             .where('post.author IN (:...usersId)', { usersId })
-            .orderBy('createdAt', 'DESC')
+            .orderBy('post.createdAt', 'DESC')
             .getMany()
         return postArrayDao(posts)
     }
     async findWithoutDetailByID(postId: PostId) {
-        const postEntity: PostEntity | null = await this.PostRepo.createQueryBuilder('post').where('post.id = :postId', { postId }).groupBy('post.id').setLock('pessimistic_read').getOne()
+        const postEntity: PostEntity | null = await this.PostRepo.createQueryBuilder('post').where('post.id = :postId', { postId }).getOne()
         return postWithoutDetailOrNullDao(postEntity)
     }
 
@@ -89,7 +89,6 @@ export class PostRepository implements IPostRepository {
             .loadRelationCountAndMap('post.bookmarkCount', 'post.bookmarks')
             .loadRelationCountAndMap('post.commentCount', 'post.comments')
             .where('post.id = :postId', { postId })
-            .groupBy('post.id')
             .getOne()
 
         return postWithDetailOrNullDao(output)

@@ -3,7 +3,7 @@ import { UserId } from '../../user/model/user-id'
 import { CommentId } from './comment-id'
 
 export interface BasicCommentLike {
-    id:LikeId
+    id: LikeId
     commentId: CommentId
     userId: UserId
 }

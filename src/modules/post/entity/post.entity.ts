@@ -17,7 +17,7 @@ export class PostEntity {
     @Column()
     caption!: Caption
 
-    @Column({ type: 'text', array: true, default: [], nullable:true })
+    @Column({ type: 'text', array: true, default: [], nullable: true })
     tags?: Tag[]
 
     @Column()
@@ -25,25 +25,25 @@ export class PostEntity {
 
     @Column('integer', { name: 'commentCount', default: 0 })
     commentCount!: WholeNumber
-    
+
     @Column('integer', { name: 'likeCount', default: 0 })
     likeCount!: WholeNumber
-    
+
     @Column('integer', { name: 'bookmarkCount', default: 0 })
     bookmarkCount!: WholeNumber
 
     @Column('boolean', { default: false })
     closeFriend!: boolean
 
-    @OneToMany((type) => LikeEntity, (like)=>like.post , { lazy: true })
+    @OneToMany((type) => LikeEntity, (like) => like.post, { lazy: true })
     @JoinColumn({ name: 'like_id' })
     likes: LikeEntity[] | undefined
 
-    @OneToMany((type) => BookmarkEntity, (bookmark)=>bookmark.post , { lazy: true })
+    @OneToMany((type) => BookmarkEntity, (bookmark) => bookmark.post, { lazy: true })
     @JoinColumn({ name: 'bookmark_id' })
     bookmarks: BookmarkEntity[] | undefined
-    
-    @OneToMany((type) => CommentEntity, (comment)=>comment.postId , { lazy: true })
+
+    @OneToMany((type) => CommentEntity, (comment) => comment.postId, { lazy: true })
     @JoinColumn({ name: 'comment_id' })
     comments: CommentEntity[] | undefined
 

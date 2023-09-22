@@ -19,7 +19,6 @@ export const zodPost = z.object({
     bookmarkCount: zodWholeNumber.optional(),
     caption: zodCaption.optional(),
     commentCount: zodWholeNumber.optional(),
-
 })
 export const zodStrictPost = z.object({
     id: zodPostId,
@@ -31,10 +30,7 @@ export const zodStrictPost = z.object({
     bookmarkCount: zodWholeNumber,
     caption: zodCaption,
     commentCount: zodWholeNumber,
-
 })
-
-
 
 export interface PostWithDetail extends PostWithoutDetail {
     likeCount: WholeNumber

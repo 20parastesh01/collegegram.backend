@@ -76,7 +76,6 @@ export class PostService implements IPostService {
     }
 
     async getMyPosts(userId: UserId) {
-        console.log(userId)
         const posts = (await this.postRepo.findAllByAuthor(userId)).toPostList()
         if (posts.length < 1) return { msg: messages.postNotFound.persian }
 
@@ -96,7 +95,6 @@ export class PostService implements IPostService {
         for (let post of posts) {
             await this.adjustPhoto(post)
         }
-        //posts.map(async (post) => (post.photos = (await MinioRepo.getPostPhotoUrl(post.id)) || []))
         const result = posts.map((post) => ({ user: users.filter((user) => user.id === post.author)[0], post: post }))
         return { result: result, total: result.length }
     }
