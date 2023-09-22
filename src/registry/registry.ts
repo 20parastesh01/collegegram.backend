@@ -37,14 +37,14 @@ export async function scan(app: Express) {
         for (let i = 0; i < 3; i++) await importFilesRecursively(path.join(process.cwd(), 'src', 'modules'))
         await importFilesRecursively(path.join(process.cwd(), 'src', 'routes'))
         for (let router of routes) {
-            app.use(router)
+            app.use('/api', router)
         }
         const swaggerFilePath = path.join(process.cwd(), 'src', 'registry', 'swagger.json')
         if (process.env.SWAGGER) fs.writeFileSync(swaggerFilePath, JSON.stringify(swaggerObject))
         const filePath = swaggerUi.getAbsoluteFSPath() + '/swagger-initializer.js'
         fs.writeFileSync(filePath, fs.readFileSync(filePath).toString().replace('https://petstore.swagger.io/v2/swagger.json', '/swagger'))
-        app.use('/api-docs', express.static(swaggerUi.getAbsoluteFSPath()))
-        app.use('/swagger', (req, res) => res.sendFile(swaggerFilePath))
+        app.use('/api/api-docs', express.static(swaggerUi.getAbsoluteFSPath()))
+        app.use('/api/swagger', (req, res) => res.sendFile(swaggerFilePath))
     } catch (error) {
         console.error('Error:', error)
     }
