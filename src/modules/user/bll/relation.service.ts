@@ -1,9 +1,10 @@
 import { MinioRepo } from '../../../data-source'
-import { Service } from '../../../registry/layer-decorators'
+import { zodWholeNumber } from '../../../data/whole-number'
+import { Service, services } from '../../../registry/layer-decorators'
 import { ForbiddenError, NotFoundError } from '../../../utility/http-error'
 import { messages } from '../../../utility/persian-messages'
 import { NotificationService } from '../../notification/bll/notification.service'
-import { resMessage } from '../../post/bll/post.service'
+import { PostService, resMessage } from '../../post/bll/post.service'
 import { Relation, RelationStatus } from '../model/relation'
 import { User, UserWithStatus } from '../model/user'
 import { UserId } from '../model/user-id'
@@ -129,6 +130,8 @@ export class RelationService implements IRelationService {
     async getTargetUser(userId: UserId, targetUserId: UserId): Promise<UserWithStatus | NotFoundError> {
         const target = await this.userService.getUserById(targetUserId)
         if (!target) return new NotFoundError(messages.userNotFound.persian)
+        const postCount = await (services['PostService'] as PostService).getUserPostCount(target.id)
+        target.postsCount = zodWholeNumber.parse(postCount)
         const dao = await this.relationRepo.getRelation(target.id, userId)
         let status = null
         const status1 = dao ? dao.toRelation().status : null

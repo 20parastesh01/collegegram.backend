@@ -25,6 +25,7 @@ export interface IPostRepository {
     findAllByAuthor(userId: UserId): Promise<ReturnType<typeof postArrayDao>>
     findWithoutDetailByID(postId: PostId): Promise<ReturnType<typeof postWithoutDetailOrNullDao>>
     findAllByAuthorList(usersId: UserId[]): Promise<ReturnType<typeof postArrayDao>>
+    countByAuthor(userId: UserId): Promise<number>
 }
 
 @Repo()
@@ -47,6 +48,11 @@ export class PostRepository implements IPostRepository {
         })
         return postDaoList(posts)
     }
+
+    async countByAuthor(userId: UserId) {
+        return this.PostRepo.countBy({ author: userId })
+    }
+
     async findAllByAuthor(userId: UserId) {
         const posts: PostEntity[] = await this.PostRepo.createQueryBuilder('post')
             .loadRelationCountAndMap('post.likeCount', 'post.likes')
