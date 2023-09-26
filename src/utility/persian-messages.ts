@@ -42,4 +42,9 @@ export const messages = {
     notBookmarkedYet: { persian: 'شما پست مورد نظر را قبلا ذخیره نکرده‌اید' as Msg },
     alreadyBookmarked: { persian: 'شما پست مورد نظر را قبلا ذخیره کرده‌اید' as Msg },
     postAccessDenied: { persian: 'شما به پست‌های این کاربر دسترسی ندارید' as Msg },
+    cantBeCloseFriend: { persian: 'شما نمیتوانید این کاربر را به دوستان نزیک خود اضافه کنید' as Msg },
+    closeFriendAdded: { persian: 'شما این کاربر را به دوستان نزیک خود اضافه کردید' as Msg },
+    closeFriendRemoved: { persian: 'شما این کاربر را از دوستان نزیک خود حذف کردید' as Msg },
+    closeFriendExists: { persian: 'این کاربر در لیست دوستان نزدیک شما وجود دارد' as Msg },
+    closeFriendNotExists: { persian: 'این کاربر در لیست دوستان نزدیک شما وجود ندارد' as Msg },
 }
