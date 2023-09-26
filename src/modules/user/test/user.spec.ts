@@ -19,26 +19,6 @@ import { userDao, userDaoList } from '../bll/user.dao'
 import * as emailUtils from '../../../utility/send-email'
 import { User, UserShort } from '../model/user'
 
-// class MockRedis implements IRedis {
-//     repo: any = {}
-//     async setSession(session: Hashed, userId: UserId): Promise<void> {
-//         this.repo[session] = userId
-//     }
-//     async setNewExpire(session: Hashed): Promise<void> {}
-//     async getSession(userId: UserId): Promise<Hashed | null> {
-//         return this.repo[userId]
-//     }
-//     async getUserId(session: Hashed): Promise<UserId | null> {
-//         return this.repo[session]
-//     }
-//     async setResetPasswordToken(uuId: string, userId: UserId): Promise<void> {
-//         this.repo[uuId] = userId
-//     }
-//     async getResetPasswordUserId(uuId: string): Promise<UserId | null> {
-//         return this.repo[uuId]
-//     }
-// }
-
 class MockUserRepository implements IUserRepository {
     public users: UserEntity[] = []
     constructor() {

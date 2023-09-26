@@ -5,16 +5,8 @@ import { UserId, isUserId } from './modules/user/model/user-id'
 const redisPass = process.env.REDIS_PASS
 const redisHost = process.env.REDIS_HOST
 const redisPort = process.env.REDIS_PORT
-export interface IRedis {
-    setSession(session: Hashed, userId: UserId, remember: boolean): Promise<void>
-    setNewExpire(session: Hashed): Promise<void>
-    getSession(userId: UserId): Promise<Hashed | null>
-    getUserId(session: Hashed): Promise<UserId | null>
-    setResetPasswordToken(uuId: string, userId: UserId): Promise<void>
-    getResetPasswordUserId(uuId: string): Promise<UserId | null>
-    deleteSession(userId: UserId): Promise<void>
-}
-export class Redis implements IRedis {
+
+export class Redis {
     private client
     constructor() {
         this.client = createClient({
