@@ -13,14 +13,16 @@ import { zodUserId } from '../modules/user/model/user-id'
 import { NotificationService } from '../modules/notification/bll/notification.service'
 import { BookmarkService } from '../modules/postAction/bll/bookmark.service'
 import { PostService } from '../modules/post/bll/post.service'
+import { CloseFriendService } from '../modules/user/bll/closefriend.service'
 
-@Route('/user', UserService, RelationService, BookmarkService, NotificationService)
+@Route('/user', UserService, RelationService, BookmarkService, NotificationService, CloseFriendService)
 export class UserRouter {
     constructor(
         private userService: UserService,
         private relationService: RelationService,
         private bookmarkService: BookmarkService,
-        private notificationService: NotificationService
+        private notificationService: NotificationService,
+        private closeFriendService: CloseFriendService
     ) {}
     @Post('/signup')
     @RequestBody('SignUpDto')
@@ -121,5 +123,17 @@ export class UserRouter {
     @Auth()
     getTargetUser(req: Request, res: Response) {
         handleExpress(res, () => this.relationService.getTargetUser(req.user.userId, zodUserId.parse(req.params.id)))
+    }
+
+    @Post('/:id/closefriend')
+    @Auth()
+    addCloseFriend(req: Request, res: Response) {
+        handleExpress(res, () => this.closeFriendService.addCloseFriend(req.user.userId, zodUserId.parse(req.params.id)))
+    }
+
+    @Delete('/:id/unclosefriend')
+    @Auth()
+    removeCloseFriend(req: Request, res: Response) {
+        handleExpress(res, () => this.closeFriendService.removeCloseFriend(req.user.userId, zodUserId.parse(req.params.id)))
     }
 }
