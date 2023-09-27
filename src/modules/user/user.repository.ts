@@ -5,8 +5,9 @@ import { Email } from '../../data/email'
 import { Password } from './model/password'
 import { UserId } from './model/user-id'
 import { Repo } from '../../registry/layer-decorators'
-import { userDao, userDaoList } from './bll/user.dao'
+import { userDao, userDaoList, userEntityToUserShort } from './bll/user.dao'
 import { WholeNumber } from '../../data/whole-number'
+import { UserShort } from './model/user'
 
 export interface CreateUser {
     username: Username
@@ -38,6 +39,7 @@ export interface IUserRepository {
     findListById(userIds: { id: UserId }[]): Promise<ReturnType<typeof userDaoList>>
     changePassword(userId: UserId, newPassword: Password): Promise<ReturnType<typeof userDao>>
     edit(userId: UserId, data: EditUser): Promise<ReturnType<typeof userDao>>
+    getInfoByIds(userIds: UserId[]): Promise<UserShort[]>
 }
 
 @Repo()
@@ -80,5 +82,13 @@ export class UserRepository implements IUserRepository {
     async edit(userId: UserId, data: EditUser): Promise<ReturnType<typeof userDao>> {
         const userEntity = await this.userRepo.save({ id: userId, ...data })
         return userDao(userEntity)
+    }
+    async getInfoByIds(userIds: UserId[]) {
+        const userEntities = await this.userRepo.find({ where: { id: In(userIds) } })
+        const result = []
+        for (let userEntity of userEntities) {
+            result.push(userEntityToUserShort(userEntity))
+        }
+        return result
     }
 }

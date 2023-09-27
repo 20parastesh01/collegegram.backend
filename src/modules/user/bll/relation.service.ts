@@ -1,4 +1,5 @@
 import { MinioRepo } from '../../../data-source'
+import { PaginationInfo } from '../../../data/pagination'
 import { zodWholeNumber } from '../../../data/whole-number'
 import { Service, services } from '../../../registry/layer-decorators'
 import { ForbiddenError, NotFoundError } from '../../../utility/http-error'
@@ -126,6 +127,24 @@ export class RelationService implements IRelationService {
         }
         await this.relationRepo.updateRelation({ userA: userId, userB: targetId, status: 'Blocked' })
         return { msg: messages.blocked.persian }
+    }
+
+    async getFollowers(userId: UserId, paginationInfo: PaginationInfo) {
+        const followerUserIds = await this.relationRepo.findFollowers(userId,paginationInfo)
+        const userShorts = await this.userService.getBatchUserInfo(followerUserIds)
+        return userShorts 
+    }
+
+    async getFollowings(userId:UserId,paginationInfo:PaginationInfo) {
+        const followingUserIds = await this.relationRepo.findFollowings(userId,paginationInfo)
+        const userShorts = await this.userService.getBatchUserInfo(followingUserIds)
+        return userShorts  
+    }
+
+    async getBlockeds(userId:UserId,paginationInfo:PaginationInfo) {
+        const followingUserIds = await this.relationRepo.findBlockeds(userId,paginationInfo)
+        const userShorts = await this.userService.getBatchUserInfo(followingUserIds)
+        return userShorts  
     }
 
     async getTargetUser(userId: UserId, targetUserId: UserId): Promise<UserWithStatus | NotFoundError> {

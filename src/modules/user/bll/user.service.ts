@@ -118,6 +118,15 @@ export class UserService implements IUserService {
         }
     }
 
+    async getBatchUserInfo(userIds: UserId[]) {
+        const users = await this.userRepo.getInfoByIds(userIds)
+        for(let user of users) {
+            const photo = await MinioRepo.getProfileUrl(user.id)
+            if (photo) user.photo = photo
+        }
+        return users
+    }
+
     async getUserById(userId: UserId): Promise<User | null> {
         const dao = await this.userRepo.findById(userId)
         if (!dao) return null

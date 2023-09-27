@@ -1,3 +1,4 @@
+import { PaginationInfo } from '../../../data/pagination'
 import { Service, services } from '../../../registry/layer-decorators'
 import { BadRequestError, ForbiddenError, NotFoundError } from '../../../utility/http-error'
 import { messages } from '../../../utility/persian-messages'
@@ -44,5 +45,11 @@ export class CloseFriendService implements ICloseFriendService {
         if (!closeFriend) return { msg: messages.closeFriendNotExists.persian }
         await this.closeFriendRepo.removeCloseFriend(userId, targetUserId)
         return { msg: messages.closeFriendRemoved.persian }
+    }
+
+    async getCloseFriends(userId: UserId, paginationInfo: PaginationInfo) {
+        const followerUserIds = await this.closeFriendRepo.findCloseFriends(userId,paginationInfo)
+        const userShorts = await this.userService.getBatchUserInfo(followerUserIds)
+        return userShorts 
     }
 }
