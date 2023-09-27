@@ -198,7 +198,7 @@ export class UserService implements IUserService {
         const user = dao.toUser()
         const profile = await MinioRepo.getProfileUrl(id)
         user.photo = profile || ''
-        const postCount = await (services['PostService'] as PostService).getUserPostCount(id)
+        const postCount = await (services['PostService'] as PostService).getCurrentUserPostCount(id)
         user.postsCount = zodWholeNumber.parse(postCount)
         return user
     }

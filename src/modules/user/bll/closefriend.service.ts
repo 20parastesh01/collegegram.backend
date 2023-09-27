@@ -2,11 +2,14 @@ import { Service, services } from '../../../registry/layer-decorators'
 import { BadRequestError, ForbiddenError, NotFoundError } from '../../../utility/http-error'
 import { messages } from '../../../utility/persian-messages'
 import { CloseFriendRepository, CreateCloseFriend, ICloseFriendRepository } from '../closefriend.repository'
+import { CloseFriend } from '../model/closefriend'
 import { UserId } from '../model/user-id'
 import { RelationService } from './relation.service'
 import { UserService } from './user.service'
 
-export interface ICloseFriendService {}
+export interface ICloseFriendService {
+    getCloseFriend(userId: UserId, targetUserId: UserId):Promise<CloseFriend | undefined>
+}
 
 @Service(CloseFriendRepository, UserService)
 export class CloseFriendService implements ICloseFriendService {

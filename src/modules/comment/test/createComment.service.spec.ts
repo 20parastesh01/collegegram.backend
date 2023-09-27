@@ -23,6 +23,7 @@ const mockCreatedComment: Comment = {
     likeCount: 0 as WholeNumber,
     parentId: mockcreateCommentDto.parentId,
     postId: mockcreateCommentDto.postId,
+    createdAt: new Date()
 }
 const commentDao = (input: Comment) => {
     return {

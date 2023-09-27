@@ -4,11 +4,12 @@ import { Service, services } from '../../../registry/layer-decorators'
 import { ForbiddenError, NotFoundError } from '../../../utility/http-error'
 import { messages } from '../../../utility/persian-messages'
 import { NotificationService } from '../../notification/bll/notification.service'
-import { PostService, resMessage } from '../../post/bll/post.service'
+import { PostService } from '../../post/bll/post.service'
 import { Relation, RelationStatus } from '../model/relation'
 import { User, UserWithStatus } from '../model/user'
 import { UserId } from '../model/user-id'
 import { CreateRelation, IRelationRepository, RelationRepository } from '../relation.repository'
+import { CloseFriendService, ICloseFriendService } from './closefriend.service'
 import { UserService } from './user.service'
 export type accessToUser = 'FullAccess' | 'JustProfile' | 'Denied'
 export interface IRelationService {
@@ -30,8 +31,9 @@ export class RelationService implements IRelationService {
     constructor(
         private relationRepo: IRelationRepository,
         private userService: UserService,
-        private notifService: NotificationService
+        private notifService: NotificationService,
     ) {}
+
     async checkAccessAuth(userId: UserId, targetUser: User, status: RelationStatus) {
         const relation = (await this.getRelations(userId, targetUser.id)).relation
         if (targetUser.private === false || (relation && relation.status === 'Following')) {
@@ -131,7 +133,7 @@ export class RelationService implements IRelationService {
     async getTargetUser(userId: UserId, targetUserId: UserId): Promise<UserWithStatus | NotFoundError> {
         const target = await this.userService.getUserById(targetUserId)
         if (!target) return new NotFoundError(messages.userNotFound.persian)
-        const postCount = await (services['PostService'] as PostService).getUserPostCount(target.id)
+        const postCount = await (services['PostService'] as PostService).getUserPostCount(userId, target.id)
         target.postsCount = zodWholeNumber.parse(postCount)
         const dao = await this.relationRepo.getRelation(target.id, userId)
         let status = null
