@@ -30,7 +30,7 @@ export type resMessage = Message | PostWithDetail | PostWithoutDetail | LikeWith
 //}
 
 export interface IPostService {
-    createPost(dto: CreatePostDTO, files: Express.Multer.File[], userId: UserId): Promise<ServerError | PostWithDetail>
+    createPost(dto: CreatePostDTO, files: Express.Multer.File[], userId: UserId): Promise<ServerError | PostWithDetail | Message>
     editPost(dto: EditPostDTO, id: JustId, userId: UserId): Promise<Message | ServerError | PostWithDetail>
     getPost(id: JustId): Promise<Message | PostWithDetail>
     getPostWitoutDetail(id: JustId): Promise<Message | PostWithoutDetail>
@@ -100,6 +100,7 @@ export class PostService implements IPostService {
     }
 
     async createPost(dto: CreatePostDTO, files: Express.Multer.File[], userId: UserId) {
+        if(files.length <1) return { msg: messages.failed.persian }
         const createPostRepoInput = toCreatePost({ ...dto, author: userId })
         const createdPost = (await this.postRepo.create(createPostRepoInput)).toPost()
         if (!createdPost) return new ServerError(PersianErrors.ServerError)
