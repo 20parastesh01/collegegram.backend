@@ -1,7 +1,7 @@
 import { MinioRepo } from '../../../data-source'
 import { zodWholeNumber } from '../../../data/whole-number'
 import { Service, services } from '../../../registry/layer-decorators'
-import { ForbiddenError, NotFoundError } from '../../../utility/http-error'
+import { BadRequestError, ForbiddenError, NotFoundError } from '../../../utility/http-error'
 import { messages } from '../../../utility/persian-messages'
 import { NotificationService } from '../../notification/bll/notification.service'
 import { PostService, resMessage } from '../../post/bll/post.service'
@@ -47,6 +47,7 @@ export class RelationService implements IRelationService {
     }
 
     async follow(userId: UserId, targetId: UserId) {
+        if (userId == targetId) return new BadRequestError('شما نمیتوانید خودتان را انتخاب کنید')
         const target = await this.userService.getUserById(targetId)
         if (!target) return new NotFoundError(messages.userNotFound.persian)
         const relationDao = await this.relationRepo.getRelation(userId, target.id)
@@ -80,6 +81,7 @@ export class RelationService implements IRelationService {
     }
 
     async unfollow(userId: UserId, targetId: UserId) {
+        if (userId == targetId) return new BadRequestError('شما نمیتوانید خودتان را انتخاب کنید')
         const target = await this.userService.getUserById(targetId)
         if (!target) return new NotFoundError(messages.userNotFound.persian)
         const dao = await this.relationRepo.getRelation(userId, target.id)
@@ -93,6 +95,7 @@ export class RelationService implements IRelationService {
     }
 
     async acceptRequest(userId: UserId, targetId: UserId) {
+        if (userId == targetId) return new BadRequestError('شما نمیتوانید خودتان را انتخاب کنید')
         const target = await this.userService.getUserById(targetId)
         if (!target) return new NotFoundError(messages.userNotFound.persian)
         const dao = await this.relationRepo.getRelation(target.id, userId)
@@ -105,6 +108,7 @@ export class RelationService implements IRelationService {
     }
 
     async rejectRequest(userId: UserId, targetId: UserId) {
+        if (userId == targetId) return new BadRequestError('شما نمیتوانید خودتان را انتخاب کنید')
         const target = await this.userService.getUserById(targetId)
         if (!target) return new NotFoundError(messages.userNotFound.persian)
         const dao = await this.relationRepo.getRelation(target.id, userId)
@@ -117,6 +121,7 @@ export class RelationService implements IRelationService {
     }
 
     async block(userId: UserId, targetId: UserId) {
+        if (userId == targetId) return new BadRequestError('شما نمیتوانید خودتان را انتخاب کنید')
         const target = await this.userService.getUserById(targetId)
         if (!target) return new NotFoundError(messages.userNotFound.persian)
         const dao = await this.relationRepo.getRelation(target.id, userId)
