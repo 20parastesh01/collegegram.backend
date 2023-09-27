@@ -52,7 +52,7 @@ export class BookmarkService implements IBookmarkService {
         if (bookmark) return { msg: messages.alreadyBookmarked.persian }
 
         const user = await this.userService.getUserById(userId)
-        const post = await this.postService.getPost(id)
+        const post = await this.postService.getPost(id, userId)
         if (user === null || 'msg' in post) return { msg: messages.postNotFound.persian }
 
         const input = toCreateBookmark(user, post)
@@ -66,6 +66,9 @@ export class BookmarkService implements IBookmarkService {
         const bookmark = (await this.bookmarkRepo.findByUserAndPost(userId, postId)).toBookmark()
         if (!bookmark) return { msg: messages.notBookmarkedYet.persian }
 
+        const post = await this.postService.getPost(id, userId)
+        if('msg' in post) return { msg: messages.postNotFound.persian }
+        
         const createdBookmark = (await this.bookmarkRepo.remove(bookmark.id)).toBookmark()
         if (!createdBookmark) return new ServerError(PersianErrors.ServerError)
         const updatedPost = createdBookmark.post
