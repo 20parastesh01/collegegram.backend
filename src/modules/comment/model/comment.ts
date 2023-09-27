@@ -13,11 +13,12 @@ export const zodComment = z.object({
     author: zodUserShort.optional(),
     likeCount: zodWholeNumber,
     parentId: zodCommentId.optional(),
-    createdAt: zodWholeNumber,
+    createdAt: z.instanceof(Date),
 })
 export interface Comment extends BaseComment {
     likeCount: WholeNumber
     parentId?: CommentId
+    createdAt: Date
 }
 export interface NewComment {
     author: User

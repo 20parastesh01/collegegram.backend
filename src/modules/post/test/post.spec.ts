@@ -37,7 +37,7 @@ describe('PostService', () => {
         mockPostRepository.create.mockResolvedValue(postWithoutDetailDao(mockCreatedPost[0]))
 
         const result = await postService.createPost(mockCreatePostDTO, mockFiles, mockUserId.userId1)
-        if (!(result instanceof HttpError)) {
+        if (!(result instanceof HttpError) && !('msg' in result)) {
             delete result.photos
         }
         const { id, ...rest } = mockCreatedPost[0]
