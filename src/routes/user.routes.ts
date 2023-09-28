@@ -14,6 +14,7 @@ import { NotificationService } from '../modules/notification/bll/notification.se
 import { BookmarkService } from '../modules/postAction/bll/bookmark.service'
 import { PostService } from '../modules/post/bll/post.service'
 import { CloseFriendService } from '../modules/user/bll/closefriend.service'
+import { extractPaginationInfo } from '../data/pagination'
 
 @Route('/user', UserService, RelationService, BookmarkService, NotificationService, CloseFriendService)
 export class UserRouter {
@@ -135,5 +136,29 @@ export class UserRouter {
     @Auth()
     removeCloseFriend(req: Request, res: Response) {
         handleExpress(res, () => this.closeFriendService.removeCloseFriend(req.user.userId, zodUserId.parse(req.params.id)))
+    }
+
+    @Get('/follower')
+    @Auth()
+    getFollowers(req: Request, res: Response) {
+        handleExpress(res, () => this.relationService.getFollowers(req.user.userId, extractPaginationInfo(req)))
+    }
+
+    @Get('/following')
+    @Auth()
+    getFollowings(req: Request, res: Response) {
+        handleExpress(res, () => this.relationService.getFollowings(req.user.userId, extractPaginationInfo(req)))
+    }
+
+    @Get('/blocked')
+    @Auth()
+    getBlockeds(req: Request, res: Response) {
+        handleExpress(res, () => this.relationService.getBlockeds(req.user.userId, extractPaginationInfo(req)))
+    }
+
+    @Get('/closefriend')
+    @Auth()
+    getCloseFriends(req: Request, res: Response) {
+        handleExpress(res, () => this.closeFriendService.getCloseFriends(req.user.userId, extractPaginationInfo(req)))
     }
 }

@@ -40,6 +40,9 @@ class MockUserRepository implements IUserRepository {
             updatedAt: new Date(),
         })
     }
+    getInfoByIds(userIds: UserId[]): Promise<UserShort[]> {
+        throw new Error('Method not implemented.')
+    }
     findListById(userIds: { id: UserId }[]): Promise<ReturnType<typeof userDaoList>> {
         throw new Error('Method not implemented.')
     }
