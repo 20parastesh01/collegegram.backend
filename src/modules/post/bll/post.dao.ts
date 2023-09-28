@@ -7,9 +7,11 @@ import { zodUserId } from '../../user/model/user-id'
 import { zodCaption } from '../model/caption'
 import { zodPostId } from '../model/post-id'
 import { zodBooleanOrBooleanString } from '../../../data/boolean-stringBoolean'
+import { ZodType, ZodTypeDef, z } from 'zod'
+const zodCreatedAt: ZodType<Date, ZodTypeDef, Date> = z.instanceof(Date); //TODO: Generallize it
 
 const postEntityWithDetailToPost = (input: PostEntity) => {
-    const { createdAt, updatedAt, ...rest } = input
+    const { updatedAt, ...rest } = input
     const output: PostWithDetail = {
         id: zodPostId.parse(rest.id),
         caption: zodCaption.parse(rest.caption),
@@ -19,17 +21,19 @@ const postEntityWithDetailToPost = (input: PostEntity) => {
         commentCount: zodWholeNumber.parse(rest.commentCount),
         likeCount: zodWholeNumber.parse(rest.likeCount),
         bookmarkCount: zodWholeNumber.parse(rest.bookmarkCount),
+        createdAt: zodCreatedAt.parse(rest.createdAt),
     }
     return output
 }
 const postEntityWithoutDetailToPost = (input: PostEntity) => {
-    const { createdAt, updatedAt, likeCount, bookmarkCount, commentCount, ...rest } = input
+    const { updatedAt, likeCount, bookmarkCount, commentCount, ...rest } = input
     const output: PostWithoutDetail = {
         id: zodPostId.parse(rest.id),
         caption: zodCaption.parse(rest.caption),
         author: zodUserId.parse(rest.author),
         closeFriend: zodBooleanOrBooleanString.parse(rest.closeFriend),
         tags: zodTags.optional().parse(rest.tags),
+        createdAt: zodCreatedAt.parse(rest.createdAt),
     }
     return output
 }

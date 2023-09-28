@@ -123,6 +123,7 @@ export const mockCreatedPost: PostWithDetail[] = [
         likeCount: 0 as WholeNumber,
         bookmarkCount: 0 as WholeNumber,
         commentCount: 0 as WholeNumber,
+        createdAt: new Date()
     },
     {
         id: mockPostId.postId2,
@@ -133,6 +134,7 @@ export const mockCreatedPost: PostWithDetail[] = [
         likeCount: 1 as WholeNumber,
         bookmarkCount: 1 as WholeNumber,
         commentCount: 1 as WholeNumber,
+        createdAt: new Date()
     },
 ]
 export const mockEditedPost = {
@@ -144,6 +146,7 @@ export const mockEditedPost = {
     likeCount: 1 as WholeNumber,
     bookmarkCount: 1 as WholeNumber,
     commentCount: 1 as WholeNumber,
+    createdAt: new Date()
 }
 
 export const mockPostWithoutDetail: PostWithoutDetail = {
@@ -152,6 +155,7 @@ export const mockPostWithoutDetail: PostWithoutDetail = {
     tags: ['a', 'b'] as Tag[],
     author: mockUserId.userId1,
     closeFriend: false,
+    createdAt: new Date()
 }
 
 export const mockLikeDto: CreateLike = {

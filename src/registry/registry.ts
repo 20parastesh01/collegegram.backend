@@ -1,9 +1,10 @@
-import { Express } from 'express'
+import { ErrorRequestHandler, Express } from 'express'
 import * as fs from 'fs'
 import * as path from 'path'
 import swaggerUi from 'swagger-ui-dist'
 import express from 'express'
 import { routes, swaggerObject } from './layer-decorators'
+import { ZodError } from 'zod'
 
 async function importFilesRecursively(dir: string): Promise<void> {
     const files = await fs.readdirSync(dir)
@@ -45,6 +46,19 @@ export async function scan(app: Express) {
         fs.writeFileSync(filePath, fs.readFileSync(filePath).toString().replace('https://petstore.swagger.io/v2/swagger.json', '/api/swagger'))
         app.use('/api/api-docs', express.static(swaggerUi.getAbsoluteFSPath()))
         app.use('/api/swagger', (req, res) => res.sendFile(swaggerFilePath))
+        app.use((req, res) => {
+            res.status(404).send({ message: 'URL Not Found' })
+        })
+
+        const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
+            if (err instanceof ZodError) {
+                res.status(400).send({ message: err.errors })
+                return
+            }
+            console.log(err)
+            res.status(500).send()
+        }
+        app.use(errorHandler)
     } catch (error) {
         console.error('Error:', error)
     }

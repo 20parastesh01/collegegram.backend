@@ -4,7 +4,7 @@ import { RelationStatus } from '../../user/model/relation'
 import { User, UserShort } from '../../user/model/user'
 import { NotificationId } from './notification-id'
 
-export type NotificationType = 'Like' | 'Comment' | 'Follow' | 'Request'
+export type NotificationType = 'Like' | 'Comment' | 'Follow' | 'Request' | 'Accept'
 
 export interface Notification {
     id: NotificationId
@@ -18,6 +18,8 @@ export interface Notification {
     post?: BasicPost
 
     comment?: Comment
+
+    createdAt: Date
 }
 
 export interface NotificationWithRelation extends Notification {

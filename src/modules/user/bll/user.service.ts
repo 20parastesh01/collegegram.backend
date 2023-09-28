@@ -18,11 +18,12 @@ import { UserId } from '../model/user-id'
 import { isUsername } from '../model/username'
 import { EditUser, IUserRepository, UserRepository } from '../user.repository'
 import { userDao } from './user.dao'
-import { Service } from '../../../registry/layer-decorators'
+import { Service, services } from '../../../registry/layer-decorators'
 import { EditProfileDto, editProfileDto } from '../dto/edit-profile.dto'
 import { Token } from '../../../data/token'
 import { PersianErrors, messages } from '../../../utility/persian-messages'
 import { zodWholeNumber } from '../../../data/whole-number'
+import { PostService } from '../../post/bll/post.service'
 
 export type LoginSignUp = UserWithToken | BadRequestError | ServerError
 
@@ -34,8 +35,8 @@ export interface IUserService {
     getUserListById(userIds: UserId[]): Promise<User[]>
     forgetPassSendEmail(data: SendEmailDto): Promise<SimpleMessage | BadRequestError>
     forgetPassSetPass(data: SetPasswordDto): Promise<LoginSignUp>
-    editProfile(user: UserBasic, data: EditProfileDto, file?: Express.Multer.File): Promise<{ user: User; token: Token } | ServerError>
-    getUnrelatedUsers(userId: UserId, userIds: UserId[]): Promise<User[]>
+    editProfile(user: UserBasic, data: EditProfileDto, file?: Express.Multer.File): Promise<{ user: User } | ServerError>
+    getExploreUsers(userId: UserId, userIds: UserId[]): Promise<User[]>
     logout(userId: UserId): Promise<SimpleMessage | BadRequestError>
 }
 
@@ -117,6 +118,15 @@ export class UserService implements IUserService {
         }
     }
 
+    async getBatchUserInfo(userIds: UserId[]) {
+        const users = await this.userRepo.getInfoByIds(userIds)
+        for(let user of users) {
+            const photo = await MinioRepo.getProfileUrl(user.id)
+            if (photo) user.photo = photo
+        }
+        return users
+    }
+
     async getUserById(userId: UserId): Promise<User | null> {
         const dao = await this.userRepo.findById(userId)
         if (!dao) return null
@@ -168,7 +178,7 @@ export class UserService implements IUserService {
         return { user, accessToken, refreshToken }
     }
 
-    async editProfile(userBasic: UserBasic, data: EditProfileDto, file?: Express.Multer.File): Promise<{ user: User; token: Token } | ServerError> {
+    async editProfile(userBasic: UserBasic, data: EditProfileDto, file?: Express.Multer.File): Promise<{ user: User } | ServerError> {
         const { password, ...rest } = data
         const payload: EditUser = rest
         if (data.password) {
@@ -180,10 +190,10 @@ export class UserService implements IUserService {
         if (file) {
             await MinioRepo.uploadProfile(userBasic.userId, file)
         }
-
-        const newAccessToken = generateToken(dao.toUserBasic())
-        if (newAccessToken instanceof ServerError) return newAccessToken
-        return { user, token: newAccessToken }
+        if (data.removeProfile) {
+            await MinioRepo.removeProfileUrl(userBasic.userId)
+        }
+        return { user }
     }
 
     async getProfilePhoto(user: UserBasic): Promise<string> {
@@ -197,6 +207,8 @@ export class UserService implements IUserService {
         const user = dao.toUser()
         const profile = await MinioRepo.getProfileUrl(id)
         user.photo = profile || ''
+        const postCount = await (services['PostService'] as PostService).getCurrentUserPostCount(id)
+        user.postsCount = zodWholeNumber.parse(postCount)
         return user
     }
 
@@ -232,11 +244,13 @@ export class UserService implements IUserService {
         return editedDao.toUser()
     }
 
-    async getUnrelatedUsers(userId: UserId, userIds: UserId[]): Promise<User[]> {
+    async getExploreUsers(userId: UserId, userIds: UserId[]): Promise<User[]> {
         const usersDao = await this.userRepo.findUsersNotInIds(userId, userIds, 0, 25)
         let users = usersDao.map((a) => a.toUser())
+        users = users.filter((user) => !user.private)
         return users
     }
+
     async getUserListById(userIds: UserId[]) {
         const userList = userIds.map((userId) => ({ id: userId }))
         const usersDao = await this.userRepo.findListById(userList)

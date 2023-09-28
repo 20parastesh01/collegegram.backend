@@ -5,10 +5,12 @@ import { PostWithDetail } from '../model/post'
 import { IRelationService } from '../../user/bll/relation.service'
 import { IUserService } from '../../user/bll/user.service'
 import { HttpError } from '../../../utility/http-error'
+import { ICloseFriendService } from '../../user/bll/closefriend.service'
 
 describe('PostService', () => {
     let postService: PostService
     let relationService: jest.Mocked<IRelationService>
+    let closeFriendService: jest.Mocked<ICloseFriendService>
     let userService: jest.Mocked<IUserService>
     let mockPostRepository: jest.Mocked<IPostRepository>
 
@@ -30,14 +32,17 @@ describe('PostService', () => {
             getRelations: jest.fn(),
             getFollowing: jest.fn(),
         } as any
-        postService = new PostService(mockPostRepository, userService, relationService)
+        closeFriendService = {
+            getCloseFriend: jest.fn(),
+        } as any
+        postService = new PostService(mockPostRepository, userService, relationService, closeFriendService)
     })
 
     it('should create a post', async () => {
         mockPostRepository.create.mockResolvedValue(postWithoutDetailDao(mockCreatedPost[0]))
 
         const result = await postService.createPost(mockCreatePostDTO, mockFiles, mockUserId.userId1)
-        if (!(result instanceof HttpError)) {
+        if (!(result instanceof HttpError) && !('msg' in result)) {
             delete result.photos
         }
         const { id, ...rest } = mockCreatedPost[0]
@@ -58,7 +63,7 @@ describe('PostService', () => {
 
     it('should get a post', async () => {
         mockPostRepository.findWithDetailByID.mockResolvedValue(postWithDetailOrNullDao(mockCreatedPost[0]))
-        const result = await postService.getPost(mockJustId.id1)
+        const result = await postService.getPost(mockJustId.id1, mockUserId.userId1)
         if (!('msg' in result)) {
             delete result.photos
         }

@@ -11,9 +11,9 @@ export const notificationDao = (input: NotificationEntity) => {
             const user = userDao(input.user)!.toUserShort()
             const actor = userDao(input.actor)!.toUserShort()
             const post = postWithoutDetailOrNullDao(input.post).toPost()
-            const comment = commentOrNullDao({ ...input.comment, likeCount: zodWholeNumber.parse(0) }).toCommentModel()
-            const { type, id } = input
-            return { user, actor, post, comment, type, id }
+            const comment = commentOrNullDao(input.comment).toCommentModel()
+            const { type, id, createdAt } = input
+            return { user, actor, post, comment, type, id, createdAt }
         },
     }
 }
@@ -26,8 +26,8 @@ export const notificationListDao = (inputs: NotificationEntity[]) => {
                 const actor = userDao(input.actor)!.toUserShort()
                 const post = postWithoutDetailOrNullDao(input.post).toPost()
                 const comment = commentOrNullDao(input.comment).toCommentModel()
-                const { type, id } = input
-                return { user, actor, post, comment, type, id }
+                const { type, id, createdAt } = input
+                return { user, actor, post, comment, type, id, createdAt }
             })
         },
     }

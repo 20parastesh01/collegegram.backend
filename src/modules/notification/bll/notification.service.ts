@@ -20,6 +20,15 @@ export class NotificationService {
         return notification
     }
 
+    async createAcceptNotification(user: UserId, actor: UserId) {
+        const notification = await this.notifRepo.create({
+            actorId: actor,
+            userId: user,
+            type: 'Accept',
+        })
+        return notification
+    }
+
     async createLikeNotification(user: UserId, actor: UserId, post: BasicPost) {
         const notification = await this.notifRepo.create({
             actorId: actor,

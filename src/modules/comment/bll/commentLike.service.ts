@@ -1,28 +1,19 @@
-import { BadRequestError, NotFoundError, ServerError } from '../../../utility/http-error'
+import { ServerError } from '../../../utility/http-error'
 import { UserId } from '../../user/model/user-id'
 import { Service } from '../../../registry/layer-decorators'
 import { Msg, PersianErrors, messages } from '../../../utility/persian-messages'
 import { JustId } from '../../../data/just-id'
-import { Comment } from '../model/comment'
 import { zodCommentId } from '../../comment/model/comment-id'
 import { CommentService, ICommentService } from '../../comment/bll/comment.service'
 import { UserService, IUserService } from '../../user/bll/user.service'
 import { CommentLikeRepository, ICommentLikeRepository } from '../commentLike.repository'
 import { toCreateCommentLike } from './commentLike.dao'
 
-type arrayResult = { result: Comment[]; total: number }
 type Message = { msg: Msg }
-export type resMessage = Message | arrayResult | BadRequestError | ServerError | NotFoundError
-// {
-//     msg: Msg,
-//     err: BadRequestError[] | ServerError[] | NotFoundError[],
-//     data: PostWithDetail[] | PostWithoutDetail[] | LikeWithPost[]| arrayResult[]| requestedPostId[],
-//     errCode?: WholeNumber,
-// }
 
 export interface ICommentLikeService {
-    likeComment(userId: UserId, id: JustId): Promise<resMessage>
-    unlikeComment(userId: UserId, id: JustId): Promise<resMessage>
+    likeComment(userId: UserId, id: JustId): Promise<Message>
+    unlikeComment(userId: UserId, id: JustId): Promise<Message | ServerError>
 }
 
 @Service(CommentLikeRepository, CommentService, UserService)

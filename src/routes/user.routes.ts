@@ -13,14 +13,17 @@ import { zodUserId } from '../modules/user/model/user-id'
 import { NotificationService } from '../modules/notification/bll/notification.service'
 import { BookmarkService } from '../modules/postAction/bll/bookmark.service'
 import { PostService } from '../modules/post/bll/post.service'
+import { CloseFriendService } from '../modules/user/bll/closefriend.service'
+import { extractPaginationInfo } from '../data/pagination'
 
-@Route('/user', UserService, RelationService, BookmarkService, NotificationService)
+@Route('/user', UserService, RelationService, BookmarkService, NotificationService, CloseFriendService)
 export class UserRouter {
     constructor(
         private userService: UserService,
         private relationService: RelationService,
         private bookmarkService: BookmarkService,
-        private notificationService: NotificationService
+        private notificationService: NotificationService,
+        private closeFriendService: CloseFriendService
     ) {}
     @Post('/signup')
     @RequestBody('SignUpDto')
@@ -117,9 +120,51 @@ export class UserRouter {
         handleExpress(res, () => this.relationService.block(req.user.userId, zodUserId.parse(req.params.id)))
     }
 
+    @Post('/:id/unblock')
+    @Auth()
+    unblock(req: Request, res: Response) {
+        handleExpress(res, () => this.relationService.unblock(req.user.userId, zodUserId.parse(req.params.id)))
+    }
+
     @Get('/:id/profile')
     @Auth()
     getTargetUser(req: Request, res: Response) {
         handleExpress(res, () => this.relationService.getTargetUser(req.user.userId, zodUserId.parse(req.params.id)))
+    }
+
+    @Post('/:id/closefriend')
+    @Auth()
+    addCloseFriend(req: Request, res: Response) {
+        handleExpress(res, () => this.closeFriendService.addCloseFriend(req.user.userId, zodUserId.parse(req.params.id)))
+    }
+
+    @Delete('/:id/unclosefriend')
+    @Auth()
+    removeCloseFriend(req: Request, res: Response) {
+        handleExpress(res, () => this.closeFriendService.removeCloseFriend(req.user.userId, zodUserId.parse(req.params.id)))
+    }
+
+    @Get('/follower')
+    @Auth()
+    getFollowers(req: Request, res: Response) {
+        handleExpress(res, () => this.relationService.getFollowers(req.user.userId, extractPaginationInfo(req)))
+    }
+
+    @Get('/following')
+    @Auth()
+    getFollowings(req: Request, res: Response) {
+        handleExpress(res, () => this.relationService.getFollowings(req.user.userId, extractPaginationInfo(req)))
+    }
+
+    @Get('/blocked')
+    @Auth()
+    getBlockeds(req: Request, res: Response) {
+        handleExpress(res, () => this.relationService.getBlockeds(req.user.userId, extractPaginationInfo(req)))
+    }
+
+    @Get('/closefriend')
+    @Auth()
+    getCloseFriends(req: Request, res: Response) {
+        handleExpress(res, () => this.closeFriendService.getCloseFriends(req.user.userId, extractPaginationInfo(req)))
     }
 }

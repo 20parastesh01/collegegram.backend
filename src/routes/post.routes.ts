@@ -66,7 +66,7 @@ export class PostRouter {
     @Auth()
     getAPost(req: Request, res: Response) {
         const data = zodJustId.parse(req.params.postId)
-        handleExpress(res, () => this.postService.getPost(data))
+        handleExpress(res, () => this.postService.getPost(data, req.user.userId))
     }
 
     @Post('/:id/like')

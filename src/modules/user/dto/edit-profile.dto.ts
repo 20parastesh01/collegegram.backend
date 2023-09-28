@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { zodEmail } from '../../../data/email'
 import { zodUsername } from '../model/username'
 import { zodInputPassword } from '../model/inputpassword'
+import { zodBooleanOrBooleanString } from '../../../data/boolean-stringBoolean'
 
 export const editProfileDto = z.object({
     email: zodEmail.optional(),
@@ -10,6 +11,7 @@ export const editProfileDto = z.object({
     password: zodInputPassword.optional(),
     private: z.boolean().optional(),
     bio: z.string().nonempty().optional(),
+    removeProfile: zodBooleanOrBooleanString.default(false)
 })
 
 export type EditProfileDto = z.infer<typeof editProfileDto>

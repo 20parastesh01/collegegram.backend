@@ -31,3 +31,13 @@ export const userDao = (input: UserEntity | null) => {
 export const userDaoList = (input: UserEntity[]) => {
     return input.map((entity) => convert(entity))
 }
+
+export const userEntityToUserShort = (input: UserEntity): UserShort => {
+    return {
+        id: input.id,
+        lastname: input.lastname,
+        name: input.name,
+        photo: '',
+        username: input.username,
+    }
+}

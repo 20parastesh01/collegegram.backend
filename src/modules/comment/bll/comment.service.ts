@@ -12,13 +12,12 @@ import { PersianErrors } from '../../../utility/persian-messages'
 import { CommentId, zodCommentId } from '../model/comment-id'
 import { JustId } from '../../../data/just-id'
 
-type resComment = Comment | BadRequestError | ServerError | NotFoundError
-type resComments = { result: Comment[]; total: number } | BadRequestError | ServerError
+type arrayResult = { result: Comment[], total: number }
 
 export interface ICommentService {
-    createComment(data: CreateCommentDTO, userId: UserId): Promise<resComment>
+    createComment(data: CreateCommentDTO, userId: UserId): Promise<Comment | ServerError>
     getComment(id: JustId): Promise<Comment | null>
-    getAllComments(postId: PostId): Promise<{ result: Comment[]; total: number }>
+    getAllComments(postId: PostId): Promise<arrayResult>
 }
 
 @Service(CommentRepository, UserService)
