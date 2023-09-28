@@ -43,6 +43,7 @@ export class PostService implements IPostService {
     ) { }
 
     checkCloseFriend = async (userId: UserId, targetId: UserId): Promise<boolean[]> => {
+        if (targetId == userId) return [true, false]
         const interaction = await this.closeFriendService.getCloseFriend(userId, targetId)
         return interaction ? [true, false] : [false]
     }
@@ -84,12 +85,14 @@ export class PostService implements IPostService {
         const users = await this.userService.getUserListById(usersId)
         if (users.length < usersId.length) return new ServerError(PersianErrors.ServerError)
 
-        const posts = await Promise.all(usersId.map(async (targetUserId) => {
-            const closeFriend = await (this.checkCloseFriend(userId, targetUserId))
-            return (await this.postRepo.findAllByAuthor(targetUserId, closeFriend)).toPostList()
+        const posts = await Promise.all(users.map(async (targetUser) => {
+            const closeFriend = await (this.checkCloseFriend(userId, targetUser.id))
+            return (await this.postRepo.findAllByAuthor(targetUser.id, closeFriend)).toPostList()
         }))
+
         const flattenedPosts = posts.flat();
         flattenedPosts.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
         if (flattenedPosts.length < 1) return { msg: messages.postNotFound.persian }
         const postsWithPhotos = await Promise.all(flattenedPosts.map((post) => (this.adjustPhoto(post))))
         const result = postsWithPhotos.map((post) => ({ user: users.filter((user) => user.id === post.author)[0], post: post }))
