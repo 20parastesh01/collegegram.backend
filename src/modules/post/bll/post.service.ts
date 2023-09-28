@@ -28,7 +28,7 @@ export interface IPostService {
     getMyPosts(userId: UserId): Promise<arrayResult | Message>
     getMyTimeline(userId: UserId): Promise<timelineArrayResult | Message | ServerError>
     getSomePosts(userId: UserId, closeFriend: boolean[]): Promise<BasicPost[]>
-    explore(userId: UserId): Promise<{ user: User; posts: BasicPost[] }[]>
+    explore(userId: UserId): Promise<{ user: User; posts: BasicPost[] }[] | null>
     getUserPostCount(userId: UserId, targetId: UserId): Promise<number>
     getCurrentUserPostCount(userId: UserId, targetId: UserId): Promise<number>
     adjustPhoto(post: PostWithDetail): Promise<PostWithDetail>
@@ -40,8 +40,8 @@ export class PostService implements IPostService {
         private postRepo: IPostRepository,
         private userService: IUserService,
         private relationService: IRelationService,
-        private closeFriendService: ICloseFriendService,
-    ) { }
+        private closeFriendService: ICloseFriendService
+    ) {}
 
     checkCloseFriend = async (userId: UserId, targetId: UserId): Promise<boolean[]> => {
         if (targetId == userId) return [true, false]
@@ -69,7 +69,7 @@ export class PostService implements IPostService {
         const posts = (await this.postRepo.findAllByAuthor(targetUserId, closeFriend)).toPostList()
         if (posts.length < 1) return { msg: messages.postNotFound.persian }
 
-        const postsWithPhotos = await Promise.all(posts.map((post) => (this.adjustPhoto(post))))
+        const postsWithPhotos = await Promise.all(posts.map((post) => this.adjustPhoto(post)))
         return { result: postsWithPhotos, total: posts.length }
     }
 
@@ -77,7 +77,7 @@ export class PostService implements IPostService {
         const posts = (await this.postRepo.findAllByAuthor(userId, [true, false])).toPostList()
         if (posts.length < 1) return { msg: messages.postNotFound.persian }
 
-        const postsWithPhotos = await Promise.all(posts.map((post) => (this.adjustPhoto(post))))
+        const postsWithPhotos = await Promise.all(posts.map((post) => this.adjustPhoto(post)))
         return { result: postsWithPhotos, total: posts.length }
     }
 
@@ -86,16 +86,18 @@ export class PostService implements IPostService {
         const users = await this.userService.getUserListById(usersId)
         if (users.length < usersId.length) return new ServerError(PersianErrors.ServerError)
 
-        const posts = await Promise.all(users.map(async (targetUser) => {
-            const closeFriend = await (this.checkCloseFriend(userId, targetUser.id))
-            return (await this.postRepo.findAllByAuthor(targetUser.id, closeFriend)).toPostList()
-        }))
+        const posts = await Promise.all(
+            users.map(async (targetUser) => {
+                const closeFriend = await this.checkCloseFriend(userId, targetUser.id)
+                return (await this.postRepo.findAllByAuthor(targetUser.id, closeFriend)).toPostList()
+            })
+        )
 
-        const flattenedPosts = posts.flat();
-        flattenedPosts.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+        const flattenedPosts = posts.flat()
+        flattenedPosts.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
 
         if (flattenedPosts.length < 1) return { msg: messages.postNotFound.persian }
-        const postsWithPhotos = await Promise.all(flattenedPosts.map((post) => (this.adjustPhoto(post))))
+        const postsWithPhotos = await Promise.all(flattenedPosts.map((post) => this.adjustPhoto(post)))
         const result = postsWithPhotos.map((post) => ({ user: users.filter((user) => user.id === post.author)[0], post: post }))
         return { result: result, total: result.length }
     }
@@ -126,12 +128,12 @@ export class PostService implements IPostService {
     }
 
     async getUserPostCount(userId: UserId, targetId: UserId) {
-        const closeFriend = (targetId === userId)? [true,false] : await this.checkCloseFriend(userId, targetId)
+        const closeFriend = targetId === userId ? [true, false] : await this.checkCloseFriend(userId, targetId)
         return this.postRepo.countByAuthor(targetId, closeFriend)
     }
 
     async getCurrentUserPostCount(userId: UserId) {
-        const closeFriend = [true,false]
+        const closeFriend = [true, false]
         return this.postRepo.countByAuthor(userId, closeFriend)
     }
 
@@ -140,8 +142,7 @@ export class PostService implements IPostService {
         const post = (await this.postRepo.findWithDetailByID(postId)).toPost()
         if (!post) return { msg: messages.postNotFound.persian }
         const closeFriend = await this.checkCloseFriend(userId, post.author)
-        if(closeFriend[0] === false && post.closeFriend === true )
-        return { msg: messages.postAccessDenied.persian }
+        if (closeFriend[0] === false && post.closeFriend === true) return { msg: messages.postAccessDenied.persian }
         const result = await this.adjustPhoto(post)
         return this.adjustPhoto(result)
     }
@@ -162,9 +163,11 @@ export class PostService implements IPostService {
 
     async explore(userId: UserId): Promise<{ user: User; posts: BasicPost[] }[]> {
         const result: { user: User; posts: BasicPost[] }[] = []
-        const relatedUsers = await this.relationService.getRealtedUsers(userId)
-        const unrelatedUsers = await this.userService.getUnrelatedUsers(userId, relatedUsers)
+        const relatedUsers = await this.relationService.getNotExploreUsers(userId)
+        const unrelatedUsers = await this.userService.getExploreUsers(userId, relatedUsers)
         for (const user of unrelatedUsers) {
+            const postsNumber = await this.getUserPostCount(userId, user.id)
+            if (postsNumber === 0) return []
             const closeFriend = await this.checkCloseFriend(userId, user.id)
             const posts = await this.getSomePosts(user.id, closeFriend)
             result.push({ user, posts })
