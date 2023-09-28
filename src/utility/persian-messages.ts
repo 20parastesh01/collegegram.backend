@@ -38,7 +38,7 @@ export const messages = {
     alreadyLiked: { persian: 'شما محتوا مورد نظر را قبلا لایک کرده‌اید' as Msg },
     postNotFound: { persian: 'پست مورد نظر یافت نشد' as Msg },
     bookmarked: { persian: 'پست مورد نظر ذخیره شد' as Msg },
-    unbookmarked: { persian: 'پست مورد نظر از پست‌های ذخیره‌شده حذف شد شد' as Msg },
+    unbookmarked: { persian: 'پست مورد نظر از پست‌های ذخیره‌شده حذف شد' as Msg },
     notBookmarkedYet: { persian: 'شما پست مورد نظر را قبلا ذخیره نکرده‌اید' as Msg },
     alreadyBookmarked: { persian: 'شما پست مورد نظر را قبلا ذخیره کرده‌اید' as Msg },
     postAccessDenied: { persian: 'شما به پست‌های این کاربر دسترسی ندارید' as Msg },
