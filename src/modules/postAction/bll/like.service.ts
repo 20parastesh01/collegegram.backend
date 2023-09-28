@@ -1,33 +1,21 @@
-import { BadRequestError, NotFoundError, ServerError } from '../../../utility/http-error'
+import { ServerError } from '../../../utility/http-error'
 import { UserId } from '../../user/model/user-id'
 import { Service } from '../../../registry/layer-decorators'
-import { WholeNumber } from '../../../data/whole-number'
 import { ILikeRepository, LikeRepository } from '../like.repository'
-import { IUserRepository } from '../../user/user.repository'
 import { toCreateLike } from './like.dao'
-import { LikeWithPost } from '../model/like'
 import { Msg, PersianErrors, messages } from '../../../utility/persian-messages'
 import { JustId } from '../../../data/just-id'
-import { IPostRepository } from '../../post/post.repository'
 import { PostWithDetail } from '../../post/model/post'
 import { zodPostId } from '../../post/model/post-id'
 import { PostService, IPostService } from '../../post/bll/post.service'
 import { UserService, IUserService } from '../../user/bll/user.service'
 
 type arrayResult = { result: PostWithDetail[]; total: number }
-export type requestedPostId = { requestedPostId: JustId }
 type Message = { msg: Msg }
-export type resMessage = Message | PostWithDetail | LikeWithPost | arrayResult | BadRequestError | ServerError | NotFoundError
-// {
-//     msg: Msg,
-//     err: BadRequestError[] | ServerError[] | NotFoundError[],
-//     data: PostWithDetail[] | PostWithoutDetail[] | LikeWithPost[]| arrayResult[]| requestedPostId[],
-//     errCode?: WholeNumber,
-// }
 
 export interface ILikeService {
-    likePost(userId: UserId, id: JustId): Promise<resMessage>
-    unlikePost(userId: UserId, id: JustId): Promise<resMessage>
+    likePost(userId: UserId, id: JustId): Promise<Message>
+    unlikePost(userId: UserId, id: JustId): Promise<Message | ServerError>
 }
 
 @Service(LikeRepository, PostService, UserService)
