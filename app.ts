@@ -35,19 +35,7 @@ export const initializeProject = async () => {
         })
     })
 
-    app.use((req, res) => {
-        res.status(404).send({ message: 'URL Not Found' })
-    })
-
-    const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
-        if (err instanceof ZodError) {
-            res.status(400).send({ message: err.errors })
-            return
-        }
-        console.log(err)
-        res.status(500).send()
-    }
-    app.use(errorHandler)
+    
 
     app.listen(PORT, () => {
         console.log(`express is listening on port ${PORT}`)
