@@ -136,6 +136,15 @@ export class RelationService implements IRelationService {
         return { msg: messages.blocked.persian }
     }
 
+    async unblock(userId: UserId, targetId: UserId) {
+        const target = await this.userService.getUserById(targetId)
+        if (!target) return new NotFoundError(messages.userNotFound.persian)
+        const dao = await this.relationRepo.getRelation(target.id, userId)
+        if (dao) {
+            await this.relationRepo.deleteRelation({ userA: target.id, userB: userId })
+        }
+        return { msg: messages.unblocked.persian }
+    }
     async getFollowers(userId: UserId, paginationInfo: PaginationInfo) {
         const followerUserIds = await this.relationRepo.findFollowers(userId,paginationInfo)
         const userShorts = await this.userService.getBatchUserInfo(followerUserIds)
