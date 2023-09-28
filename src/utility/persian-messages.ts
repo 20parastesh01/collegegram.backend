@@ -31,6 +31,7 @@ export const messages = {
     rejected: { persian: 'درخواست مورد نظر حذف شد' as Msg },
     failed: { persian: 'درخواست مورد نظر موفقیت‌آمیز اجرا نشد' as Msg },
     succeeded: { persian: 'درخواست مورد نظر با موفقیت‌ اجرا شد' as Msg },
+    done: { persian: 'درخواست مورد نظر انجام شد' as Msg },
     blocked: { persian: 'کاربر مورد نظر بلاک شد' as Msg },
     unblocked: { persian: 'کاربر مورد نظر آنبلاک شد' as Msg },
     liked: { persian: 'محتوا مورد نظر لایک شد' as Msg },

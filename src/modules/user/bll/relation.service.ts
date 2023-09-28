@@ -6,6 +6,7 @@ import { BadRequestError, ForbiddenError, NotFoundError } from '../../../utility
 import { messages } from '../../../utility/persian-messages'
 import { NotificationService } from '../../notification/bll/notification.service'
 import { PostService } from '../../post/bll/post.service'
+import { LikeService } from '../../postAction/bll/like.service'
 import { Relation, RelationStatus } from '../model/relation'
 import { User, UserWithStatus } from '../model/user'
 import { UserId } from '../model/user-id'
@@ -27,12 +28,13 @@ export interface IRelationService {
     getFollowing(id: UserId): Promise<UserId[]>
 }
 
-@Service(RelationRepository, UserService, NotificationService)
+@Service(RelationRepository, UserService, NotificationService, LikeService)
 export class RelationService implements IRelationService {
     constructor(
         private relationRepo: IRelationRepository,
         private userService: UserService,
         private notifService: NotificationService,
+        private likeService: LikeService,
     ) {}
 
     async checkAccessAuth(userId: UserId, targetUser: User, status: RelationStatus) {
@@ -132,6 +134,8 @@ export class RelationService implements IRelationService {
             const status = dao.toRelation().status
             await this.relationRepo.deleteRelation({ userA: target.id, userB: userId })
         }
+
+        this.likeService.removeLikesWhenBlockingUser(userId, targetId)
         await this.relationRepo.updateRelation({ userA: userId, userB: targetId, status: 'Blocked' })
         return { msg: messages.blocked.persian }
     }

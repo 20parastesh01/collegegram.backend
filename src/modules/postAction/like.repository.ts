@@ -7,6 +7,7 @@ import { User } from '../user/model/user'
 import { LikeId } from './model/like-id'
 import { PostWithDetail } from '../post/model/post'
 import { PostId } from '../post/model/post-id'
+import { LikeWithPost } from './model/like'
 
 export interface CreateLike {
     user: User
@@ -19,6 +20,7 @@ export interface ILikeRepository {
     remove(likeId: LikeId): Promise<ReturnType<typeof likeOrNullDao>>
     findAllByPost(postId: PostId): Promise<ReturnType<typeof likeArrayDao>>
     findByUserAndPost(userId: UserId, postId: PostId): Promise<ReturnType<typeof likeOrNullDao>>
+    getUserLikesOnTargetUserPosts(userId: UserId, targetId: UserId): Promise<LikeWithPost[]>
 }
 
 @Repo()
@@ -28,13 +30,22 @@ export class LikeRepository implements ILikeRepository {
     constructor(appDataSource: DataSource) {
         this.LikeRepo = appDataSource.getRepository(LikeEntity)
     }
+    async getUserLikesOnTargetUserPosts(userId: UserId, targetId: UserId) {
+        const likes: LikeEntity[] = await this.LikeRepo.createQueryBuilder('like')
+        .leftJoinAndSelect('like.user', 'user')
+        .leftJoinAndSelect('like.post', 'post')
+        .where('like.user.id = :userId', { userId })
+        .andWhere('like.post.author = :targetId', { targetId })
+        .getMany()
+        return likeArrayDao(likes).toLikeList()
+    }
     async findAllByUser(userId: UserId) {
-        const like: LikeEntity[] = await this.LikeRepo.createQueryBuilder('like').leftJoinAndSelect('like.user', 'user').leftJoinAndSelect('like.post', 'post').where('like.user.id = :userId', { userId }).orderBy('like.createdAt', 'DESC').getMany()
-        return likeArrayDao(like)
+        const likes: LikeEntity[] = await this.LikeRepo.createQueryBuilder('like').leftJoinAndSelect('like.user', 'user').leftJoinAndSelect('like.post', 'post').where('like.user.id = :userId', { userId }).orderBy('like.createdAt', 'DESC').getMany()
+        return likeArrayDao(likes)
     }
     async findAllByPost(postId: PostId) {
-        const like: LikeEntity[] = await this.LikeRepo.createQueryBuilder('like').leftJoinAndSelect('like.user', 'user').leftJoinAndSelect('like.post', 'post').where('like.post.id = :postId', { postId }).orderBy('like.createdAt', 'DESC').getMany()
-        return likeArrayDao(like)
+        const likes: LikeEntity[] = await this.LikeRepo.createQueryBuilder('like').leftJoinAndSelect('like.user', 'user').leftJoinAndSelect('like.post', 'post').where('like.post.id = :postId', { postId }).orderBy('like.createdAt', 'DESC').getMany()
+        return likeArrayDao(likes)
     }
     async findByUserAndPost(userId: UserId, postId: PostId) {
         const output = await this.LikeRepo.createQueryBuilder('like').leftJoinAndSelect('like.user', 'user').leftJoinAndSelect('like.post', 'post').where('like.user.id = :userId', { userId }).andWhere('like.post.id = :postId', { postId }).getOne()
