@@ -120,6 +120,12 @@ export class UserRouter {
         handleExpress(res, () => this.relationService.block(req.user.userId, zodUserId.parse(req.params.id)))
     }
 
+    @Post('/:id/unblock')
+    @Auth()
+    unblock(req: Request, res: Response) {
+        handleExpress(res, () => this.relationService.unblock(req.user.userId, zodUserId.parse(req.params.id)))
+    }
+
     @Get('/:id/profile')
     @Auth()
     getTargetUser(req: Request, res: Response) {

@@ -18,6 +18,8 @@ export interface Notification {
     post?: BasicPost
 
     comment?: Comment
+
+    createdAt: Date
 }
 
 export interface NotificationWithRelation extends Notification {

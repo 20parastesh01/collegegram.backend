@@ -35,7 +35,7 @@ export interface IUserService {
     getUserListById(userIds: UserId[]): Promise<User[]>
     forgetPassSendEmail(data: SendEmailDto): Promise<SimpleMessage | BadRequestError>
     forgetPassSetPass(data: SetPasswordDto): Promise<LoginSignUp>
-    editProfile(user: UserBasic, data: EditProfileDto, file?: Express.Multer.File): Promise<{ user: User; token: Token } | ServerError>
+    editProfile(user: UserBasic, data: EditProfileDto, file?: Express.Multer.File): Promise<{ user: User } | ServerError>
     getExploreUsers(userId: UserId, userIds: UserId[]): Promise<User[]>
     logout(userId: UserId): Promise<SimpleMessage | BadRequestError>
 }
@@ -178,7 +178,7 @@ export class UserService implements IUserService {
         return { user, accessToken, refreshToken }
     }
 
-    async editProfile(userBasic: UserBasic, data: EditProfileDto, file?: Express.Multer.File): Promise<{ user: User; token: Token } | ServerError> {
+    async editProfile(userBasic: UserBasic, data: EditProfileDto, file?: Express.Multer.File): Promise<{ user: User } | ServerError> {
         const { password, ...rest } = data
         const payload: EditUser = rest
         if (data.password) {
@@ -190,10 +190,10 @@ export class UserService implements IUserService {
         if (file) {
             await MinioRepo.uploadProfile(userBasic.userId, file)
         }
-
-        const newAccessToken = generateToken(dao.toUserBasic())
-        if (newAccessToken instanceof ServerError) return newAccessToken
-        return { user, token: newAccessToken }
+        if (data.removeProfile) {
+            await MinioRepo.removeProfileUrl(userBasic.userId)
+        }
+        return { user }
     }
 
     async getProfilePhoto(user: UserBasic): Promise<string> {
