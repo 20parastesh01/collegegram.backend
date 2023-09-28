@@ -31,6 +31,7 @@ export interface IPostService {
     explore(userId: UserId): Promise<{ user: User; posts: BasicPost[] }[]>
     getUserPostCount(userId: UserId, targetId: UserId): Promise<number>
     getCurrentUserPostCount(userId: UserId, targetId: UserId): Promise<number>
+    adjustPhoto(post: PostWithDetail): Promise<PostWithDetail>
 }
 
 @Service(PostRepository, UserService, RelationService, CloseFriendService)
@@ -51,7 +52,7 @@ export class PostService implements IPostService {
     validateAccess = (targetUser: User, relation?: Relation | undefined) => {
         return (relation && relation.status === 'Following') || (!relation && targetUser.private === false)
     }
-    adjustPhoto = async (post: PostWithDetail) => {
+    async adjustPhoto(post: PostWithDetail) {
         const postPhotos = await MinioRepo.getPostPhotoUrl(post.id)
         post.photos = postPhotos || []
         return post
