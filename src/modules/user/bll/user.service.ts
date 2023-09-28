@@ -36,7 +36,7 @@ export interface IUserService {
     forgetPassSendEmail(data: SendEmailDto): Promise<SimpleMessage | BadRequestError>
     forgetPassSetPass(data: SetPasswordDto): Promise<LoginSignUp>
     editProfile(user: UserBasic, data: EditProfileDto, file?: Express.Multer.File): Promise<{ user: User; token: Token } | ServerError>
-    getUnrelatedUsers(userId: UserId, userIds: UserId[]): Promise<User[]>
+    getExploreUsers(userId: UserId, userIds: UserId[]): Promise<User[]>
     logout(userId: UserId): Promise<SimpleMessage | BadRequestError>
 }
 
@@ -244,11 +244,13 @@ export class UserService implements IUserService {
         return editedDao.toUser()
     }
 
-    async getUnrelatedUsers(userId: UserId, userIds: UserId[]): Promise<User[]> {
+    async getExploreUsers(userId: UserId, userIds: UserId[]): Promise<User[]> {
         const usersDao = await this.userRepo.findUsersNotInIds(userId, userIds, 0, 25)
         let users = usersDao.map((a) => a.toUser())
+        users = users.filter((user) => !user.private)
         return users
     }
+
     async getUserListById(userIds: UserId[]) {
         const userList = userIds.map((userId) => ({ id: userId }))
         const usersDao = await this.userRepo.findListById(userList)

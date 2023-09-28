@@ -23,7 +23,7 @@ export interface IRelationService {
         reverseRelation: Relation | undefined
     }>
     checkAccessAuth(userId: UserId, targetUser: User, status: RelationStatus): Promise<accessToUser>
-    getRealtedUsers(userId: UserId): Promise<UserId[]>
+    getNotExploreUsers(userId: UserId): Promise<UserId[]>
     getFollowing(id: UserId): Promise<UserId[]>
 }
 
@@ -171,12 +171,14 @@ export class RelationService implements IRelationService {
         return { user: target, status, reverseStatus }
     }
 
-    async getRealtedUsers(userId: UserId): Promise<UserId[]> {
+    async getNotExploreUsers(userId: UserId): Promise<UserId[]> {
         const relations = (await this.relationRepo.findRelations(userId)).toRelationList()
         const relatedUsers = new Set<UserId>()
         relations.forEach((relation) => {
             if (relation.userA !== userId) {
-                relatedUsers.add(relation.userA)
+                if (relation.status === 'Blocked') {
+                    relatedUsers.add(relation.userA)
+                }
             }
             if (relation.userB !== userId) {
                 relatedUsers.add(relation.userB)
@@ -184,6 +186,7 @@ export class RelationService implements IRelationService {
         })
         return Array.from(relatedUsers)
     }
+
     async getFollowing(id: UserId) {
         const relations = (await this.relationRepo.findByRelation(id, 'Following')).toRelationList()
         if (relations.length < 1) return []

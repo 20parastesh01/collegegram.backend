@@ -47,4 +47,5 @@ export const messages = {
     closeFriendRemoved: { persian: 'شما این کاربر را از دوستان نزیک خود حذف کردید' as Msg },
     closeFriendExists: { persian: 'این کاربر در لیست دوستان نزدیک شما وجود دارد' as Msg },
     closeFriendNotExists: { persian: 'این کاربر در لیست دوستان نزدیک شما وجود ندارد' as Msg },
+    userIsPrivate: { persian: 'پیج این کاربر خصوصی است' as Msg },
 }
