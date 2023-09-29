@@ -3,7 +3,7 @@ import { CreateLike } from '../like.repository'
 import { zodUserId } from '../../user/model/user-id'
 import { LikeId, zodLikeId } from '../model/like-id'
 import { User } from '../../user/model/user'
-import { BasicLike, DeletedLike, LikeWithPost } from '../model/like'
+import { BasicLike, LikeWithPost } from '../model/like'
 import { PostWithDetail, zodStrictPost } from '../../post/model/post'
 import { zodPostId } from '../../post/model/post-id'
 

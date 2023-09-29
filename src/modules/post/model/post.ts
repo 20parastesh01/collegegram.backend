@@ -33,6 +33,12 @@ export const zodStrictPost = z.object({
     commentCount: zodWholeNumber,
     createdAt: z.instanceof(Date),
 })
+export const zodBasicPost = z.object({
+    id: zodPostId,
+    author: zodUserId,
+    closeFriend: zodBooleanOrBooleanString,
+    photos: zodPaths.optional(),
+})
 
 export interface PostWithDetail extends PostWithoutDetail {
     likeCount: WholeNumber
