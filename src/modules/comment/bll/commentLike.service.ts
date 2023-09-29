@@ -12,7 +12,7 @@ import { toCreateCommentLike } from './commentLike.dao'
 type Message = { msg: Msg }
 
 export interface ICommentLikeService {
-    likeComment(userId: UserId, id: JustId): Promise<Message>
+    likeComment(userId: UserId, id: JustId): Promise<Message | ServerError>
     unlikeComment(userId: UserId, id: JustId): Promise<Message | ServerError>
     removeCommentLikesWhenBlockingUser(userId: UserId, targetId: UserId): Promise<Message | ServerError>
 }
@@ -46,7 +46,8 @@ export class CommentLikeService implements ICommentLikeService {
 
         const user = await this.userService.getUserById(userId)
         const comment = await this.commentService.getComment(id)
-        if (user === null || comment === null) return { msg: messages.postNotFound.persian }
+        if (user === null) return new ServerError(PersianErrors.ServerError)
+        if (comment === null) return { msg: messages.postNotFound.persian }
 
         const input = toCreateCommentLike(user, comment)
         await this.commentLikeRepo.create(input)

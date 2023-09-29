@@ -3,10 +3,11 @@ import { zodWholeNumber } from '../../../data/whole-number'
 import { Service, services } from '../../../registry/layer-decorators'
 import { BadRequestError, ForbiddenError, NotFoundError } from '../../../utility/http-error'
 import { messages } from '../../../utility/persian-messages'
-import { CommentLikeService } from '../../comment/bll/commentLike.service'
+import { CommentService, ICommentService } from '../../comment/bll/comment.service'
+import { CommentLikeService, ICommentLikeService } from '../../comment/bll/commentLike.service'
 import { NotificationService } from '../../notification/bll/notification.service'
 import { PostService } from '../../post/bll/post.service'
-import { LikeService } from '../../postAction/bll/like.service'
+import { ILikeService, LikeService } from '../../postAction/bll/like.service'
 import { Relation, RelationStatus } from '../model/relation'
 import { User, UserWithStatus } from '../model/user'
 import { UserId } from '../model/user-id'
@@ -135,7 +136,8 @@ export class RelationService implements IRelationService {
         }
 
         const promises = [(services['LikeService'] as LikeService).removePostLikesWhenBlockingUser(userId, targetId),
-        (services['CommentLikeService'] as CommentLikeService).removeCommentLikesWhenBlockingUser(userId, targetId),]
+        (services['CommentLikeService'] as CommentLikeService).removeCommentLikesWhenBlockingUser(userId, targetId),
+        (services['CommentService'] as CommentService).removeCommentsWhenBlockingUser(userId, targetId),]
         Promise.all(promises);
         await this.relationRepo.updateRelation({ userA: userId, userB: targetId, status: 'Blocked' })
         return { msg: messages.blocked.persian }

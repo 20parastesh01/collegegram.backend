@@ -12,7 +12,7 @@ import { UserService, IUserService } from '../../user/bll/user.service'
 type Message = { msg: Msg }
 
 export interface ILikeService {
-    likePost(userId: UserId, id: JustId): Promise<Message>
+    likePost(userId: UserId, id: JustId): Promise<Message | ServerError>
     unlikePost(userId: UserId, id: JustId): Promise<Message | ServerError>
     removePostLikesWhenBlockingUser(userId: UserId, targetId: UserId): Promise<Message | ServerError>
 }
@@ -32,7 +32,8 @@ export class LikeService implements ILikeService {
 
         const user = await this.userService.getUserById(userId)
         const post = await this.postService.getPost(id, userId)
-        if (user === null || 'msg' in post) return { msg: messages.postNotFound.persian }
+        if (user === null) return new ServerError(PersianErrors.ServerError)
+        if ('msg' in post) return { msg: messages.postNotFound.persian }
 
         const input = toCreateLike(user, post)
         await this.likeRepo.create(input)

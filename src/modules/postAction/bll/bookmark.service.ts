@@ -43,7 +43,8 @@ export class BookmarkService implements IBookmarkService {
 
         const user = await this.userService.getUserById(userId)
         const post = await this.postService.getPost(id, userId)
-        if (user === null || 'msg' in post) return { msg: messages.postNotFound.persian }
+        if (user === null) return new ServerError(PersianErrors.ServerError)
+        if ('msg' in post) return { msg: messages.postNotFound.persian }
 
         const input = toCreateBookmark(user, post)
         const createdBookmark = (await this.bookmarkRepo.create(input)).toBookmark()
