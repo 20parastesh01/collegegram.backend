@@ -41,11 +41,10 @@ export class RelationService implements IRelationService {
     ) {}
 
     async checkAccessAuth(userId: UserId, targetUser: User, status: RelationStatus) {
-        const relation = (await this.getRelations(userId, targetUser.id)).relation
-        if (targetUser.private === false || (relation && relation.status === 'Following')) {
-            return 'FullAccess'
-        } else if (relation && relation.status === 'Following') return 'JustProfile'
-        return 'Denied'
+        const reverseRelation = (await this.getRelations(userId, targetUser.id)).reverseRelation
+        if (reverseRelation && reverseRelation.status === 'Blocked') return 'Denied'
+        if (targetUser.private === false || (reverseRelation && reverseRelation.status === 'Following')) return 'FullAccess'
+        return 'JustProfile'
     }
 
     async getRelations(userId: UserId, targetId: UserId) {
