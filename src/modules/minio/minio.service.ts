@@ -5,6 +5,7 @@ import { getMinioConfig } from './mino.config'
 import { UserId } from '../user/model/user-id'
 import path from 'path'
 import { PostId } from '../post/model/post-id'
+import fs from 'fs'
 
 export const profilePhotoBucket = 'userprofile'
 export const postPhotoBucket = 'post'
@@ -99,7 +100,7 @@ export class Minio {
         const objectList: string[] = await this.getObjectListByPrefix(postId + '-')
         for (let i = 1; i <= objectList.length; i++) {
             const minioUrl = await this.client.presignedUrl('GET', postPhotoBucket, postId + '-' + i)
-            console.log(minioUrl)
+            fs.writeFileSync('temppppp', minioUrl)
             result.push('/file' + minioUrl.split(this.config.endPoint + ':' + this.config.port)[1])
         }
         return result
