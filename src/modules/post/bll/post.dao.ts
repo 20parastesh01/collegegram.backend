@@ -1,6 +1,6 @@
 import { zodWholeNumber } from '../../../data/whole-number'
 import { PostEntity } from '../entity/post.entity'
-import { PostWithDetail, PostWithoutDetail, NewPost, BasicPost } from '../model/post'
+import { PostWithDetail, PostWithoutDetail, NewPost, BasicPost, zodStrictPost, zodBasicPost, zodPost } from '../model/post'
 import { CreatePost } from '../post.repository'
 import { zodTags } from '../model/tag'
 import { zodUserId } from '../../user/model/user-id'
@@ -9,6 +9,20 @@ import { zodPostId } from '../model/post-id'
 import { zodBooleanOrBooleanString } from '../../../data/boolean-stringBoolean'
 import { ZodType, ZodTypeDef, z } from 'zod'
 const zodCreatedAt: ZodType<Date, ZodTypeDef, Date> = z.instanceof(Date); //TODO: Generallize it
+const toPostWithDetail = (input: PostEntity): PostWithDetail => {
+    const { createdAt, updatedAt, ...rest } = input;
+    return zodStrictPost.parse(rest);
+}
+
+const toPostWithoutDetail = (input: PostEntity): PostWithoutDetail => {
+    const { createdAt, updatedAt, likeCount, bookmarkCount, commentCount, ...rest } = input;
+    return zodPost.parse(rest);
+}
+
+const toBasicPost = (input: PostEntity): BasicPost => {
+    const { createdAt, updatedAt, likeCount, bookmarkCount, commentCount, ...rest } = input;
+    return zodBasicPost.parse(rest);
+}
 
 const postEntityWithDetailToPost = (input: PostEntity) => {
     const { updatedAt, ...rest } = input

@@ -17,7 +17,7 @@ export const zodPost = z.object({
     tags: zodTags.optional(),
     likeCount: zodWholeNumber.optional(),
     bookmarkCount: zodWholeNumber.optional(),
-    caption: zodCaption.optional(),
+    caption: zodCaption,
     createdAt: z.instanceof(Date),
     commentCount: zodWholeNumber.optional(),
 })
