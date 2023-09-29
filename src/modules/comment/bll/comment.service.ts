@@ -45,7 +45,7 @@ export class CommentService implements ICommentService {
     }
     async getAllComments(id: JustId) {
         const postId = zodPostId.parse(id)
-        const comments = (await this.commentRepo.findAllByPost(postId)).toCommentList()
+        const comments = (await this.commentRepo.findAllByPost(postId))
         const commentsWithProfilePhotos = await Promise.all( comments.map(async(comment)=>{
             const profilePhoto = await MinioRepo.getProfileUrl(comment.author.id)
             if (profilePhoto) comment.author.photo = profilePhoto
@@ -66,13 +66,13 @@ export class CommentService implements ICommentService {
             post: post,
             ...rest,
         })
-        const createdComment = (await this.commentRepo.create(commentEntity)).toComment()
+        const createdComment = (await this.commentRepo.create(commentEntity))
         return createdComment ?? new ServerError()
     }
 
     async getComment(id: JustId) {
         const commentId = zodCommentId.parse(id)
-        const comment = (await this.commentRepo.findByID(commentId)).toComment()
+        const comment = (await this.commentRepo.findByID(commentId))
         return comment ?? null
     }
 }

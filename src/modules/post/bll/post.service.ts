@@ -16,7 +16,7 @@ import { Relation } from '../../user/model/relation'
 import { EditPostDTO } from '../dto/editPost.dto'
 import { CloseFriendService, ICloseFriendService } from '../../user/bll/closefriend.service'
 
-export type arrayResult = { result: PostWithDetail[]; total: number }
+export type arrayResult = { result: BasicPost[]; total: number }
 export type timelineArrayResult = { result: { user: User; post: PostWithDetail }[]; total: number }
 type Message = { msg: Msg }
 export interface IPostService {
@@ -52,7 +52,7 @@ export class PostService implements IPostService {
     validateAccess = (targetUser: User, relation?: Relation | undefined) => {
         return (relation && relation.status === 'Following') || (!relation && targetUser.private === false)
     }
-    async adjustPhoto(post: PostWithDetail) {
+    async adjustPhoto<A extends BasicPost>(post: A) {
         const postPhotos = await MinioRepo.getPostPhotoUrl(post.id)
         post.photos = postPhotos || []
         return post
@@ -66,7 +66,7 @@ export class PostService implements IPostService {
         const relation = (await this.relationService.getRelations(userId, targetUserId)).relation
         if (!this.validateAccess(targetUser, relation)) return { msg: messages.postAccessDenied.persian }
         const closeFriend = await this.checkCloseFriend(userId, targetUserId)
-        const posts = (await this.postRepo.findAllByAuthor(targetUserId, closeFriend)).toPostList()
+        const posts = (await this.postRepo.findAllBasicPosts(targetUserId, closeFriend))
         if (posts.length < 1) return { msg: messages.postNotFound.persian }
 
         const postsWithPhotos = await Promise.all(posts.map((post) => this.adjustPhoto(post)))
@@ -74,7 +74,7 @@ export class PostService implements IPostService {
     }
 
     async getMyPosts(userId: UserId) {
-        const posts = (await this.postRepo.findAllByAuthor(userId, [true, false])).toPostList()
+        const posts = (await this.postRepo.findAllBasicPosts(userId, [true, false]))
         if (posts.length < 1) return { msg: messages.postNotFound.persian }
 
         const postsWithPhotos = await Promise.all(posts.map((post) => this.adjustPhoto(post)))
@@ -89,7 +89,8 @@ export class PostService implements IPostService {
         const posts = await Promise.all(
             users.map(async (targetUser) => {
                 const closeFriend = await this.checkCloseFriend(userId, targetUser.id)
-                return (await this.postRepo.findAllByAuthor(targetUser.id, closeFriend)).toPostList()
+                const posts = (await this.postRepo.findAllFullPosts(targetUser.id, closeFriend))
+                return posts
             })
         )
 
@@ -105,7 +106,7 @@ export class PostService implements IPostService {
     async createPost(dto: CreatePostDTO, files: Express.Multer.File[], userId: UserId) {
         if (files.length < 1) return { msg: messages.failed.persian }
         const createPostRepoInput = toCreatePost({ ...dto, author: userId })
-        const createdPost = (await this.postRepo.create(createPostRepoInput)).toPost()
+        const createdPost = (await this.postRepo.create(createPostRepoInput))
         if (!createdPost) return new ServerError(PersianErrors.ServerError)
 
         await MinioRepo.uploadPostPhoto(createdPost.id, files)
@@ -115,12 +116,12 @@ export class PostService implements IPostService {
 
     async editPost(dto: EditPostDTO, id: JustId, userId: UserId) {
         const postId = zodPostId.parse(id)
-        const post = (await this.postRepo.findWithoutDetailByID(postId)).toPost()
+        const post = (await this.postRepo.findWithoutDetailByID(postId))
         if (!post || post.author !== userId) return { msg: messages.postNotFound.persian }
         post.caption = dto.caption
         post.closeFriend = dto.closeFriend
         post.tags = dto.tags ?? []
-        const editedPost = (await this.postRepo.edit(post)).toPost()
+        const editedPost = (await this.postRepo.edit(post))
         if (!editedPost) return new ServerError(PersianErrors.ServerError)
 
         const result = await this.adjustPhoto(editedPost)
@@ -139,7 +140,7 @@ export class PostService implements IPostService {
 
     async getPost(id: JustId, userId: UserId) {
         const postId = zodPostId.parse(id)
-        const post = (await this.postRepo.findWithDetailByID(postId)).toPost()
+        const post = (await this.postRepo.findWithDetailByID(postId))
         if (!post) return { msg: messages.postNotFound.persian }
         const closeFriend = await this.checkCloseFriend(userId, post.author)
         if (closeFriend[0] === false && post.closeFriend === true) return { msg: messages.postAccessDenied.persian }
@@ -149,15 +150,14 @@ export class PostService implements IPostService {
 
     async getPostWitoutDetail(id: JustId) {
         const postId = zodPostId.parse(id)
-        const post = (await this.postRepo.findWithoutDetailByID(postId)).toPost()
+        const post = (await this.postRepo.findWithoutDetailByID(postId))
         if (!post) return { msg: messages.postNotFound.persian }
 
         return post
     }
 
     async getSomePosts(userId: UserId, closeFriend: boolean[]): Promise<BasicPost[]> {
-        const postsDao = await this.postRepo.findSomeByAuthor(userId, 4, closeFriend)
-        const posts = postsDao.toThumbnailList()
+        const posts = await this.postRepo.findSomeByAuthor(userId, 4, closeFriend)
         return posts
     }
 

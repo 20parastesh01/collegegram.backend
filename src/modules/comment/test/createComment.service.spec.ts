@@ -47,7 +47,7 @@ describe('CommentService', () => {
     })
 
     it('should create a comment', async () => {
-        mockCommentRepository.create.mockResolvedValue(commentDao(mockCreatedComment))
+        mockCommentRepository.create.mockResolvedValue(mockCreatedComment)
 
         const result = await commentService.createComment(mockcreateCommentDto, userId)
 
