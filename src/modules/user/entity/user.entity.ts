@@ -46,11 +46,11 @@ export class UserEntity {
 
     @OneToMany(() => LikeEntity, (like) => like.user, { lazy: true })
     @JoinColumn({ name: 'like_id' })
-    likes: LikeEntity[] | undefined
+    likes?: LikeEntity[]
 
     @OneToMany(() => BookmarkEntity, (bookmark) => bookmark.user, { lazy: true })
     @JoinColumn({ name: 'bookmark_id' })
-    bookmarks: BookmarkEntity[] | undefined
+    bookmarks?: BookmarkEntity[]
 
     @CreateDateColumn()
     createdAt!: Date
