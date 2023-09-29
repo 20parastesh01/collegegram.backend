@@ -9,7 +9,7 @@ export const editProfileDto = z.object({
     name: z.string().nonempty().optional(),
     lastname: z.string().nonempty().optional(),
     password: zodInputPassword.optional(),
-    private: z.boolean().optional(),
+    private: zodBooleanOrBooleanString.optional(),
     bio: z.string().nonempty().optional(),
     removeProfile: zodBooleanOrBooleanString.default(false)
 })
