@@ -9,6 +9,7 @@ import { zodPostId } from '../model/post-id'
 import { zodBooleanOrBooleanString } from '../../../data/boolean-stringBoolean'
 import { ZodType, ZodTypeDef, z } from 'zod'
 const zodCreatedAt: ZodType<Date, ZodTypeDef, Date> = z.instanceof(Date); //TODO: Generallize it
+
 const toPostWithDetail = (input: PostEntity): PostWithDetail => {
     const { createdAt, updatedAt, ...rest } = input;
     return zodStrictPost.parse(rest);
@@ -24,52 +25,16 @@ const toBasicPost = (input: PostEntity): BasicPost => {
     return zodBasicPost.parse(rest);
 }
 
-const postEntityWithDetailToPost = (input: PostEntity) => {
-    const { updatedAt, ...rest } = input
-    const output: PostWithDetail = {
-        id: zodPostId.parse(rest.id),
-        caption: zodCaption.parse(rest.caption),
-        author: zodUserId.parse(rest.author),
-        closeFriend: zodBooleanOrBooleanString.parse(rest.closeFriend),
-        tags: zodTags.optional().parse(rest.tags),
-        commentCount: zodWholeNumber.parse(rest.commentCount),
-        likeCount: zodWholeNumber.parse(rest.likeCount),
-        bookmarkCount: zodWholeNumber.parse(rest.bookmarkCount),
-        createdAt: zodCreatedAt.parse(rest.createdAt),
-    }
-    return output
-}
-const postEntityWithoutDetailToPost = (input: PostEntity) => {
-    const { updatedAt, likeCount, bookmarkCount, commentCount, ...rest } = input
-    const output: PostWithoutDetail = {
-        id: zodPostId.parse(rest.id),
-        caption: zodCaption.parse(rest.caption),
-        author: zodUserId.parse(rest.author),
-        closeFriend: zodBooleanOrBooleanString.parse(rest.closeFriend),
-        tags: zodTags.optional().parse(rest.tags),
-        createdAt: zodCreatedAt.parse(rest.createdAt),
-    }
-    return output
-}
-const postEntityToPostThumbnail = (input: PostEntity | PostEntity) => {
-    const { createdAt, updatedAt, ...rest } = input
-    const output: BasicPost = {
-        id: zodPostId.parse(rest.id),
-        author: zodUserId.parse(rest.author),
-        closeFriend: zodBooleanOrBooleanString.parse(rest.closeFriend),
-    }
-    return output
-}
 export const postWithoutDetailOrNullDao = (input: PostEntity | null) => {
     return {
         toPost(): undefined | PostWithoutDetail {
             if (input === null) return undefined
 
-            return postEntityWithoutDetailToPost(input)
+            return toPostWithoutDetail(input)
         },
         toThumbnail(): BasicPost | undefined {
             if (input === null) return undefined
-            return postEntityToPostThumbnail(input)
+            return toBasicPost(input)
         },
     }
 }
@@ -77,23 +42,23 @@ export const postWithDetailOrNullDao = (input: PostEntity | null) => {
     return {
         toPost(): PostWithDetail | undefined {
             if (input === null) return undefined
-            return postEntityWithDetailToPost(input)
+            return toPostWithDetail(input)
         },
         toThumbnail(): BasicPost | undefined {
             if (input === null) return undefined
-            return postEntityToPostThumbnail(input)
+            return toBasicPost(input)
         },
     }
 }
 export const postWithoutDetailDao = (input: PostEntity) => {
     return {
         toPost(): PostWithDetail {
-            const rest = postEntityWithoutDetailToPost(input)
+            const rest = toPostWithoutDetail(input)
             const output: PostWithDetail = { likeCount: zodWholeNumber.parse(0), bookmarkCount: zodWholeNumber.parse(0), commentCount: zodWholeNumber.parse(0), ...rest }
             return output
         },
         toPostWithoutDetail(): PostWithoutDetail {
-            const rest = postEntityWithoutDetailToPost(input)
+            const rest = toPostWithoutDetail(input)
             const output: PostWithoutDetail = { ...rest }
             return output
         },
@@ -103,14 +68,14 @@ export const postArrayDao = (input: PostEntity[]) => {
     return {
         toPostList(): PostWithDetail[] {
             return input.map((entity) => {
-                const rest = postEntityWithDetailToPost(entity)
+                const rest = toPostWithDetail(entity)
                 const output: PostWithDetail = { ...rest }
                 return output
             })
         },
         toThumbnailList(): BasicPost[] {
             return input.map((entity) => {
-                const rest = postEntityToPostThumbnail(entity)
+                const rest = toBasicPost(entity)
                 return rest
             })
         },
@@ -120,14 +85,14 @@ export const postDaoList = (input: PostEntity[]) => {
     return {
         toPostList(): PostWithoutDetail[] {
             return input.map((entity) => {
-                const rest = postEntityWithoutDetailToPost(entity)
+                const rest = toPostWithoutDetail(entity)
                 const output: PostWithoutDetail = { ...rest }
                 return output
             })
         },
         toThumbnailList(): BasicPost[] {
             return input.map((entity) => {
-                const rest = postEntityToPostThumbnail(entity)
+                const rest = toBasicPost(entity)
                 return rest
             })
         },
