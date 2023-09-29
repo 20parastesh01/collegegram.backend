@@ -7,14 +7,13 @@ import { CommentId } from '../model/comment-id'
 const convertToModel = (entity: CommentEntity): Comment => {
     const { updatedAt, post, likes, author, id, ...rest } = entity
     const ID = id ?? (0 as CommentId)
-    return { id:ID, author: zodUserShort.parse({ photo: '', ...author }), ...rest }
+    return { id: ID, author: zodUserShort.parse({ photo: '', ...author }), ...rest }
 }
 
 export const commentDao = (input: CommentEntity) => {
     return {
-        toComment(): Comment | undefined {
-            const { updatedAt, author, ...rest } = input
-            return { author: zodUserShort.parse({ photo: '', ...author }), ...rest }
+        toComment(): Comment {
+            return convertToModel(input)
         },
     }
 }
