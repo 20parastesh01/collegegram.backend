@@ -5,17 +5,16 @@ import { ILikeRepository, LikeRepository } from '../like.repository'
 import { toCreateLike } from './like.dao'
 import { Msg, PersianErrors, messages } from '../../../utility/persian-messages'
 import { JustId } from '../../../data/just-id'
-import { PostWithDetail } from '../../post/model/post'
 import { zodPostId } from '../../post/model/post-id'
 import { PostService, IPostService } from '../../post/bll/post.service'
 import { UserService, IUserService } from '../../user/bll/user.service'
 
-type arrayResult = { result: PostWithDetail[]; total: number }
 type Message = { msg: Msg }
 
 export interface ILikeService {
     likePost(userId: UserId, id: JustId): Promise<Message>
     unlikePost(userId: UserId, id: JustId): Promise<Message | ServerError>
+    removePostLikesWhenBlockingUser(userId: UserId, targetId: UserId): Promise<Message | ServerError>
 }
 
 @Service(LikeRepository, PostService, UserService)
@@ -36,8 +35,8 @@ export class LikeService implements ILikeService {
         if (user === null || 'msg' in post) return { msg: messages.postNotFound.persian }
 
         const input = toCreateLike(user, post)
-        const createdLike = (await this.likeRepo.create(input)).toLike()
-        const updatedPost = createdLike.post
+        await this.likeRepo.create(input)
+        
         return { msg: messages.liked.persian }
     }
     async unlikePost(userId: UserId, id: JustId) {
@@ -48,10 +47,22 @@ export class LikeService implements ILikeService {
         const post = await this.postService.getPost(id, userId)
         if('msg' in post) return { msg: messages.postNotFound.persian }
 
-        const createdLike = (await this.likeRepo.remove(like.id)).toLike()
-        if (!createdLike) return new ServerError(PersianErrors.ServerError)
+        const removedLike = (await this.likeRepo.remove(like.id)).toLike()
+        if (!removedLike) return new ServerError(PersianErrors.ServerError)
 
-        const updatedPost = createdLike.post
         return { msg: messages.unliked.persian }
+    }
+    async removePostLikesWhenBlockingUser(userId: UserId, targetId: UserId) {
+        const postLikes = await this.likeRepo.getUserLikesOnTargetUserPosts(userId, targetId)
+
+        await Promise.all(postLikes.map(async (postLike) => {
+            const removedLike = (await this.likeRepo.remove(postLike.id)).toLike()
+            if (!removedLike) {
+                console.log(`Remove Post's Like element in remove post's likes when User block targetUser was not successful. Target PostLike : :postLike`, {postLike})
+            }
+            return removedLike
+        }))
+
+        return { msg: messages.done.persian }
     }
 }

@@ -15,7 +15,7 @@ export const zodComment = z.object({
     parentId: zodCommentId.optional(),
     createdAt: z.instanceof(Date),
 })
-export interface Comment extends BaseComment {
+export interface Comment extends BasicComment {
     likeCount: WholeNumber
     parentId?: CommentId
     createdAt: Date
@@ -26,7 +26,7 @@ export interface NewComment {
     content: Content
     parentId?: CommentId
 }
-export interface BaseComment {
+export interface BasicComment {
     id: CommentId
     author: UserShort
     postId: PostId

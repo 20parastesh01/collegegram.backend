@@ -3,7 +3,7 @@ export type Types =
     | 'CommentId'
     | 'Comment'
     | 'NewComment'
-    | 'BaseComment'
+    | 'BasicComment'
     | 'Content'
     | 'EmailId'
     | 'EmailHistory'
