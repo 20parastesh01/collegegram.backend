@@ -1,6 +1,6 @@
 import { WholeNumber, zodWholeNumber } from '../../../data/whole-number'
 import { UserId } from '../../user/model/user-id'
-import { Content } from './content'
+import { Content, zodContent } from './content'
 import { CommentId, zodCommentId } from './comment-id'
 import { PostId, zodPostId } from '../../post/model/post-id'
 import { User, UserShort, zodUserShort } from '../../user/model/user'
@@ -9,9 +9,9 @@ import { PostWithDetail } from '../../post/model/post'
 
 export const zodComment = z.object({
     id: zodCommentId,
-    content: z.string(), // Use z.string() to validate content as a simple string
+    content: zodContent,
     postId: zodPostId,
-    author: zodUserShort.optional(),
+    author: zodUserShort,
     likeCount: zodWholeNumber,
     parentId: zodCommentId.optional(),
     createdAt: z.instanceof(Date),
