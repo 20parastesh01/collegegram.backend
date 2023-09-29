@@ -5,7 +5,7 @@ import { BasicPost, PostWithDetail, PostWithoutDetail } from '../model/post'
 import { zodPostId } from '../model/post-id'
 import { toCreatePost } from './post.dao'
 import { UserId, zodUserId } from '../../user/model/user-id'
-import { Service } from '../../../registry/layer-decorators'
+import { Service, services } from '../../../registry/layer-decorators'
 import { MinioRepo } from '../../../data-source'
 import { Msg, PersianErrors, messages } from '../../../utility/persian-messages'
 import { JustId } from '../../../data/just-id'
@@ -15,6 +15,8 @@ import { User } from '../../user/model/user'
 import { Relation } from '../../user/model/relation'
 import { EditPostDTO } from '../dto/editPost.dto'
 import { CloseFriendService, ICloseFriendService } from '../../user/bll/closefriend.service'
+import { LikeService } from '../../postAction/bll/like.service'
+import { BookmarkService } from '../../postAction/bll/bookmark.service'
 
 export type arrayResult = { result: BasicPost[]; total: number }
 export type timelineArrayResult = { result: { user: User; post: PostWithDetail }[]; total: number }
@@ -96,9 +98,16 @@ export class PostService implements IPostService {
 
         const flattenedPosts = posts.flat()
         flattenedPosts.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+        const postsWithLiked = await Promise.all(flattenedPosts.map(async(post)=>{
+            const like = await (services['LikeService'] as LikeService).getLikeByUserAndPost(userId, post.id)
+            const bookmark = await (services['BookmarkService'] as BookmarkService).getBookmarkByUserAndPost(userId, post.id)
+            post.ifBookmarked = bookmark
+            post.ifLiked = like
+            return post
+        }))
 
-        if (flattenedPosts.length < 1) return { msg: messages.postNotFound.persian }
-        const postsWithPhotos = await Promise.all(flattenedPosts.map((post) => this.adjustPhoto(post)))
+        if (postsWithLiked.length < 1) return { msg: messages.postNotFound.persian }
+        const postsWithPhotos = await Promise.all(postsWithLiked.map((post) => this.adjustPhoto(post)))
         const result = postsWithPhotos.map((post) => ({ user: users.filter((user) => user.id === post.author)[0], post: post }))
         return { result: result, total: result.length }
     }
@@ -144,6 +153,11 @@ export class PostService implements IPostService {
         if (!post) return { msg: messages.postNotFound.persian }
         const closeFriend = await this.checkCloseFriend(userId, post.author)
         if (closeFriend[0] === false && post.closeFriend === true) return { msg: messages.postAccessDenied.persian }
+        const like = await (services['LikeService'] as LikeService).getLikeByUserAndPost(userId, post.id)
+        const bookmark = await (services['BookmarkService'] as BookmarkService).getBookmarkByUserAndPost(userId, post.id)
+        post.ifBookmarked = bookmark
+        post.ifLiked = like
+        
         const result = await this.adjustPhoto(post)
         return this.adjustPhoto(result)
     }
