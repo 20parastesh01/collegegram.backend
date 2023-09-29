@@ -5,18 +5,15 @@ import { CreateCommentLike } from '../commentLike.repository'
 import { CommentLikeEntity } from '../entity/commentLike.entity'
 import { Comment } from '../model/comment'
 import { CommentId, zodCommentId } from '../model/comment-id'
-import { BasicCommentLike } from '../model/commentLike'
+import { BasicCommentLike, zodBasicCommentLike } from '../model/commentLike'
 
-const ToBasicCommentLike = (input: CommentLikeEntity) => {
-    const { id, comment_id, user_id } = input
+export const ToBasicCommentLike = (input: CommentLikeEntity) => {
+    const { id, ...rest } = input
     const ID = id ?? (0 as LikeId)
-    const output: BasicCommentLike = {
-        id: zodLikeId.parse(ID),
-        userId: zodUserId.parse(user_id),
-        commentId: zodCommentId.parse(comment_id),
-    }
+    const output: BasicCommentLike = zodBasicCommentLike.parse({id:ID, ...rest})
     return output
 }
+
 export const commentLikeOrNullDao = (input: CommentLikeEntity | null) => {
     return {
         toCommentLike(): BasicCommentLike | undefined {
