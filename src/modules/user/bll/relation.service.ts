@@ -151,6 +151,16 @@ export class RelationService implements IRelationService {
         return userShorts 
     }
 
+    async getFollowersCount(userId: UserId) {
+        const count = await this.relationRepo.findFollowersCount(userId)
+        return count 
+    }
+
+    async getFollowingCount(userId: UserId) {
+        const count = await this.relationRepo.findFollowingsCount(userId)
+        return count 
+    }
+
     async getFollowings(userId:UserId,paginationInfo:PaginationInfo) {
         const followingUserIds = await this.relationRepo.findFollowings(userId,paginationInfo)
         const userShorts = await this.userService.getBatchUserInfo(followingUserIds)
