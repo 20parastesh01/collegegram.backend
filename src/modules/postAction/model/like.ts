@@ -1,19 +1,25 @@
-import { PostWithDetail } from '../../post/model/post'
-import { PostId } from '../../post/model/post-id'
-import { UserId } from '../../user/model/user-id'
-import { LikeId } from './like-id'
+import { z } from 'zod'
+import { PostWithDetail, zodStrictPost } from '../../post/model/post'
+import { PostId, zodPostId } from '../../post/model/post-id'
+import { UserId, zodUserId } from '../../user/model/user-id'
+import { LikeId, zodLikeId } from './like-id'
 
+export const zodLikeWithPost = z.object({
+    id: zodLikeId,
+    post: zodStrictPost,
+    userId: zodUserId,
+    postId: zodPostId,
+})
+export const zodBasicLike = z.object({
+    id: zodLikeId,
+    userId: zodUserId,
+    postId: zodPostId,
+})
 export interface LikeWithPost extends BasicLike {
     post: PostWithDetail
 }
 export interface BasicLike {
     id: LikeId
-    postId: PostId
-    userId: UserId
-}
-export interface DeletedLike {
-    id: LikeId
-    post: PostWithDetail
     postId: PostId
     userId: UserId
 }

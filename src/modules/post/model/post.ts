@@ -17,7 +17,7 @@ export const zodPost = z.object({
     tags: zodTags.optional(),
     likeCount: zodWholeNumber.optional(),
     bookmarkCount: zodWholeNumber.optional(),
-    caption: zodCaption.optional(),
+    caption: zodCaption,
     createdAt: z.instanceof(Date),
     commentCount: zodWholeNumber.optional(),
 })
@@ -32,6 +32,12 @@ export const zodStrictPost = z.object({
     caption: zodCaption,
     commentCount: zodWholeNumber,
     createdAt: z.instanceof(Date),
+})
+export const zodBasicPost = z.object({
+    id: zodPostId,
+    author: zodUserId,
+    closeFriend: zodBooleanOrBooleanString,
+    photos: zodPaths.optional(),
 })
 
 export interface PostWithDetail extends PostWithoutDetail {
