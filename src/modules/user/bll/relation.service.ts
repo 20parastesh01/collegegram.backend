@@ -29,15 +29,12 @@ export interface IRelationService {
     getFollowing(id: UserId): Promise<UserId[]>
 }
 
-@Service(RelationRepository, UserService, NotificationService, LikeService, CommentLikeService, CommentService)
+@Service(RelationRepository, UserService, NotificationService)
 export class RelationService implements IRelationService {
     constructor(
         private relationRepo: IRelationRepository,
         private userService: UserService,
         private notifService: NotificationService,
-        private likeService: ILikeService,
-        private commentLikeService: ICommentLikeService,
-        private commentService: ICommentService,
     ) {}
 
     async checkAccessAuth(userId: UserId, targetUser: User, status: RelationStatus) {
@@ -138,9 +135,10 @@ export class RelationService implements IRelationService {
             await this.relationRepo.deleteRelation({ userA: target.id, userB: userId })
         }
 
-        this.likeService.removePostLikesWhenBlockingUser(userId, targetId)
-        this.commentLikeService.removeCommentLikesWhenBlockingUser(userId, targetId)
-        this.commentService.removeCommentsWhenBlockingUser(userId, targetId)
+        const promises = [(services['LikeService'] as LikeService).removePostLikesWhenBlockingUser(userId, targetId),
+        (services['CommentLikeService'] as CommentLikeService).removeCommentLikesWhenBlockingUser(userId, targetId),
+        (services['CommentService'] as CommentService).removeCommentsWhenBlockingUser(userId, targetId),]
+        Promise.all(promises);
         await this.relationRepo.updateRelation({ userA: userId, userB: targetId, status: 'Blocked' })
         return { msg: messages.blocked.persian }
     }

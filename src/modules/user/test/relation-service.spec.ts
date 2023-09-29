@@ -37,16 +37,7 @@ const mockRelationRepo: Partial<RelationRepository> = {
 const mockUserService: Partial<UserService> = {
     getUserById: jest.fn().mockImplementation(() => resolvesHandler[0]()),
 }
-const mockLikeService: Partial<LikeService> = {
-    getUserLikesOnTargetUserPosts: jest.fn(),
-} as any
-const mockCommentLikeService: Partial<CommentLikeService> = {
-    getUserLikesOnTargetUserPosts: jest.fn(),
-} as any
-const mockCommentService: Partial<CommentService> = {
-    removeCommentsWhenBlockingUser: jest.fn(),
-} as any
-const relationService = new RelationService(mockRelationRepo as RelationRepository, mockUserService as UserService, {} as NotificationService, mockLikeService as LikeService, mockCommentLikeService as CommentLikeService, mockCommentService as CommentService)
+const relationService = new RelationService(mockRelationRepo as RelationRepository, mockUserService as UserService, {} as NotificationService)
 
 describe('Relation Service', () => {
     describe('Follow', () => {
