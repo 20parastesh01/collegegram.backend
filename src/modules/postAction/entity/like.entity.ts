@@ -18,10 +18,10 @@ export class LikeEntity {
     user!: UserEntity
 
     @Column()
-    post_id!: PostId
+    postId!: PostId
 
     @ManyToOne(() => PostEntity, { eager: true, cascade: true, onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'post_id' })
+    @JoinColumn({ name: 'postId' })
     post!: PostEntity
 
     @CreateDateColumn()

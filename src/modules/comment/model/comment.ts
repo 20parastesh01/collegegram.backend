@@ -5,6 +5,7 @@ import { CommentId, zodCommentId } from './comment-id'
 import { PostId, zodPostId } from '../../post/model/post-id'
 import { User, UserShort, zodUserShort } from '../../user/model/user'
 import { z } from 'zod'
+import { PostWithDetail } from '../../post/model/post'
 
 export const zodComment = z.object({
     id: zodCommentId,
@@ -22,7 +23,7 @@ export interface Comment extends BasicComment {
 }
 export interface NewComment {
     author: User
-    postId: PostId
+    post: PostWithDetail
     content: Content
     parentId?: CommentId
 }

@@ -1,7 +1,6 @@
 import { Request, Response, Router } from 'express'
 import { handleExpress } from '../utility/handle-express'
 import { CommentService } from '../modules/comment/bll/comment.service'
-import { zodGetAllCommentsDTO } from '../modules/comment/dto/getAllComments.dto'
 import { zodCreateCommentDTO } from '../modules/comment/dto/createComment.dto'
 import { Route } from '../registry/layer-decorators'
 import { Auth, Delete, Get, Post, RequestBody } from '../registry/endpoint-decorator'
@@ -26,9 +25,10 @@ export class CommentRouter {
     @Get('/:postId')
     @Auth()
     getAllCommentsByPost(req: Request, res: Response) {
-        const data = zodGetAllCommentsDTO.parse(req.params.postId)
+        const data = zodJustId.parse(req.params.postId)
         handleExpress(res, () => this.commentService.getAllComments(data))
     }
+
     @Post('/:id/like')
     @Auth()
     likeAComment(req: Request, res: Response) {

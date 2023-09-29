@@ -1,6 +1,7 @@
 import { SimpleMessage } from '../../../data/simple-message'
 import { ForbiddenError, NotFoundError } from '../../../utility/http-error'
 import { messages } from '../../../utility/persian-messages'
+import { CommentService } from '../../comment/bll/comment.service'
 import { CommentLikeService } from '../../comment/bll/commentLike.service'
 import { NotificationService } from '../../notification/bll/notification.service'
 import { LikeService } from '../../postAction/bll/like.service'
@@ -42,7 +43,10 @@ const mockLikeService: Partial<LikeService> = {
 const mockCommentLikeService: Partial<CommentLikeService> = {
     getUserLikesOnTargetUserPosts: jest.fn(),
 } as any
-const relationService = new RelationService(mockRelationRepo as RelationRepository, mockUserService as UserService, {} as NotificationService, mockLikeService as LikeService, mockCommentLikeService as CommentLikeService)
+const mockCommentService: Partial<CommentService> = {
+    removeCommentsWhenBlockingUser: jest.fn(),
+} as any
+const relationService = new RelationService(mockRelationRepo as RelationRepository, mockUserService as UserService, {} as NotificationService, mockLikeService as LikeService, mockCommentLikeService as CommentLikeService, mockCommentService as CommentService)
 
 describe('Relation Service', () => {
     describe('Follow', () => {

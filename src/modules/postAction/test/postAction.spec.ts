@@ -45,7 +45,7 @@ describe('PostActionService', () => {
         mockUserService.getUserById.mockResolvedValue(mockUser[1])
         const result = await likeService.likePost(mockLikeDto.user.id, mockJustId.id2)
 
-        expect(result.msg).toEqual(messages.liked.persian)
+        expect(result).toEqual({ msg: messages.liked.persian})
         //expect(result).toEqual(mockCreatedPost[1])
         expect(mockLikeRepository.create).toHaveBeenCalledWith(expect.objectContaining({ post: mockPostWithoutDetail, user: mockUser[1] }))
     })

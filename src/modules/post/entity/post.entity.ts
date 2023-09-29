@@ -43,7 +43,7 @@ export class PostEntity {
     @JoinColumn({ name: 'bookmark_id' })
     bookmarks: BookmarkEntity[] | undefined
 
-    @OneToMany((type) => CommentEntity, (comment) => comment.postId, { lazy: true })
+    @OneToMany((type) => CommentEntity, (comment) => comment.post, { lazy: true })
     @JoinColumn({ name: 'comment_id' })
     comments: CommentEntity[] | undefined
 

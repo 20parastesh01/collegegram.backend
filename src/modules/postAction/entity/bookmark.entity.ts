@@ -18,10 +18,10 @@ export class BookmarkEntity {
     user!: UserEntity
 
     @Column()
-    post_id!: PostId
+    postId!: PostId
 
     @ManyToOne(() => PostEntity, (post) => post.bookmarks, { eager: true, onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'post_id' })
+    @JoinColumn({ name: 'postId' })
     post!: PostEntity
 
     @CreateDateColumn()

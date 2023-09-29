@@ -17,9 +17,12 @@ export class CommentEntity {
     @Column()
     content!: Content
 
-    @ManyToOne(() => PostEntity, (post: PostEntity) => post.id)
-    @JoinColumn()
+    @Column()
     postId!: PostId
+
+    @ManyToOne(() => PostEntity, { eager: true, cascade: true, onDelete: 'CASCADE' })
+    @JoinColumn({ name: 'postId' })
+    post!: PostEntity
 
     @ManyToOne(() => CommentEntity, (comment) => comment.id, { nullable: true })
     @JoinColumn()

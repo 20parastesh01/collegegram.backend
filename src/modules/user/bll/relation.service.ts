@@ -3,10 +3,11 @@ import { zodWholeNumber } from '../../../data/whole-number'
 import { Service, services } from '../../../registry/layer-decorators'
 import { BadRequestError, ForbiddenError, NotFoundError } from '../../../utility/http-error'
 import { messages } from '../../../utility/persian-messages'
-import { CommentLikeService } from '../../comment/bll/commentLike.service'
+import { CommentService, ICommentService } from '../../comment/bll/comment.service'
+import { CommentLikeService, ICommentLikeService } from '../../comment/bll/commentLike.service'
 import { NotificationService } from '../../notification/bll/notification.service'
 import { PostService } from '../../post/bll/post.service'
-import { LikeService } from '../../postAction/bll/like.service'
+import { ILikeService, LikeService } from '../../postAction/bll/like.service'
 import { Relation, RelationStatus } from '../model/relation'
 import { User, UserWithStatus } from '../model/user'
 import { UserId } from '../model/user-id'
@@ -28,14 +29,15 @@ export interface IRelationService {
     getFollowing(id: UserId): Promise<UserId[]>
 }
 
-@Service(RelationRepository, UserService, NotificationService, LikeService, CommentLikeService)
+@Service(RelationRepository, UserService, NotificationService, LikeService, CommentLikeService, CommentService)
 export class RelationService implements IRelationService {
     constructor(
         private relationRepo: IRelationRepository,
         private userService: UserService,
         private notifService: NotificationService,
-        private likeService: LikeService,
-        private commentLikeService: CommentLikeService,
+        private likeService: ILikeService,
+        private commentLikeService: ICommentLikeService,
+        private commentService: ICommentService,
     ) {}
 
     async checkAccessAuth(userId: UserId, targetUser: User, status: RelationStatus) {
@@ -138,6 +140,7 @@ export class RelationService implements IRelationService {
 
         this.likeService.removePostLikesWhenBlockingUser(userId, targetId)
         this.commentLikeService.removeCommentLikesWhenBlockingUser(userId, targetId)
+        this.commentService.removeCommentsWhenBlockingUser(userId, targetId)
         await this.relationRepo.updateRelation({ userA: userId, userB: targetId, status: 'Blocked' })
         return { msg: messages.blocked.persian }
     }
