@@ -13,8 +13,7 @@ const convertToModel = (entity: CommentEntity): Comment => {
 export const commentDao = (input: CommentEntity) => {
     return {
         toComment(): Comment | undefined {
-            const { updatedAt, author, ...rest } = input
-            return { author: zodUserShort.parse({ photo: '', ...author }), ...rest }
+            return convertToModel(input)
         },
     }
 }
