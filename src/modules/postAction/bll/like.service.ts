@@ -27,7 +27,7 @@ export class LikeService implements ILikeService {
 
     async likePost(userId: UserId, id: JustId) {
         const postId = zodPostId.parse(id)
-        const like = (await this.likeRepo.findByUserAndPost(userId, postId)).toLike()
+        const like = (await this.likeRepo.findByUserAndPost(userId, postId))
         if (like) return { msg: messages.alreadyLiked.persian }
 
         const user = await this.userService.getUserById(userId)
@@ -42,13 +42,13 @@ export class LikeService implements ILikeService {
     }
     async unlikePost(userId: UserId, id: JustId) {
         const postId = zodPostId.parse(id)
-        const like = (await this.likeRepo.findByUserAndPost(userId, postId)).toLike()
+        const like = (await this.likeRepo.findByUserAndPost(userId, postId))
         if (!like) return { msg: messages.notLikedYet.persian }
 
         const post = await this.postService.getPost(id, userId)
         if('msg' in post) return { msg: messages.postNotFound.persian }
 
-        const removedLike = (await this.likeRepo.remove(like.id)).toLike()
+        const removedLike = (await this.likeRepo.remove(like.id))
         if (!removedLike) return new ServerError(PersianErrors.ServerError)
 
         return { msg: messages.unliked.persian }
@@ -57,7 +57,7 @@ export class LikeService implements ILikeService {
         const postLikes = await this.likeRepo.getUserLikesOnTargetUserPosts(userId, targetId)
 
         await Promise.all(postLikes.map(async (postLike) => {
-            const removedLike = (await this.likeRepo.remove(postLike.id)).toLike()
+            const removedLike = (await this.likeRepo.remove(postLike.id))
             if (!removedLike) {
                 console.log(`Remove Post's Like element in remove post's likes when User block targetUser was not successful. Target PostLike : :postLike`, {postLike})
             }
