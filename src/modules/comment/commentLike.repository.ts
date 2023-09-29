@@ -7,6 +7,7 @@ import { LikeId } from '../postAction/model/like-id'
 import { commentLikeDao, commentLikeArrayDao, commentLikeOrNullDao } from './bll/commentLike.dao'
 import { Comment } from './model/comment'
 import { User } from '../user/model/user'
+import { BasicCommentLike } from './model/commentLike'
 
 export interface CreateCommentLike {
     user: User
@@ -19,6 +20,7 @@ export interface ICommentLikeRepository {
     remove(commentLikeId: LikeId): Promise<ReturnType<typeof commentLikeOrNullDao>>
     findAllByComment(commentId: CommentId): Promise<ReturnType<typeof commentLikeArrayDao>>
     findByUserAndComment(userId: UserId, commentId: CommentId): Promise<ReturnType<typeof commentLikeOrNullDao>>
+    getUserLikesOnTargetUserComments(userId: UserId, targetId: UserId): Promise<BasicCommentLike[]>
 }
 
 @Repo()
@@ -27,6 +29,15 @@ export class CommentLikeRepository implements ICommentLikeRepository {
 
     constructor(appDataSource: DataSource) {
         this.CommentLikeRepo = appDataSource.getRepository(CommentLikeEntity)
+    }
+    async getUserLikesOnTargetUserComments(userId: UserId, targetId: UserId) {
+        const commentLikes: CommentLikeEntity[] = await this.CommentLikeRepo.createQueryBuilder('commentLike')
+        .leftJoinAndSelect('commentLike.user', 'user')
+        .leftJoinAndSelect('commentLike.comment', 'comment')
+        .where('commentLike.user.id = :userId', { userId })
+        .andWhere('commentLike.comment.author.id = :targetId', { targetId })
+        .getMany()
+        return commentLikeArrayDao(commentLikes).toCommentLikeList()
     }
     async findAllByUser(userId: UserId) {
         const commentLike: CommentLikeEntity[] = await this.CommentLikeRepo.createQueryBuilder('commentLike').leftJoinAndSelect('commentLike.user', 'user').leftJoinAndSelect('commentLike.comment', 'comment').where('commentLike.user.id = :userId', { userId }).getMany()

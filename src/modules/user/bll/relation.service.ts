@@ -1,9 +1,9 @@
-import { MinioRepo } from '../../../data-source'
 import { PaginationInfo } from '../../../data/pagination'
 import { zodWholeNumber } from '../../../data/whole-number'
 import { Service, services } from '../../../registry/layer-decorators'
 import { BadRequestError, ForbiddenError, NotFoundError } from '../../../utility/http-error'
 import { messages } from '../../../utility/persian-messages'
+import { CommentLikeService } from '../../comment/bll/commentLike.service'
 import { NotificationService } from '../../notification/bll/notification.service'
 import { PostService } from '../../post/bll/post.service'
 import { LikeService } from '../../postAction/bll/like.service'
@@ -11,8 +11,8 @@ import { Relation, RelationStatus } from '../model/relation'
 import { User, UserWithStatus } from '../model/user'
 import { UserId } from '../model/user-id'
 import { CreateRelation, IRelationRepository, RelationRepository } from '../relation.repository'
-import { CloseFriendService, ICloseFriendService } from './closefriend.service'
 import { UserService } from './user.service'
+
 export type accessToUser = 'FullAccess' | 'JustProfile' | 'Denied'
 export interface IRelationService {
     getTargetUser(userId: UserId, targetUserId: UserId): Promise<UserWithStatus | NotFoundError>
@@ -28,13 +28,14 @@ export interface IRelationService {
     getFollowing(id: UserId): Promise<UserId[]>
 }
 
-@Service(RelationRepository, UserService, NotificationService, LikeService)
+@Service(RelationRepository, UserService, NotificationService, LikeService, CommentLikeService)
 export class RelationService implements IRelationService {
     constructor(
         private relationRepo: IRelationRepository,
         private userService: UserService,
         private notifService: NotificationService,
         private likeService: LikeService,
+        private commentLikeService: CommentLikeService,
     ) {}
 
     async checkAccessAuth(userId: UserId, targetUser: User, status: RelationStatus) {
@@ -135,7 +136,8 @@ export class RelationService implements IRelationService {
             await this.relationRepo.deleteRelation({ userA: target.id, userB: userId })
         }
 
-        this.likeService.removeLikesWhenBlockingUser(userId, targetId)
+        this.likeService.removePostLikesWhenBlockingUser(userId, targetId)
+        this.commentLikeService.removeCommentLikesWhenBlockingUser(userId, targetId)
         await this.relationRepo.updateRelation({ userA: userId, userB: targetId, status: 'Blocked' })
         return { msg: messages.blocked.persian }
     }

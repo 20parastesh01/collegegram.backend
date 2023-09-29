@@ -1,7 +1,9 @@
 import { SimpleMessage } from '../../../data/simple-message'
 import { ForbiddenError, NotFoundError } from '../../../utility/http-error'
 import { messages } from '../../../utility/persian-messages'
+import { CommentLikeService } from '../../comment/bll/commentLike.service'
 import { NotificationService } from '../../notification/bll/notification.service'
+import { LikeService } from '../../postAction/bll/like.service'
 import { relationDao } from '../bll/relation.dao'
 import { RelationService } from '../bll/relation.service'
 import { UserService } from '../bll/user.service'
@@ -34,7 +36,13 @@ const mockRelationRepo: Partial<RelationRepository> = {
 const mockUserService: Partial<UserService> = {
     getUserById: jest.fn().mockImplementation(() => resolvesHandler[0]()),
 }
-const relationService = new RelationService(mockRelationRepo as RelationRepository, mockUserService as UserService, {} as NotificationService)
+const mockLikeService: Partial<LikeService> = {
+    getUserLikesOnTargetUserPosts: jest.fn(),
+} as any
+const mockCommentLikeService: Partial<CommentLikeService> = {
+    getUserLikesOnTargetUserPosts: jest.fn(),
+} as any
+const relationService = new RelationService(mockRelationRepo as RelationRepository, mockUserService as UserService, {} as NotificationService, mockLikeService as LikeService, mockCommentLikeService as CommentLikeService)
 
 describe('Relation Service', () => {
     describe('Follow', () => {

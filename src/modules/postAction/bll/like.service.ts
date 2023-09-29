@@ -14,7 +14,7 @@ type Message = { msg: Msg }
 export interface ILikeService {
     likePost(userId: UserId, id: JustId): Promise<Message>
     unlikePost(userId: UserId, id: JustId): Promise<Message | ServerError>
-    removeLikesWhenBlockingUser(userId: UserId, targetId: UserId): Promise<Message | ServerError>
+    removePostLikesWhenBlockingUser(userId: UserId, targetId: UserId): Promise<Message | ServerError>
 }
 
 @Service(LikeRepository, PostService, UserService)
@@ -52,13 +52,13 @@ export class LikeService implements ILikeService {
 
         return { msg: messages.unliked.persian }
     }
-    async removeLikesWhenBlockingUser(userId: UserId, targetId: UserId) {
-        const likes = await this.likeRepo.getUserLikesOnTargetUserPosts(userId, targetId)
+    async removePostLikesWhenBlockingUser(userId: UserId, targetId: UserId) {
+        const postLikes = await this.likeRepo.getUserLikesOnTargetUserPosts(userId, targetId)
 
-        await Promise.all(likes.map(async (like) => {
-            const removedLike = (await this.likeRepo.remove(like.id)).toLike()
+        await Promise.all(postLikes.map(async (postLike) => {
+            const removedLike = (await this.likeRepo.remove(postLike.id)).toLike()
             if (!removedLike) {
-                console.log(`Remove Like element in remove likes when User block was not successful. Target Like : :like`, {like})
+                console.log(`Remove Post's Like element in remove post's likes when User block targetUser was not successful. Target PostLike : :postLike`, {postLike})
             }
             return removedLike
         }))
