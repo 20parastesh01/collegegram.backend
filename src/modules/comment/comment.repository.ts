@@ -18,10 +18,10 @@ export interface CreateComment {
 }
 
 export interface ICommentRepository {
-    create(data: CreateComment): Promise<ReturnType<typeof commentDao>>
+    create(data: CreateComment): Promise<Comment>
     remove(commentId: CommentId): Promise<Comment | undefined>
-    findAllByPost(postId: PostId): Promise<ReturnType<typeof commentListDao>>
-    findByID(commentId: CommentId): Promise<ReturnType<typeof commentOrNullDao>>
+    findAllByPost(postId: PostId): Promise<Comment[]>
+    findByID(commentId: CommentId): Promise<Comment | undefined>
     getUserCommentsOnTargetUserPosts(userId: UserId, targetId: UserId): Promise<Comment[]>
 }
 
@@ -41,7 +41,7 @@ export class CommentRepository implements ICommentRepository {
             .leftJoinAndSelect('comment.parentId', 'commentId')
             .orderBy('comment.createdAt', 'DESC')
             .getMany()
-        return commentListDao(comments)
+        return commentListDao(comments).toCommentList()
     }
     // async findByauthor(userID: UserId): Promise<PostEntity[] | null> {
     //     return this.PostRepo.findBy({ author:userID })
@@ -55,11 +55,11 @@ export class CommentRepository implements ICommentRepository {
             .leftJoinAndSelect('comment.parentId', 'commentId')
             .orderBy('comment.createdAt', 'DESC')
             .getOne()
-        return commentOrNullDao(commentEntity)
+        return commentOrNullDao(commentEntity).toComment()
     }
     async create(data: CreateComment) {
         const commentEntity = await this.CommentRepo.save(data)
-        return commentDao(commentEntity)
+        return commentDao(commentEntity).toComment()
     }
     async getUserCommentsOnTargetUserPosts(userId: UserId, targetId: UserId) {
         const comments: CommentEntity[] = await this.CommentRepo.createQueryBuilder('comment')

@@ -39,8 +39,8 @@ describe('PostActionService', () => {
     })
 
     it('should like a post', async () => {
-        mockLikeRepository.create.mockResolvedValue(likeDao(mockCreatedLike))
-        mockLikeRepository.findByUserAndPost.mockResolvedValue(likeOrNullDao(null))
+        mockLikeRepository.create.mockResolvedValue(mockCreatedLike)
+        mockLikeRepository.findByUserAndPost.mockResolvedValue(undefined)
         mockPostService.getPostWitoutDetail.mockResolvedValue(mockPostWithoutDetail)
         mockUserService.getUserById.mockResolvedValue(mockUser[1])
         const result = await likeService.likePost(mockLikeDto.user.id, mockJustId.id2)
@@ -50,8 +50,8 @@ describe('PostActionService', () => {
         expect(mockLikeRepository.create).toHaveBeenCalledWith(expect.objectContaining({ post: mockPostWithoutDetail, user: mockUser[1] }))
     })
     it('should unlike a post', async () => {
-        mockLikeRepository.remove.mockResolvedValue(likeOrNullDao(mockCreatedLike))
-        mockLikeRepository.findByUserAndPost.mockResolvedValue(likeOrNullDao(mockCreatedLike))
+        mockLikeRepository.remove.mockResolvedValue(mockCreatedLike)
+        mockLikeRepository.findByUserAndPost.mockResolvedValue(mockCreatedLike)
         mockPostService.getPostWitoutDetail.mockResolvedValue(mockPostWithoutDetail)
         mockUserService.getUserById.mockResolvedValue(mockUser[1])
         const result = await likeService.unlikePost(mockLikeDto.user.id, mockJustId.id2)
@@ -62,8 +62,8 @@ describe('PostActionService', () => {
     })
 
     it('should bookmark a post', async () => {
-        mockBookmarkRepository.create.mockResolvedValue(bookmarkDao(mockCreatedBookmark))
-        mockBookmarkRepository.findByUserAndPost.mockResolvedValue(bookmarkOrNullDao(null))
+        mockBookmarkRepository.create.mockResolvedValue(mockCreatedBookmark)
+        mockBookmarkRepository.findByUserAndPost.mockResolvedValue(undefined)
         mockPostService.getPostWitoutDetail.mockResolvedValue(mockPostWithoutDetail)
         mockUserService.getUserById.mockResolvedValue(mockUser[1])
         const result = await bookmarkService.bookmarkPost(mockLikeDto.user.id, mockJustId.id1)
@@ -74,8 +74,8 @@ describe('PostActionService', () => {
     })
 
     it('should unbookmark a post', async () => {
-        mockBookmarkRepository.remove.mockResolvedValue(bookmarkDao(mockCreatedBookmark))
-        mockBookmarkRepository.findByUserAndPost.mockResolvedValue(bookmarkOrNullDao(mockCreatedBookmark))
+        mockBookmarkRepository.remove.mockResolvedValue(mockCreatedBookmark)
+        mockBookmarkRepository.findByUserAndPost.mockResolvedValue(mockCreatedBookmark)
         mockPostService.getPostWitoutDetail.mockResolvedValue(mockPostWithoutDetail)
         mockUserService.getUserById.mockResolvedValue(mockUser[1])
         const result = await bookmarkService.unbookmarkPost(mockLikeDto.user.id, mockJustId.id1)
@@ -85,7 +85,7 @@ describe('PostActionService', () => {
         expect(mockBookmarkRepository.remove).toHaveBeenCalledWith(mockCreatedLike.id)
     })
     it('should get myBookmarkeds list of post', async () => {
-        mockBookmarkRepository.findAllByUser.mockResolvedValue(bookmarkArrayDao([mockCreatedBookmark]))
+        mockBookmarkRepository.findAllByUser.mockResolvedValue([mockCreatedBookmark])
         const result = await bookmarkService.getMyBookmarkeds(mockLikeDto.user.id)
 
         expect(result).toEqual({ result: [mockCreatedPost[1]], total: 1 })

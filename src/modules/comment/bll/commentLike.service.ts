@@ -29,7 +29,7 @@ export class CommentLikeService implements ICommentLikeService {
         const commentLikes = await this.commentLikeRepo.getUserLikesOnTargetUserComments(userId, targetId)
 
         await Promise.all(commentLikes.map(async (commentLike) => {
-            const removedCommentLike = (await this.commentLikeRepo.remove(commentLike.id)).toCommentLike()
+            const removedCommentLike = (await this.commentLikeRepo.remove(commentLike.id))
             if (!removedCommentLike) {
                 console.log(`Removing Comment's Like element in remove comment's likes when User block targetUser was not successful. Target CommentLike : :commentLike`, {commentLike})
             }
@@ -40,7 +40,7 @@ export class CommentLikeService implements ICommentLikeService {
     }
     async likeComment(userId: UserId, id: JustId) {
         const commentId = zodCommentId.parse(id)
-        const commentLike = (await this.commentLikeRepo.findByUserAndComment(userId, commentId)).toCommentLike()
+        const commentLike = (await this.commentLikeRepo.findByUserAndComment(userId, commentId))
 
         if (commentLike) return { msg: messages.alreadyLiked.persian }
 
@@ -55,10 +55,10 @@ export class CommentLikeService implements ICommentLikeService {
     }
     async unlikeComment(userId: UserId, id: JustId) {
         const commentId = zodCommentId.parse(id)
-        const commentLike = (await this.commentLikeRepo.findByUserAndComment(userId, commentId)).toCommentLike()
+        const commentLike = (await this.commentLikeRepo.findByUserAndComment(userId, commentId))
         if (!commentLike) return { msg: messages.notLikedYet.persian }
 
-        const createdCommentLike = (await this.commentLikeRepo.remove(commentLike.id)).toCommentLike()
+        const createdCommentLike = (await this.commentLikeRepo.remove(commentLike.id))
         if (!createdCommentLike) return new ServerError(PersianErrors.ServerError)
 
         return { msg: messages.unliked.persian }

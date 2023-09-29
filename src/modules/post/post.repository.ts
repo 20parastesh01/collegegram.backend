@@ -7,7 +7,7 @@ import { UserId } from '../user/model/user-id'
 import { WholeNumber } from '../../data/whole-number'
 import { postArrayDao, postDaoList, postWithDetailOrNullDao, postWithoutDetailDao, postWithoutDetailOrNullDao } from './bll/post.dao'
 import { Repo } from '../../registry/layer-decorators'
-import { PostWithoutDetail } from './model/post'
+import { BasicPost, PostWithDetail, PostWithoutDetail } from './model/post'
 
 export interface CreatePost {
     caption: Caption
@@ -18,13 +18,14 @@ export interface CreatePost {
 export type LikeCount = WholeNumber
 
 export interface IPostRepository {
-    findWithDetailByID(postId: PostId): Promise<ReturnType<typeof postWithDetailOrNullDao>>
-    create(data: CreatePost): Promise<ReturnType<typeof postWithoutDetailDao>>
-    findSomeByAuthor(userId: UserId, count: number, closeFriend: boolean[]): Promise<ReturnType<typeof postDaoList>>
-    edit(data: PostWithoutDetail): Promise<ReturnType<typeof postWithoutDetailDao>>
-    findAllByAuthor(userId: UserId, closeFriend: boolean[]): Promise<ReturnType<typeof postArrayDao>>
-    findWithoutDetailByID(postId: PostId): Promise<ReturnType<typeof postWithoutDetailOrNullDao>>
-    findAllByAuthorList(usersId: UserId[], closeFriend: boolean[]): Promise<ReturnType<typeof postArrayDao>>
+    findWithDetailByID(postId: PostId): Promise<PostWithDetail | undefined>
+    create(data: CreatePost): Promise<PostWithDetail>
+    findSomeByAuthor(userId: UserId, count: number, closeFriend: boolean[]): Promise<BasicPost[]>
+    edit(data: PostWithoutDetail): Promise<PostWithDetail>
+    findAllFullPosts(userId: UserId, closeFriend: boolean[]): Promise<PostWithDetail[]>;
+    findAllBasicPosts(userId: UserId, closeFriend: boolean[]): Promise<BasicPost[]>;
+    findWithoutDetailByID(postId: PostId): Promise<undefined | PostWithoutDetail>
+    findAllByAuthorList(usersId: UserId[], closeFriend: boolean[]): Promise<PostWithDetail[]>
     countByAuthor(userId: UserId, closeFriend: boolean[]): Promise<number>
 }
 
@@ -36,7 +37,7 @@ export class PostRepository implements IPostRepository {
         this.PostRepo = appDataSource.getRepository(PostEntity)
     }
 
-    async findSomeByAuthor(userId: UserId, count: number, closeFriend: boolean[]): Promise<ReturnType<typeof postDaoList>> {
+    async findSomeByAuthor(userId: UserId, count: number, closeFriend: boolean[]) {
         const posts: PostEntity[] = await this.PostRepo.find({
             where: {
                 author: userId,
@@ -47,25 +48,35 @@ export class PostRepository implements IPostRepository {
             },
             take: count,
         })
-        return postDaoList(posts)
+        return postDaoList(posts).toThumbnailList()
     }
 
     async countByAuthor(userId: UserId) {
         return this.PostRepo.countBy({ author: userId })
     }
 
-    async findAllByAuthor(userId: UserId, closeFriend: boolean[]) {
-        const posts: PostEntity[] = await this.PostRepo.createQueryBuilder('post')
+    
+    private async findPostsByUser(userId: UserId, closeFriend: boolean[]): Promise<PostEntity[]> {
+        return await this.PostRepo.createQueryBuilder('post')
             .loadRelationCountAndMap('post.likeCount', 'post.likes')
             .loadRelationCountAndMap('post.bookmarkCount', 'post.bookmarks')
             .loadRelationCountAndMap('post.commentCount', 'post.comments')
             .where('post.author = :userId', { userId })
             .andWhere('post.closeFriend IN (:...closeFriend)', { closeFriend })
             .orderBy('post.createdAt', 'DESC')
-            .getMany()
-
-        return postArrayDao(posts)
+            .getMany();
     }
+
+    async findAllFullPosts(userId: UserId, closeFriend: boolean[]): Promise<PostWithDetail[]> {
+        const posts: PostEntity[] = await this.findPostsByUser(userId, closeFriend);
+        return postArrayDao(posts).toPostList();
+    }
+
+    async findAllBasicPosts(userId: UserId, closeFriend: boolean[]): Promise<BasicPost[]> {
+        const posts: PostEntity[] = await this.findPostsByUser(userId, closeFriend);
+        return postArrayDao(posts).toThumbnailList();
+    }
+
     async findAllByAuthorList(usersId: UserId[], closeFriend: boolean[]) {
         const posts: PostEntity[] = await this.PostRepo.createQueryBuilder('post')
             .loadRelationCountAndMap('post.likeCount', 'post.likes')
@@ -74,21 +85,21 @@ export class PostRepository implements IPostRepository {
             .where('post.author IN (:...usersId)', { usersId })
             .orderBy('post.createdAt', 'DESC')
             .getMany()
-        return postArrayDao(posts)
+        return postArrayDao(posts).toPostList()
     }
     async findWithoutDetailByID(postId: PostId) {
         const postEntity: PostEntity | null = await this.PostRepo.createQueryBuilder('post').where('post.id = :postId', { postId }).getOne()
-        return postWithoutDetailOrNullDao(postEntity)
+        return postWithoutDetailOrNullDao(postEntity).toPost()
     }
 
     async create(data: CreatePost) {
         const postEntity: PostEntity = await this.PostRepo.save(data)
-        return postWithoutDetailDao(postEntity)
+        return postWithoutDetailDao(postEntity).toPost()
     }
 
     async edit(data: PostWithoutDetail) {
         const postEntity: PostEntity = await this.PostRepo.save(data)
-        return postWithoutDetailDao(postEntity)
+        return postWithoutDetailDao(postEntity).toPost()
     }
 
     async findWithDetailByID(postId: PostId) {
@@ -99,6 +110,6 @@ export class PostRepository implements IPostRepository {
             .where('post.id = :postId', { postId })
             .getOne()
 
-        return postWithDetailOrNullDao(output)
+        return postWithDetailOrNullDao(output).toPost()
     }
 }
