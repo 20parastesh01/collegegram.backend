@@ -28,7 +28,7 @@ export interface IPostService {
     getMyPosts(userId: UserId): Promise<arrayResult | Message>
     getMyTimeline(userId: UserId): Promise<timelineArrayResult | Message | ServerError>
     getSomePosts(userId: UserId, closeFriend: boolean[]): Promise<BasicPost[]>
-    explore(userId: UserId): Promise<{ user: User; posts: BasicPost[] }[] | null>
+    explore(userId: UserId): Promise<{ user: User; posts: BasicPost[] }[]>
     getUserPostCount(userId: UserId, targetId: UserId): Promise<number>
     getCurrentUserPostCount(userId: UserId, targetId: UserId): Promise<number>
     adjustPhoto(post: PostWithDetail): Promise<PostWithDetail>
@@ -167,9 +167,13 @@ export class PostService implements IPostService {
         const unrelatedUsers = await this.userService.getExploreUsers(userId, relatedUsers)
         for (const user of unrelatedUsers) {
             const postsNumber = await this.getUserPostCount(userId, user.id)
-            if (postsNumber === 0) return []
+            if (postsNumber === 0) continue
             const closeFriend = await this.checkCloseFriend(userId, user.id)
             const posts = await this.getSomePosts(user.id, closeFriend)
+            for (let post of posts) {
+                const photos = await MinioRepo.getPostPhotoUrl(post.id)
+                post.photos = photos
+            }
             result.push({ user, posts })
         }
         return result
