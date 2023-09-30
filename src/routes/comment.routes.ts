@@ -26,7 +26,7 @@ export class CommentRouter {
     @Auth()
     getAllCommentsByPost(req: Request, res: Response) {
         const data = zodJustId.parse(req.params.postId)
-        handleExpress(res, () => this.commentService.getAllComments(data))
+        handleExpress(res, () => this.commentService.getAllComments(data, req.user.userId))
     }
 
     @Post('/:id/like')

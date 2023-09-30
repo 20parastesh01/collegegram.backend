@@ -26,17 +26,17 @@ export class CommentEntity {
 
     @ManyToOne(() => CommentEntity, (comment) => comment.id, { nullable: true })
     @JoinColumn()
-    parentId?: CommentId
+    parentId!: CommentId
 
     @Column('integer', { name: 'likeCount', default: 0 })
     likeCount!: WholeNumber
 
     @ManyToOne(() => UserEntity, { eager: true, cascade: true, onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'user_id' })
+    @JoinColumn({ name: 'userId' })
     author!: UserEntity
 
     @OneToMany(() => CommentLikeEntity, (commentLikes) => commentLikes.comment, { lazy: true })
-    @JoinColumn({ name: 'like_id' })
+    @JoinColumn({ name: 'likeId' })
     likes: CommentLikeEntity[] | undefined
 
     @CreateDateColumn()

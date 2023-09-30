@@ -51,8 +51,8 @@ export class CommentLikeRepository implements ICommentLikeRepository {
         const output = await this.CommentLikeRepo.createQueryBuilder('commentLike')
             .leftJoinAndSelect('commentLike.user', 'user')
             .leftJoinAndSelect('commentLike.comment', 'comment')
-            .where('commentLike.user_id = :userId', { userId })
-            .andWhere('commentLike.comment_id = :commentId', { commentId })
+            .where('commentLike.userId = :userId', { userId })
+            .andWhere('commentLike.commentId = :commentId', { commentId })
             .getOne()
         return commentLikeOrNullDao(output).toCommentLike()
     }

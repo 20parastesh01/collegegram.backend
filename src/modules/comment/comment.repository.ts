@@ -33,12 +33,12 @@ export class CommentRepository implements ICommentRepository {
         this.CommentRepo = appDataSource.getRepository(CommentEntity)
     }
     async findAllByPost(postId: PostId) {
+        const nullParentID = 0
         const comments: CommentEntity[] = await this.CommentRepo.createQueryBuilder('comment')
             .loadRelationCountAndMap('comment.likeCount', 'comment.likes')
             .where('comment.postId = :postId', { postId })
             .leftJoinAndSelect('comment.author', 'user')
-            .leftJoinAndSelect('comment.postId', 'postId')
-            .leftJoinAndSelect('comment.parentId', 'commentId')
+            .leftJoinAndSelect('comment.post', 'postId')
             .orderBy('comment.createdAt', 'DESC')
             .getMany()
         return commentListDao(comments).toCommentList()
@@ -49,10 +49,9 @@ export class CommentRepository implements ICommentRepository {
     async findByID(commentId: CommentId) {
         const commentEntity = await this.CommentRepo.createQueryBuilder('comment')
             .loadRelationCountAndMap('comment.likeCount', 'comment.likes')
-            .where('comment.id = :commentId', { commentId })
             .leftJoinAndSelect('comment.author', 'user')
-            .leftJoinAndSelect('comment.postId', 'postId')
-            .leftJoinAndSelect('comment.parentId', 'commentId')
+            .leftJoinAndSelect('comment.post', 'postId')
+            .where('comment.id = :commentId', { commentId })
             .orderBy('comment.createdAt', 'DESC')
             .getOne()
         return commentOrNullDao(commentEntity).toComment()
@@ -64,8 +63,7 @@ export class CommentRepository implements ICommentRepository {
     async getUserCommentsOnTargetUserPosts(userId: UserId, targetId: UserId) {
         const comments: CommentEntity[] = await this.CommentRepo.createQueryBuilder('comment')
         .leftJoinAndSelect('comment.author', 'user')
-        .leftJoinAndSelect('comment.postId', 'postId')
-        .leftJoinAndSelect('comment.parentId', 'commentId')
+        .leftJoinAndSelect('comment.post', 'postId')
         .where('comment.author.id = :userId', { userId })
         .andWhere('comment.comment.author.id = :targetId', { targetId })
         .getMany()

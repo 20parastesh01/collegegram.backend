@@ -3,7 +3,7 @@ import { UserId } from '../../user/model/user-id'
 import { Service } from '../../../registry/layer-decorators'
 import { Msg, PersianErrors, messages } from '../../../utility/persian-messages'
 import { JustId } from '../../../data/just-id'
-import { zodCommentId } from '../../comment/model/comment-id'
+import { CommentId, zodCommentId } from '../../comment/model/comment-id'
 import { CommentService, ICommentService } from '../../comment/bll/comment.service'
 import { UserService, IUserService } from '../../user/bll/user.service'
 import { CommentLikeRepository, ICommentLikeRepository } from '../commentLike.repository'
@@ -12,6 +12,7 @@ import { toCreateCommentLike } from './commentLike.dao'
 type Message = { msg: Msg }
 
 export interface ICommentLikeService {
+    getLikeByUserAndComment(userId: UserId, commentId: CommentId): Promise<boolean>
     likeComment(userId: UserId, id: JustId): Promise<Message | ServerError>
     unlikeComment(userId: UserId, id: JustId): Promise<Message | ServerError>
     removeCommentLikesWhenBlockingUser(userId: UserId, targetId: UserId): Promise<Message | ServerError>
@@ -25,6 +26,11 @@ export class CommentLikeService implements ICommentLikeService {
         private userService: IUserService
     ) {}
 
+    async getLikeByUserAndComment(userId: UserId, commentId: CommentId): Promise<boolean> {
+        const commentLike = (await this.commentLikeRepo.findByUserAndComment(userId, commentId))
+        if (commentLike) return true
+        return false
+    }
     async removeCommentLikesWhenBlockingUser(userId: UserId, targetId: UserId) {
         const commentLikes = await this.commentLikeRepo.getUserLikesOnTargetUserComments(userId, targetId)
 
