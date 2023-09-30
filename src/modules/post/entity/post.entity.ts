@@ -36,15 +36,15 @@ export class PostEntity {
     closeFriend!: boolean
 
     @OneToMany((type) => LikeEntity, (like) => like.post, { lazy: true })
-    @JoinColumn({ name: 'like_id' })
+    @JoinColumn({ name: 'likeId' })
     likes: LikeEntity[] | undefined
 
     @OneToMany((type) => BookmarkEntity, (bookmark) => bookmark.post, { lazy: true })
-    @JoinColumn({ name: 'bookmark_id' })
+    @JoinColumn({ name: 'bookmarkId' })
     bookmarks: BookmarkEntity[] | undefined
 
-    @OneToMany((type) => CommentEntity, (comment) => comment.postId, { lazy: true })
-    @JoinColumn({ name: 'comment_id' })
+    @OneToMany((type) => CommentEntity, (comment) => comment.post, { lazy: true })
+    @JoinColumn({ name: 'commentId' })
     comments: CommentEntity[] | undefined
 
     @CreateDateColumn()

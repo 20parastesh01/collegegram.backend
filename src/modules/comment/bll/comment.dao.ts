@@ -1,39 +1,37 @@
-import { zodWholeNumber } from '../../../data/whole-number'
 import { zodUserShort } from '../../user/model/user'
 import { CreateComment } from '../comment.repository'
 import { CommentEntity } from '../entity/comment.entity'
-import { NewComment, Comment } from '../model/comment'
+import { NewComment, Comment, zodComment } from '../model/comment'
+import { CommentId } from '../model/comment-id'
 
-const convertToModel = (entity: CommentEntity) => {
+export const toComment = (entity: CommentEntity) => {
     const { updatedAt, author, ...rest } = entity
-    return { author: zodUserShort.parse({ photo: '', ...author }), ...rest }
+    const output : Comment = zodComment.parse({author: { photo: '', ...author }, ...rest})
+    return output
 }
 
 export const commentDao = (input: CommentEntity) => {
     return {
-        toCommentModel(): Comment | undefined {
-            const { updatedAt, author, ...rest } = input
-            return { author: zodUserShort.parse({ photo: '', ...author }), ...rest }
+        toComment(): Comment {
+            return toComment(input)
         },
     }
 }
 export const commentListDao = (input: CommentEntity[]) => {
     return {
-        toCommentModelList(): Comment[] {
-            // Handle the case when input is an array of PostEntity
-            //trow error
+        toCommentList(): Comment[] {
             return input.map((entity) => {
-                return convertToModel(entity)
+                return toComment(entity)
             })
         },
     }
 }
 export const commentOrNullDao = (input: CommentEntity | null) => {
     return {
-        toCommentModel(): Comment | undefined {
+        toComment(): Comment | undefined {
             if (input === null) return undefined
             else {
-                return convertToModel(input)
+                return toComment(input)
             }
         },
     }

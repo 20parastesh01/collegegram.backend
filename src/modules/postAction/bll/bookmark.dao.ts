@@ -3,29 +3,19 @@ import { CreateBookmark } from '../bookmark.repository'
 import { zodUserId } from '../../user/model/user-id'
 import { BookmarkId, zodBookmarkId } from '../model/bookmark-id'
 import { User } from '../../user/model/user'
-import { BasicBookmark, BookmarkWithPost } from '../model/bookmark'
+import { BasicBookmark, BookmarkWithPost, zodBasicBookmark, zodBookmarkWithPost } from '../model/bookmark'
 import { PostWithDetail, zodStrictPost } from '../../post/model/post'
-import { zodPostId } from '../../post/model/post-id'
 
-const bookmarkEntityToBookmark = (input: BookmarkEntity) => {
-    const { id, post, user } = input
+const toBookmarkWithPost = (input: BookmarkEntity) => {
+    const { id, post, userId,postId } = input
     const ID = id ?? (0 as BookmarkId)
-    const output: BookmarkWithPost = {
-        id: zodBookmarkId.parse(ID),
-        post: zodStrictPost.parse(post),
-        userId: zodUserId.parse(user.id),
-        postId: zodPostId.parse(post.id),
-    }
+    const output: BookmarkWithPost = zodBookmarkWithPost.parse({id:ID, post, postId,userId})
     return output
 }
-const bookmarkEntityToBasicBookmark = (input: BookmarkEntity) => {
-    const { id, post, user } = input
+const ToBasicBookmark = (input: BookmarkEntity) => {
+    const { id, postId, userId } = input
     const ID = id ?? (0 as BookmarkId)
-    const output: BasicBookmark = {
-        id: zodBookmarkId.parse(ID),
-        userId: zodUserId.parse(user.id),
-        postId: zodPostId.parse(post.id),
-    }
+    const output: BasicBookmark =  zodBasicBookmark.parse({id:ID, postId, userId})
     return output
 }
 export const bookmarkOrNullDao = (input: BookmarkEntity | null) => {
@@ -33,7 +23,7 @@ export const bookmarkOrNullDao = (input: BookmarkEntity | null) => {
         toBookmark(): BookmarkWithPost | undefined {
             if (input === null) return undefined
             else {
-                return bookmarkEntityToBookmark(input)
+                return toBookmarkWithPost(input)
             }
         },
     }
@@ -41,7 +31,7 @@ export const bookmarkOrNullDao = (input: BookmarkEntity | null) => {
 export const bookmarkDao = (input: BookmarkEntity) => {
     return {
         toBookmark(): BookmarkWithPost {
-            return bookmarkEntityToBookmark(input)
+            return toBookmarkWithPost(input)
         },
     }
 }
@@ -49,7 +39,7 @@ export const bookmarkArrayDao = (input: BookmarkEntity[]) => {
     return {
         toBookmarkList(): BookmarkWithPost[] {
             return input.map((entity) => {
-                return bookmarkEntityToBookmark(entity)
+                return toBookmarkWithPost(entity)
             })
         },
     }

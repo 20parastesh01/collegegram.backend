@@ -6,7 +6,7 @@ import { JustId } from '../../../data/just-id'
 import { BookmarkRepository, IBookmarkRepository } from '../bookmark.repository'
 import { toCreateBookmark } from './bookmark.dao'
 import { PostWithDetail } from '../../post/model/post'
-import { zodPostId } from '../../post/model/post-id'
+import { PostId, zodPostId } from '../../post/model/post-id'
 import { IPostService, PostService } from '../../post/bll/post.service'
 import { IUserService, UserService } from '../../user/bll/user.service'
 
@@ -17,6 +17,7 @@ export interface IBookmarkService {
     bookmarkPost(userId: UserId, id: JustId): Promise<Message | ServerError>
     unbookmarkPost(userId: UserId, id: JustId): Promise<Message | ServerError>
     getMyBookmarkeds(userId: UserId): Promise<Message | arrayResult>
+    getBookmarkByUserAndPost(userId: UserId, postId: PostId): Promise<boolean>
 }
 
 @Service(BookmarkRepository, PostService, UserService)
@@ -27,8 +28,13 @@ export class BookmarkService implements IBookmarkService {
         private userService: IUserService
     ) {}
 
+    async getBookmarkByUserAndPost(userId: UserId, postId: PostId): Promise<boolean> {
+        const bookmark = (await this.bookmarkRepo.findByUserAndPost(userId, postId))
+        if (bookmark) return true
+        return false
+    }
     async getMyBookmarkeds(userId: UserId) {
-        const result = (await this.bookmarkRepo.findAllByUser(userId)).toBookmarkList()
+        const result = (await this.bookmarkRepo.findAllByUser(userId))
         if (result.length < 1) return { msg: messages.postNotFound.persian }
 
         const posts = result.map((bookmark) => bookmark.post)
@@ -38,28 +44,29 @@ export class BookmarkService implements IBookmarkService {
 
     async bookmarkPost(userId: UserId, id: JustId) {
         const postId = zodPostId.parse(id)
-        const bookmark = (await this.bookmarkRepo.findByUserAndPost(userId, postId)).toBookmark()
+        const bookmark = (await this.bookmarkRepo.findByUserAndPost(userId, postId))
         if (bookmark) return { msg: messages.alreadyBookmarked.persian }
 
         const user = await this.userService.getUserById(userId)
         const post = await this.postService.getPost(id, userId)
-        if (user === null || 'msg' in post) return { msg: messages.postNotFound.persian }
+        if (user === null) return new ServerError(PersianErrors.ServerError)
+        if ('msg' in post) return { msg: messages.postNotFound.persian }
 
         const input = toCreateBookmark(user, post)
-        const createdBookmark = (await this.bookmarkRepo.create(input)).toBookmark()
+        const createdBookmark = (await this.bookmarkRepo.create(input))
         if (createdBookmark !== undefined) return { msg: messages.bookmarked.persian }
         return new ServerError(PersianErrors.ServerError)
     }
 
     async unbookmarkPost(userId: UserId, id: JustId) {
         const postId = zodPostId.parse(id)
-        const bookmark = (await this.bookmarkRepo.findByUserAndPost(userId, postId)).toBookmark()
+        const bookmark = (await this.bookmarkRepo.findByUserAndPost(userId, postId))
         if (!bookmark) return { msg: messages.notBookmarkedYet.persian }
 
         const post = await this.postService.getPost(id, userId)
         if('msg' in post) return { msg: messages.postNotFound.persian }
         
-        const createdBookmark = (await this.bookmarkRepo.remove(bookmark.id)).toBookmark()
+        const createdBookmark = (await this.bookmarkRepo.remove(bookmark.id))
         if (!createdBookmark) return new ServerError(PersianErrors.ServerError)
         const updatedPost = createdBookmark.post
         return { msg: messages.unbookmarked.persian }

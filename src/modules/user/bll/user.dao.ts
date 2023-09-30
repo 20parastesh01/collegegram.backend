@@ -5,7 +5,7 @@ import { User, UserBasic, UserShort, UserWithPassword } from '../model/user'
 const convert = (input: UserEntity) => {
     return {
         toUser(): User {
-            const { createdAt, updatedAt, password, ...rest } = input
+            const { createdAt, updatedAt, likes, bookmarks, password, ...rest } = input
             return { ...rest, photo: '' }
         },
         toUserBasic(): UserBasic {
