@@ -5,7 +5,7 @@ import { ILikeRepository, LikeRepository } from '../like.repository'
 import { toCreateLike } from './like.dao'
 import { Msg, PersianErrors, messages } from '../../../utility/persian-messages'
 import { JustId } from '../../../data/just-id'
-import { zodPostId } from '../../post/model/post-id'
+import { PostId, zodPostId } from '../../post/model/post-id'
 import { PostService, IPostService } from '../../post/bll/post.service'
 import { UserService, IUserService } from '../../user/bll/user.service'
 
@@ -15,6 +15,7 @@ export interface ILikeService {
     likePost(userId: UserId, id: JustId): Promise<Message | ServerError>
     unlikePost(userId: UserId, id: JustId): Promise<Message | ServerError>
     removePostLikesWhenBlockingUser(userId: UserId, targetId: UserId): Promise<Message | ServerError>
+    getLikeByUserAndPost(userId: UserId, postId: PostId): Promise<boolean>
 }
 
 @Service(LikeRepository, PostService, UserService)
@@ -24,6 +25,12 @@ export class LikeService implements ILikeService {
         private postService: IPostService,
         private userService: IUserService
     ) {}
+    
+    async getLikeByUserAndPost(userId: UserId, postId: PostId): Promise<boolean> {
+        const like = (await this.likeRepo.findByUserAndPost(userId, postId))
+        if (like) return true
+        return false
+    }
 
     async likePost(userId: UserId, id: JustId) {
         const postId = zodPostId.parse(id)

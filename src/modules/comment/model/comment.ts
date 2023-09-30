@@ -6,6 +6,7 @@ import { PostId, zodPostId } from '../../post/model/post-id'
 import { User, UserShort, zodUserShort } from '../../user/model/user'
 import { z } from 'zod'
 import { PostWithDetail } from '../../post/model/post'
+import { zodBooleanOrBooleanString } from '../../../data/boolean-stringBoolean'
 
 export const zodComment = z.object({
     id: zodCommentId,
@@ -15,11 +16,13 @@ export const zodComment = z.object({
     likeCount: zodWholeNumber,
     parentId: zodCommentId.optional(),
     createdAt: z.instanceof(Date),
+    ifLiked: zodBooleanOrBooleanString.optional(),
 })
 export interface Comment extends BasicComment {
     likeCount: WholeNumber
     parentId?: CommentId
     createdAt: Date
+    ifLiked?: boolean
 }
 export interface NewComment {
     author: User

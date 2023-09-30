@@ -11,10 +11,10 @@ export class BookmarkEntity {
     id!: BookmarkId
 
     @Column()
-    user_id!: UserId
+    userId!: UserId
 
     @ManyToOne(() => UserEntity, (post) => post.bookmarks, { eager: true, onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'user_id' })
+    @JoinColumn({ name: 'userId' })
     user!: UserEntity
 
     @Column()

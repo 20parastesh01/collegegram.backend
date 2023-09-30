@@ -11,10 +11,10 @@ export class LikeEntity {
     id!: LikeId
 
     @Column()
-    user_id!: UserId
+    userId!: UserId
 
     @ManyToOne(() => UserEntity, { eager: true, cascade: true, onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'user_id' })
+    @JoinColumn({ name: 'userId' })
     user!: UserEntity
 
     @Column()

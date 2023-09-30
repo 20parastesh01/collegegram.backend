@@ -7,15 +7,15 @@ import { BasicBookmark, BookmarkWithPost, zodBasicBookmark, zodBookmarkWithPost 
 import { PostWithDetail, zodStrictPost } from '../../post/model/post'
 
 const toBookmarkWithPost = (input: BookmarkEntity) => {
-    const { id, post, user_id,postId } = input
+    const { id, post, userId,postId } = input
     const ID = id ?? (0 as BookmarkId)
-    const output: BookmarkWithPost = zodBookmarkWithPost.parse({id:ID, post, postId,user_id})
+    const output: BookmarkWithPost = zodBookmarkWithPost.parse({id:ID, post, postId,userId})
     return output
 }
 const ToBasicBookmark = (input: BookmarkEntity) => {
-    const { id, postId, user_id } = input
+    const { id, postId, userId } = input
     const ID = id ?? (0 as BookmarkId)
-    const output: BasicBookmark =  zodBasicBookmark.parse({id:ID, postId, user_id})
+    const output: BasicBookmark =  zodBasicBookmark.parse({id:ID, postId, userId})
     return output
 }
 export const bookmarkOrNullDao = (input: BookmarkEntity | null) => {

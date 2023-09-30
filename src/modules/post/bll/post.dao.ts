@@ -11,12 +11,12 @@ import { ZodType, ZodTypeDef, z } from 'zod'
 const zodCreatedAt: ZodType<Date, ZodTypeDef, Date> = z.instanceof(Date); //TODO: Generallize it
 
 const toPostWithDetail = (input: PostEntity): PostWithDetail => {
-    const { createdAt, updatedAt, ...rest } = input;
+    const { updatedAt, ...rest } = input;
     return zodStrictPost.parse(rest);
 }
 
 const toPostWithoutDetail = (input: PostEntity): PostWithoutDetail => {
-    const { createdAt, updatedAt, likeCount, bookmarkCount, commentCount, ...rest } = input;
+    const { updatedAt, likeCount, bookmarkCount, commentCount, ...rest } = input;
     return zodPost.parse(rest);
 }
 

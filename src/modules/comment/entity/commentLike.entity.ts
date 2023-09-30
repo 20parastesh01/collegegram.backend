@@ -11,17 +11,17 @@ export class CommentLikeEntity {
     id!: LikeId
 
     @Column()
-    user_id!: UserId
+    userId!: UserId
 
     @ManyToOne(() => UserEntity, { eager: true, cascade: true, onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'user_id' })
+    @JoinColumn({ name: 'userId' })
     user!: UserEntity
 
     @Column()
-    comment_id!: CommentId
+    commentId!: CommentId
 
-    @ManyToOne(() => CommentEntity, { eager: true, cascade: true, onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'comment_id' })
+    @ManyToOne(() => CommentEntity, (comment)=> comment.likes, { eager: true, cascade: true, onDelete: 'CASCADE' })
+    @JoinColumn({ name: 'commentId' })
     comment!: CommentEntity
 
     @CreateDateColumn()
