@@ -1,3 +1,4 @@
+import { MinioRepo } from '../../../data-source'
 import { PaginationInfo } from '../../../data/pagination'
 import { zodWholeNumber } from '../../../data/whole-number'
 import { Service, services } from '../../../registry/layer-decorators'
@@ -34,7 +35,7 @@ export class RelationService implements IRelationService {
     constructor(
         private relationRepo: IRelationRepository,
         private userService: UserService,
-        private notifService: NotificationService,
+        private notifService: NotificationService
     ) {}
 
     async checkAccessAuth(userId: UserId, targetUser: User, status: RelationStatus) {
@@ -134,10 +135,12 @@ export class RelationService implements IRelationService {
             await this.relationRepo.deleteRelation({ userA: target.id, userB: userId })
         }
 
-        const promises = [(services['LikeService'] as LikeService).removePostLikesWhenBlockingUser(userId, targetId),
-        (services['CommentLikeService'] as CommentLikeService).removeCommentLikesWhenBlockingUser(userId, targetId),
-        (services['CommentService'] as CommentService).removeCommentsWhenBlockingUser(userId, targetId),]
-        Promise.all(promises);
+        const promises = [
+            (services['LikeService'] as LikeService).removePostLikesWhenBlockingUser(userId, targetId),
+            (services['CommentLikeService'] as CommentLikeService).removeCommentLikesWhenBlockingUser(userId, targetId),
+            (services['CommentService'] as CommentService).removeCommentsWhenBlockingUser(userId, targetId),
+        ]
+        Promise.all(promises)
         await this.relationRepo.updateRelation({ userA: userId, userB: targetId, status: 'Blocked' })
         return { msg: messages.blocked.persian }
     }
@@ -152,21 +155,21 @@ export class RelationService implements IRelationService {
         return { msg: messages.unblocked.persian }
     }
     async getFollowers(userId: UserId, paginationInfo: PaginationInfo) {
-        const followerUserIds = await this.relationRepo.findFollowers(userId,paginationInfo)
+        const followerUserIds = await this.relationRepo.findFollowers(userId, paginationInfo)
         const userShorts = await this.userService.getBatchUserInfo(followerUserIds)
-        return userShorts 
+        return userShorts
     }
 
-    async getFollowings(userId:UserId,paginationInfo:PaginationInfo) {
-        const followingUserIds = await this.relationRepo.findFollowings(userId,paginationInfo)
+    async getFollowings(userId: UserId, paginationInfo: PaginationInfo) {
+        const followingUserIds = await this.relationRepo.findFollowings(userId, paginationInfo)
         const userShorts = await this.userService.getBatchUserInfo(followingUserIds)
-        return userShorts  
+        return userShorts
     }
 
-    async getBlockeds(userId:UserId,paginationInfo:PaginationInfo) {
-        const followingUserIds = await this.relationRepo.findBlockeds(userId,paginationInfo)
+    async getBlockeds(userId: UserId, paginationInfo: PaginationInfo) {
+        const followingUserIds = await this.relationRepo.findBlockeds(userId, paginationInfo)
         const userShorts = await this.userService.getBatchUserInfo(followingUserIds)
-        return userShorts  
+        return userShorts
     }
 
     async getTargetUser(userId: UserId, targetUserId: UserId): Promise<UserWithStatus | NotFoundError> {
@@ -174,6 +177,8 @@ export class RelationService implements IRelationService {
         if (!target) return new NotFoundError(messages.userNotFound.persian)
         const postCount = await (services['PostService'] as PostService).getUserPostCount(userId, target.id)
         target.postsCount = zodWholeNumber.parse(postCount)
+        const profilePhoto = await MinioRepo.getProfileUrl(target.id)
+        target.photo = profilePhoto || ''
         const dao = await this.relationRepo.getRelation(target.id, userId)
         let status = null
         const status1 = dao ? dao.toRelation().status : null
