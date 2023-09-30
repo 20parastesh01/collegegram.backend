@@ -12,7 +12,7 @@ import { PersianErrors } from './persian-messages'
 const SECRET_KEY = process.env.SECRET_KEY!
 
 export const generateToken = (data: UserBasic): Token | ServerError => {
-    const token = jwt.sign(data, SECRET_KEY, { expiresIn: 1800 })
+    const token = jwt.sign(data, SECRET_KEY, { expiresIn: 7200 })
     if (isToken(token)) return token
     return new ServerError()
 }
