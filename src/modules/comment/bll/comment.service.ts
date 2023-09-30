@@ -47,6 +47,7 @@ export class CommentService implements ICommentService {
     async getAllComments(id: JustId, userId: UserId) {
         const postId = zodPostId.parse(id)
         const comments = (await this.commentRepo.findAllByPost(postId))
+        
         const commentsWithProfilePhotos = await Promise.all( comments.map(async(comment)=>{
             const like = await (services['CommentLikeService'] as CommentLikeService).getLikeByUserAndComment(userId, comment.id)
             comment.ifLiked = like
