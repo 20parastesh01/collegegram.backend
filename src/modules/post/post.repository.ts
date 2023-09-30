@@ -8,6 +8,7 @@ import { WholeNumber } from '../../data/whole-number'
 import { postArrayDao, postDaoList, postWithDetailOrNullDao, postWithoutDetailDao, postWithoutDetailOrNullDao } from './bll/post.dao'
 import { Repo } from '../../registry/layer-decorators'
 import { BasicPost, PostWithDetail, PostWithoutDetail } from './model/post'
+import { PaginationInfo } from '../../data/pagination'
 
 export interface CreatePost {
     caption: Caption
@@ -111,5 +112,49 @@ export class PostRepository implements IPostRepository {
             .getOne()
 
         return postWithDetailOrNullDao(output).toPost()
+    }
+
+    async search(userId: UserId, tag: Tag, followingUserIds: UserId[], usersAddedHimAsCloseFriend: UserId[], usersBlockedHim: UserId[], privateUserIds: UserId[], paginationInfo: PaginationInfo) {
+        const { page, pageSize } = paginationInfo
+        const posts = await this.PostRepo.find()
+        const result = []
+        for (let post of posts) {
+            if (!post.tags?.includes(tag)) continue
+            if (usersBlockedHim.includes(post.author)) {
+                continue
+            }
+            if (post.closeFriend && !usersAddedHimAsCloseFriend.includes(post.author)) {
+                continue
+            }
+            if (privateUserIds.includes(post.author) && !followingUserIds.includes(post.author)) {
+                continue
+            }
+            result.push(post)
+            if (result.length === 25) return result
+        }
+        return result
+    }
+
+    async search2(tag: Tag, followingUserIds: UserId[], usersAddedHimAsCloseFriend: UserId[], usersBlockedHim: UserId[], privateUserIds: UserId[], paginationInfo: PaginationInfo) {
+        const { page, pageSize } = paginationInfo
+
+        const query = this.PostRepo.createQueryBuilder('post').where(':tag = ANY(post.tags)', { tag })
+
+        if (usersBlockedHim.length > 0) {
+            query.andWhere('post.author NOT IN (:...blockedUsers)', { blockedUsers: usersBlockedHim })
+        }
+
+        query.andWhere('(post.closeFriend = false OR post.author IN (:...closeFriends))', { closeFriends: usersAddedHimAsCloseFriend })
+
+        if (privateUserIds.length > 0) {
+            query.andWhere('(post.author NOT IN (:...privateUsers) OR post.author IN (:...followingUsers))', {
+                privateUsers: privateUserIds,
+                followingUsers: followingUserIds,
+            })
+        }
+        query.skip((page - 1) * pageSize).take(pageSize)
+
+        const result = await query.getMany()
+        return result
     }
 }
