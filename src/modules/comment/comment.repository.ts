@@ -62,10 +62,10 @@ export class CommentRepository implements ICommentRepository {
     }
     async getUserCommentsOnTargetUserPosts(userId: UserId, targetId: UserId) {
         const comments: CommentEntity[] = await this.CommentRepo.createQueryBuilder('comment')
-        .leftJoinAndSelect('comment.author', 'user')
-        .leftJoinAndSelect('comment.post', 'postId')
-        .where('comment.author.id = :userId', { userId })
-        .andWhere('comment.comment.author.id = :targetId', { targetId })
+        .leftJoinAndSelect('comment.author', 'author')
+        .leftJoinAndSelect('comment.post', 'post')
+        .where('author.id = :userId', { userId })
+        .andWhere('post.author = :targetId', { targetId })
         .getMany()
         return commentListDao(comments).toCommentList()
     }

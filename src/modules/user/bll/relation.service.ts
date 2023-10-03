@@ -134,13 +134,14 @@ export class RelationService implements IRelationService {
             const status = dao.toRelation().status
             await this.relationRepo.deleteRelation({ userA: target.id, userB: userId })
         }
-
+        
         const promises = [
             (services['LikeService'] as LikeService).removePostLikesWhenBlockingUser(userId, targetId),
             (services['CommentLikeService'] as CommentLikeService).removeCommentLikesWhenBlockingUser(userId, targetId),
             (services['CommentService'] as CommentService).removeCommentsWhenBlockingUser(userId, targetId),
         ]
         Promise.all(promises)
+        
         await this.relationRepo.updateRelation({ userA: userId, userB: targetId, status: 'Blocked' })
         return { msg: messages.blocked.persian }
     }
