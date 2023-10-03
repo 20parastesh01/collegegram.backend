@@ -47,7 +47,7 @@ export class PostService implements IPostService {
 
     checkCloseFriend = async (userId: UserId, targetId: UserId): Promise<boolean[]> => {
         if (targetId == userId) return [true, false]
-        const interaction = await this.closeFriendService.getCloseFriend(userId, targetId)
+        const interaction = await this.closeFriendService.getCloseFriend(targetId, userId)
         return interaction ? [true, false] : [false]
     }
 
