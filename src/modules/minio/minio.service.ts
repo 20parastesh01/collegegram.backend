@@ -5,6 +5,7 @@ import { getMinioConfig } from './mino.config'
 import { UserId } from '../user/model/user-id'
 import path from 'path'
 import { PostId } from '../post/model/post-id'
+import fs from 'fs'
 
 export const profilePhotoBucket = 'userprofile'
 export const postPhotoBucket = 'post'

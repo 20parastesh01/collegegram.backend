@@ -34,13 +34,18 @@ export class LikeRepository implements ILikeRepository {
         const likes: LikeEntity[] = await this.LikeRepo.createQueryBuilder('like')
         .leftJoinAndSelect('like.user', 'user')
         .leftJoinAndSelect('like.post', 'post')
-        .where('like.user.id = :userId', { userId })
-        .andWhere('like.post.author = :targetId', { targetId })
+        .where('user.id = :userId', { userId })
+        .andWhere('post.author = :targetId', { targetId })
         .getMany()
         return likeArrayDao(likes).toLikeList()
     }
     async findAllByUser(userId: UserId) {
-        const likes: LikeEntity[] = await this.LikeRepo.createQueryBuilder('like').leftJoinAndSelect('like.user', 'user').leftJoinAndSelect('like.post', 'post').where('like.user.id = :userId', { userId }).orderBy('like.createdAt', 'DESC').getMany()
+        const likes: LikeEntity[] = await this.LikeRepo.createQueryBuilder('like')
+        .leftJoinAndSelect('like.user', 'user')
+        .leftJoinAndSelect('like.post', 'post')
+        .where('like.user.id = :userId', { userId })
+        .orderBy('like.createdAt', 'DESC')
+        .getMany()
         return likeArrayDao(likes).toLikeList()
     }
     async findAllByPost(postId: PostId) {

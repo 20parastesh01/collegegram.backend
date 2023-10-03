@@ -83,6 +83,16 @@ export class RelationRepository implements IRelationRepository {
         return result
     }
 
+    async findFollowersCount(userId: UserId) {
+        const count = await this.relationRepo.count({ where: { userB: userId, status: 'Following' } })
+        return count
+    }
+
+    async findFollowingsCount(userId: UserId) {
+        const count = await this.relationRepo.count({ where: { userA: userId, status: 'Following' } })
+        return count
+    }
+
     async findFollowings(userId: UserId, paginationInfo: PaginationInfo) {
         const { page, pageSize } = paginationInfo
         const followersUserId = await this.relationRepo.find({ where: { userA: userId, status: 'Following' }, take: pageSize, skip: (page - 1) * pageSize })

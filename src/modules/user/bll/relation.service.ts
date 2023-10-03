@@ -134,13 +134,14 @@ export class RelationService implements IRelationService {
             const status = dao.toRelation().status
             await this.relationRepo.deleteRelation({ userA: target.id, userB: userId })
         }
-
+        
         const promises = [
             (services['LikeService'] as LikeService).removePostLikesWhenBlockingUser(userId, targetId),
             (services['CommentLikeService'] as CommentLikeService).removeCommentLikesWhenBlockingUser(userId, targetId),
             (services['CommentService'] as CommentService).removeCommentsWhenBlockingUser(userId, targetId),
         ]
         Promise.all(promises)
+        
         await this.relationRepo.updateRelation({ userA: userId, userB: targetId, status: 'Blocked' })
         return { msg: messages.blocked.persian }
     }
@@ -158,6 +159,16 @@ export class RelationService implements IRelationService {
         const followerUserIds = await this.relationRepo.findFollowers(userId, paginationInfo)
         const userShorts = await this.userService.getBatchUserInfo(followerUserIds)
         return userShorts
+    }
+
+    async getFollowersCount(userId: UserId) {
+        const count = await this.relationRepo.findFollowersCount(userId)
+        return count
+    }
+
+    async getFollowingCount(userId: UserId) {
+        const count = await this.relationRepo.findFollowingsCount(userId)
+        return count
     }
 
     async getFollowings(userId: UserId, paginationInfo: PaginationInfo) {
@@ -210,7 +221,6 @@ export class RelationService implements IRelationService {
         })
         return Array.from(relatedUsers)
     }
-
     async getFollowing(id: UserId) {
         const relations = (await this.relationRepo.findByRelation(id, 'Following')).toRelationList()
         if (relations.length < 1) return []
