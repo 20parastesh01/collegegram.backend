@@ -17,6 +17,7 @@ import { EditPostDTO } from '../dto/editPost.dto'
 import { CloseFriendService, ICloseFriendService } from '../../user/bll/closefriend.service'
 import { LikeService } from '../../postAction/bll/like.service'
 import { BookmarkService } from '../../postAction/bll/bookmark.service'
+import { WholeNumber } from '../../../data/whole-number'
 
 export type arrayResult = { result: BasicPost[]; total: number }
 export type timelineArrayResult = { result: { user: User; post: PostWithDetail }[]; total: number }
@@ -191,7 +192,12 @@ export class PostService implements IPostService {
                 post.photos = photos
             }
             const profilePhoto = await MinioRepo.getProfileUrl(user.id)
+            const followerCount = await (services['RelationService'] as RelationService).getFollowersCount(user.id)
+            const followingCount = await (services['RelationService'] as RelationService).getFollowingCount(user.id)
+            user.followers = followerCount as WholeNumber
+            user.following = followingCount as WholeNumber
             user.photo = profilePhoto || ''
+            user.postsCount = postsNumber as WholeNumber
             result.push({ user, posts })
         }
         return result
