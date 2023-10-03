@@ -103,7 +103,7 @@ export class RelationRepository implements IRelationRepository {
     async findBlockeds(userId: UserId, paginationInfo: PaginationInfo) {
         const { page, pageSize } = paginationInfo
         const followersUserId = await this.relationRepo.find({ where: { userA: userId, status: 'Blocked' }, take: pageSize, skip: (page - 1) * pageSize })
-        const result = followersUserId.map((a) => a.userA)
+        const result = followersUserId.map((a) => a.userB)
         return result
     }
 }
