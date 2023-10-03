@@ -106,14 +106,4 @@ export class RelationRepository implements IRelationRepository {
         const result = followersUserId.map((a) => a.userA)
         return result
     }
-
-    async findFollowersCount(userId: UserId) {
-        const count = await this.relationRepo.count({ where: { userB: userId, status: 'Following' } })
-        return count
-    }
-
-    async findFollowingsCount(userId: UserId) {
-        const count = await this.relationRepo.count({ where: { userA: userId, status: 'Following' } })
-        return count
-    }
 }

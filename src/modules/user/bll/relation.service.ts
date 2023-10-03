@@ -227,14 +227,5 @@ export class RelationService implements IRelationService {
         const users = relations.map((relation) => relation.userB)
         return users
     }
-
-    async getFollowersCount(userId: UserId) {
-        const count = await this.relationRepo.findFollowersCount(userId)
-        return count
-    }
-
-    async getFollowingCount(userId: UserId) {
-        const count = await this.relationRepo.findFollowingsCount(userId)
-        return count
-    }
+    
 }
