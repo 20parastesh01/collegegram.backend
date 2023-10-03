@@ -154,7 +154,7 @@ export class UserService implements IUserService {
         const user = dao.toUser()
         const resetPasswordToken = v4()
         await RedisRepo.setResetPasswordToken(resetPasswordToken, user.id)
-        sendEmail(user.email, 'Reset Password', `https://murphyteam.ir/reset-password?token=${resetPasswordToken}`, 'Forget Password')
+        sendEmail(user.email, 'Reset Password', `https://murphy-front.darkube.app/reset-password?token=${resetPasswordToken}`, 'Forget Password')
         return { msg: 'link sent' }
     }
 
