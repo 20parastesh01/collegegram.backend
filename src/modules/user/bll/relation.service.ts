@@ -1,6 +1,6 @@
 import { MinioRepo } from '../../../data-source'
 import { PaginationInfo } from '../../../data/pagination'
-import { zodWholeNumber } from '../../../data/whole-number'
+import { WholeNumber, zodWholeNumber } from '../../../data/whole-number'
 import { Service, services } from '../../../registry/layer-decorators'
 import { BadRequestError, ForbiddenError, NotFoundError } from '../../../utility/http-error'
 import { messages } from '../../../utility/persian-messages'
@@ -188,6 +188,10 @@ export class RelationService implements IRelationService {
         const reverseRelationDao = await this.relationRepo.getRelation(userId, target.id)
         let reverseStatus = null
         if (reverseRelationDao) reverseStatus = reverseRelationDao.toRelation().status
+        const followerCount = await (services['RelationService'] as RelationService).getFollowersCount(target.id)
+        const followingCount = await (services['RelationService'] as RelationService).getFollowingCount(target.id)
+        target.followers = followerCount as WholeNumber
+        target.following = followingCount as WholeNumber
         return { user: target, status, reverseStatus }
     }
 
@@ -212,5 +216,15 @@ export class RelationService implements IRelationService {
         if (relations.length < 1) return []
         const users = relations.map((relation) => relation.userB)
         return users
+    }
+
+    async getFollowersCount(userId: UserId) {
+        const count = await this.relationRepo.findFollowersCount(userId)
+        return count
+    }
+
+    async getFollowingCount(userId: UserId) {
+        const count = await this.relationRepo.findFollowingsCount(userId)
+        return count
     }
 }
