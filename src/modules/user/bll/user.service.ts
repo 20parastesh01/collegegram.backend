@@ -22,8 +22,9 @@ import { Service, services } from '../../../registry/layer-decorators'
 import { EditProfileDto, editProfileDto } from '../dto/edit-profile.dto'
 import { Token } from '../../../data/token'
 import { PersianErrors, messages } from '../../../utility/persian-messages'
-import { zodWholeNumber } from '../../../data/whole-number'
+import { WholeNumber, zodWholeNumber } from '../../../data/whole-number'
 import { PostService } from '../../post/bll/post.service'
+import { RelationService } from './relation.service'
 
 export type LoginSignUp = UserWithToken | BadRequestError | ServerError
 
@@ -209,6 +210,10 @@ export class UserService implements IUserService {
         user.photo = profile || ''
         const postCount = await (services['PostService'] as PostService).getCurrentUserPostCount(id)
         user.postsCount = zodWholeNumber.parse(postCount)
+        const followerCount = await (services['RelationService'] as RelationService).getFollowersCount(id)
+        const followingCount = await (services['RelationService'] as RelationService).getFollowingCount(id)
+        user.followers = followerCount as WholeNumber
+        user.following = followingCount as WholeNumber
         return user
     }
 
