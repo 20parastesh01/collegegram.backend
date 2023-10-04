@@ -143,8 +143,9 @@ export class PostRepository implements IPostRepository {
         if (usersBlockedHim.length > 0) {
             query.andWhere('post.author NOT IN (:...blockedUsers)', { blockedUsers: usersBlockedHim })
         }
-
-        query.andWhere('(post.closeFriend = false OR post.author IN (:...closeFriends))', { closeFriends: usersAddedHimAsCloseFriend })
+        if (usersAddedHimAsCloseFriend.length > 0) {
+            query.andWhere('(post.closeFriend = false OR post.author IN (:...closeFriends))', { closeFriends: usersAddedHimAsCloseFriend })
+        }
 
         if (privateUserIds.length > 0) {
             query.andWhere('(post.author NOT IN (:...privateUsers) OR post.author IN (:...followingUsers))', {
