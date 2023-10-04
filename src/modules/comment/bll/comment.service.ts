@@ -5,20 +5,21 @@ import { Comment } from '../model/comment'
 import { toCreateComment } from './comment.dao'
 import { UserId } from '../../user/model/user-id'
 import { PostId, zodPostId } from '../../post/model/post-id'
-import { Service } from '../../../registry/layer-decorators'
+import { Service, services } from '../../../registry/layer-decorators'
 import { MinioRepo } from '../../../data-source'
 import { IUserService, UserService } from '../../user/bll/user.service'
 import { Msg, PersianErrors, messages } from '../../../utility/persian-messages'
 import { zodCommentId } from '../model/comment-id'
 import { JustId } from '../../../data/just-id'
 import { IPostService, PostService } from '../../post/bll/post.service'
+import { CommentLikeService } from './commentLike.service'
 
 type arrayResult = { result: Comment[], total: number }
 type Message = { msg: Msg }
 export interface ICommentService {
     createComment(data: CreateCommentDTO, userId: UserId): Promise<Comment | Message | ServerError>
     getComment(id: JustId): Promise<Comment | null>
-    getAllComments(id: JustId): Promise<arrayResult>
+    getAllComments(id: JustId, userId: UserId): Promise<arrayResult>
     removeCommentsWhenBlockingUser(userId: UserId, targetId: UserId): Promise<Message | ServerError>
 }
 
@@ -43,10 +44,13 @@ export class CommentService implements ICommentService {
 
         return { msg: messages.done.persian }
     }
-    async getAllComments(id: JustId) {
+    async getAllComments(id: JustId, userId: UserId) {
         const postId = zodPostId.parse(id)
         const comments = (await this.commentRepo.findAllByPost(postId))
+        
         const commentsWithProfilePhotos = await Promise.all( comments.map(async(comment)=>{
+            const like = await (services['CommentLikeService'] as CommentLikeService).getLikeByUserAndComment(userId, comment.id)
+            comment.ifLiked = like
             const profilePhoto = await MinioRepo.getProfileUrl(comment.author.id)
             if (profilePhoto) comment.author.photo = profilePhoto
             return comment

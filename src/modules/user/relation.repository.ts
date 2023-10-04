@@ -33,6 +33,8 @@ export interface IRelationRepository {
     findFollowers(userId: UserId, paginationInfo: PaginationInfo): Promise<UserId[]>
     findFollowings(userId: UserId, paginationInfo: PaginationInfo): Promise<UserId[]>
     findBlockeds(userId: UserId, paginationInfo: PaginationInfo): Promise<UserId[]>
+    findFollowersCount(userId: UserId): Promise<number>
+    findFollowingsCount(userId: UserId): Promise<number>
 }
 
 @Repo()
@@ -81,17 +83,27 @@ export class RelationRepository implements IRelationRepository {
         return result
     }
 
+    async findFollowersCount(userId: UserId) {
+        const count = await this.relationRepo.count({ where: { userB: userId, status: 'Following' } })
+        return count
+    }
+
+    async findFollowingsCount(userId: UserId) {
+        const count = await this.relationRepo.count({ where: { userA: userId, status: 'Following' } })
+        return count
+    }
+
     async findFollowings(userId: UserId, paginationInfo: PaginationInfo) {
         const { page, pageSize } = paginationInfo
         const followersUserId = await this.relationRepo.find({ where: { userA: userId, status: 'Following' }, take: pageSize, skip: (page - 1) * pageSize })
-        const result = followersUserId.map((a) => a.userA)
+        const result = followersUserId.map((a) => a.userB)
         return result
     }
 
     async findBlockeds(userId: UserId, paginationInfo: PaginationInfo) {
         const { page, pageSize } = paginationInfo
         const followersUserId = await this.relationRepo.find({ where: { userA: userId, status: 'Blocked' }, take: pageSize, skip: (page - 1) * pageSize })
-        const result = followersUserId.map((a) => a.userA)
+        const result = followersUserId.map((a) => a.userB)
         return result
     }
 }

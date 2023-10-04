@@ -45,11 +45,11 @@ export class UserEntity {
     private!: boolean
 
     @OneToMany(() => LikeEntity, (like) => like.user, { lazy: true })
-    @JoinColumn({ name: 'like_id' })
+    @JoinColumn({ name: 'likeId' })
     likes?: LikeEntity[]
 
     @OneToMany(() => BookmarkEntity, (bookmark) => bookmark.user, { lazy: true })
-    @JoinColumn({ name: 'bookmark_id' })
+    @JoinColumn({ name: 'bookmarkId' })
     bookmarks?: BookmarkEntity[]
 
     @CreateDateColumn()

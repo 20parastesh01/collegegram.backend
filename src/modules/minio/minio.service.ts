@@ -5,6 +5,7 @@ import { getMinioConfig } from './mino.config'
 import { UserId } from '../user/model/user-id'
 import path from 'path'
 import { PostId } from '../post/model/post-id'
+import fs from 'fs'
 
 export const profilePhotoBucket = 'userprofile'
 export const postPhotoBucket = 'post'
@@ -48,12 +49,12 @@ export class Minio {
         try {
             const stat = await this.client.statObject(profilePhotoBucket, userId + '')
             const minioUrl = await this.client.presignedUrl('GET', profilePhotoBucket, userId + '')
-            return '/file' + minioUrl.split(this.config.endPoint + ':' + this.config.port)[1]
+            return minioUrl
         } catch (e) {
             try {
                 const stat = await this.client.statObject(profilePhotoBucket, '0')
                 const minioUrl = await this.client.presignedUrl('GET', profilePhotoBucket, '0')
-                return '/file' + minioUrl.split(this.config.endPoint + ':' + this.config.port)[1]
+                return minioUrl
             } catch (ee) {
                 return ''
             }
@@ -99,7 +100,7 @@ export class Minio {
         const objectList: string[] = await this.getObjectListByPrefix(postId + '-')
         for (let i = 1; i <= objectList.length; i++) {
             const minioUrl = await this.client.presignedUrl('GET', postPhotoBucket, postId + '-' + i)
-            result.push('/file' + minioUrl.split(this.config.endPoint + ':' + this.config.port)[1])
+            result.push(minioUrl)
         }
         return result
     }

@@ -34,8 +34,9 @@ export class CommentLikeRepository implements ICommentLikeRepository {
         const commentLikes: CommentLikeEntity[] = await this.CommentLikeRepo.createQueryBuilder('commentLike')
         .leftJoinAndSelect('commentLike.user', 'user')
         .leftJoinAndSelect('commentLike.comment', 'comment')
-        .where('commentLike.user.id = :userId', { userId })
-        .andWhere('commentLike.comment.author.id = :targetId', { targetId })
+        .leftJoinAndSelect('comment.author', 'author')
+        .where('user.id = :userId', { userId })
+        .andWhere('author.id = :targetId', { targetId })
         .getMany()
         return commentLikeArrayDao(commentLikes).toCommentLikeList()
     }
@@ -51,8 +52,8 @@ export class CommentLikeRepository implements ICommentLikeRepository {
         const output = await this.CommentLikeRepo.createQueryBuilder('commentLike')
             .leftJoinAndSelect('commentLike.user', 'user')
             .leftJoinAndSelect('commentLike.comment', 'comment')
-            .where('commentLike.user_id = :userId', { userId })
-            .andWhere('commentLike.comment_id = :commentId', { commentId })
+            .where('commentLike.userId = :userId', { userId })
+            .andWhere('commentLike.commentId = :commentId', { commentId })
             .getOne()
         return commentLikeOrNullDao(output).toCommentLike()
     }

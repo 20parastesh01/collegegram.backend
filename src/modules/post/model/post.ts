@@ -32,6 +32,8 @@ export const zodStrictPost = z.object({
     caption: zodCaption,
     commentCount: zodWholeNumber,
     createdAt: z.instanceof(Date),
+    ifLiked: zodBooleanOrBooleanString.optional(),
+    ifBookmarked: zodBooleanOrBooleanString.optional(),
 })
 export const zodBasicPost = z.object({
     id: zodPostId,
@@ -44,6 +46,8 @@ export interface PostWithDetail extends PostWithoutDetail {
     likeCount: WholeNumber
     bookmarkCount: WholeNumber
     commentCount: WholeNumber
+    ifLiked?: boolean
+    ifBookmarked?: boolean
 }
 export interface PostWithoutDetail extends BasicPost {
     caption: Caption

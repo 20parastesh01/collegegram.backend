@@ -6,7 +6,7 @@ import { JustId } from '../../../data/just-id'
 import { BookmarkRepository, IBookmarkRepository } from '../bookmark.repository'
 import { toCreateBookmark } from './bookmark.dao'
 import { PostWithDetail } from '../../post/model/post'
-import { zodPostId } from '../../post/model/post-id'
+import { PostId, zodPostId } from '../../post/model/post-id'
 import { IPostService, PostService } from '../../post/bll/post.service'
 import { IUserService, UserService } from '../../user/bll/user.service'
 
@@ -17,6 +17,7 @@ export interface IBookmarkService {
     bookmarkPost(userId: UserId, id: JustId): Promise<Message | ServerError>
     unbookmarkPost(userId: UserId, id: JustId): Promise<Message | ServerError>
     getMyBookmarkeds(userId: UserId): Promise<Message | arrayResult>
+    getBookmarkByUserAndPost(userId: UserId, postId: PostId): Promise<boolean>
 }
 
 @Service(BookmarkRepository, PostService, UserService)
@@ -27,6 +28,11 @@ export class BookmarkService implements IBookmarkService {
         private userService: IUserService
     ) {}
 
+    async getBookmarkByUserAndPost(userId: UserId, postId: PostId): Promise<boolean> {
+        const bookmark = (await this.bookmarkRepo.findByUserAndPost(userId, postId))
+        if (bookmark) return true
+        return false
+    }
     async getMyBookmarkeds(userId: UserId) {
         const result = (await this.bookmarkRepo.findAllByUser(userId))
         if (result.length < 1) return { msg: messages.postNotFound.persian }

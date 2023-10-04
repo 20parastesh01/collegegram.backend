@@ -6,7 +6,6 @@ import { upload } from '../multer'
 let title = 'CollegeGram API'
 let version = '1.0.0'
 export const swaggerObject: any = {
-    openapi: '3.0.1',
     servers: [
         {
             url: 'https://murphyteam.ir/api',
@@ -17,6 +16,7 @@ export const swaggerObject: any = {
             description: 'Local',
         },
     ],
+    openapi: '3.0.1',
     info: {
         title,
         version,

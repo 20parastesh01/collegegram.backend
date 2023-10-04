@@ -23,8 +23,8 @@ export interface IPostRepository {
     create(data: CreatePost): Promise<PostWithDetail>
     findSomeByAuthor(userId: UserId, count: number, closeFriend: boolean[]): Promise<BasicPost[]>
     edit(data: PostWithoutDetail): Promise<PostWithDetail>
-    findAllFullPosts(userId: UserId, closeFriend: boolean[]): Promise<PostWithDetail[]>;
-    findAllBasicPosts(userId: UserId, closeFriend: boolean[]): Promise<BasicPost[]>;
+    findAllFullPosts(userId: UserId, closeFriend: boolean[]): Promise<PostWithDetail[]>
+    findAllBasicPosts(userId: UserId, closeFriend: boolean[]): Promise<BasicPost[]>
     findWithoutDetailByID(postId: PostId): Promise<undefined | PostWithoutDetail>
     findAllByAuthorList(usersId: UserId[], closeFriend: boolean[]): Promise<PostWithDetail[]>
     countByAuthor(userId: UserId, closeFriend: boolean[]): Promise<number>
@@ -42,7 +42,7 @@ export class PostRepository implements IPostRepository {
         const posts: PostEntity[] = await this.PostRepo.find({
             where: {
                 author: userId,
-                closeFriend: In(closeFriend)
+                closeFriend: In(closeFriend),
             },
             order: {
                 createdAt: 'DESC',
@@ -52,11 +52,10 @@ export class PostRepository implements IPostRepository {
         return postDaoList(posts).toThumbnailList()
     }
 
-    async countByAuthor(userId: UserId) {
-        return this.PostRepo.countBy({ author: userId })
+    async countByAuthor(userId: UserId, closeFriend: boolean[]) {
+        return this.PostRepo.countBy({ author: userId, closeFriend: In(closeFriend) })
     }
 
-    
     private async findPostsByUser(userId: UserId, closeFriend: boolean[]): Promise<PostEntity[]> {
         return await this.PostRepo.createQueryBuilder('post')
             .loadRelationCountAndMap('post.likeCount', 'post.likes')
@@ -65,17 +64,17 @@ export class PostRepository implements IPostRepository {
             .where('post.author = :userId', { userId })
             .andWhere('post.closeFriend IN (:...closeFriend)', { closeFriend })
             .orderBy('post.createdAt', 'DESC')
-            .getMany();
+            .getMany()
     }
 
     async findAllFullPosts(userId: UserId, closeFriend: boolean[]): Promise<PostWithDetail[]> {
-        const posts: PostEntity[] = await this.findPostsByUser(userId, closeFriend);
-        return postArrayDao(posts).toPostList();
+        const posts: PostEntity[] = await this.findPostsByUser(userId, closeFriend)
+        return postArrayDao(posts).toPostList()
     }
 
     async findAllBasicPosts(userId: UserId, closeFriend: boolean[]): Promise<BasicPost[]> {
-        const posts: PostEntity[] = await this.findPostsByUser(userId, closeFriend);
-        return postArrayDao(posts).toThumbnailList();
+        const posts: PostEntity[] = await this.findPostsByUser(userId, closeFriend)
+        return postArrayDao(posts).toThumbnailList()
     }
 
     async findAllByAuthorList(usersId: UserId[], closeFriend: boolean[]) {
