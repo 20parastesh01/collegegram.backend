@@ -145,15 +145,22 @@ export class PostRepository implements IPostRepository {
         }
         if (usersAddedHimAsCloseFriend.length > 0) {
             query.andWhere('(post.closeFriend = false OR post.author IN (:...closeFriends))', { closeFriends: usersAddedHimAsCloseFriend })
-        }else{
+        } else {
             query.andWhere('(post.closeFriend = false)')
         }
 
         if (privateUserIds.length > 0) {
-            query.andWhere('(post.author NOT IN (:...privateUsers) OR post.author IN (:...followingUsers))', {
-                privateUsers: privateUserIds,
-                followingUsers: followingUserIds,
-            })
+            if (followingUserIds.length > 0) {
+                query.andWhere('(post.author NOT IN (:...privateUsers) OR post.author IN (:...followingUsers))', {
+                    privateUsers: privateUserIds,
+                    followingUsers: followingUserIds,
+                })
+            } else {
+                query.andWhere('(post.author NOT IN (:...privateUsers))', {
+                    privateUsers: privateUserIds,
+                    followingUsers: followingUserIds,
+                })
+            }
         }
         query.skip((page - 1) * pageSize).take(pageSize)
 
