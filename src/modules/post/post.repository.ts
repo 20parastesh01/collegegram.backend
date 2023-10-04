@@ -28,6 +28,7 @@ export interface IPostRepository {
     findWithoutDetailByID(postId: PostId): Promise<undefined | PostWithoutDetail>
     findAllByAuthorList(usersId: UserId[], closeFriend: boolean[]): Promise<PostWithDetail[]>
     countByAuthor(userId: UserId, closeFriend: boolean[]): Promise<number>
+    search2(tag: Tag, followingUserIds: UserId[], usersAddedHimAsCloseFriend: UserId[], usersBlockedHim: UserId[], privateUserIds: UserId[], paginationInfo: PaginationInfo): Promise<PostWithDetail[]>
 }
 
 @Repo()
@@ -113,26 +114,26 @@ export class PostRepository implements IPostRepository {
         return postWithDetailOrNullDao(output).toPost()
     }
 
-    async search(userId: UserId, tag: Tag, followingUserIds: UserId[], usersAddedHimAsCloseFriend: UserId[], usersBlockedHim: UserId[], privateUserIds: UserId[], paginationInfo: PaginationInfo) {
-        const { page, pageSize } = paginationInfo
-        const posts = await this.PostRepo.find()
-        const result = []
-        for (let post of posts) {
-            if (!post.tags?.includes(tag)) continue
-            if (usersBlockedHim.includes(post.author)) {
-                continue
-            }
-            if (post.closeFriend && !usersAddedHimAsCloseFriend.includes(post.author)) {
-                continue
-            }
-            if (privateUserIds.includes(post.author) && !followingUserIds.includes(post.author)) {
-                continue
-            }
-            result.push(post)
-            if (result.length === 25) return result
-        }
-        return result
-    }
+    // async search(userId: UserId, tag: Tag, followingUserIds: UserId[], usersAddedHimAsCloseFriend: UserId[], usersBlockedHim: UserId[], privateUserIds: UserId[], paginationInfo: PaginationInfo) {
+    //     const { page, pageSize } = paginationInfo
+    //     const posts = await this.PostRepo.find()
+    //     const result = []
+    //     for (let post of posts) {
+    //         if (!post.tags?.includes(tag)) continue
+    //         if (usersBlockedHim.includes(post.author)) {
+    //             continue
+    //         }
+    //         if (post.closeFriend && !usersAddedHimAsCloseFriend.includes(post.author)) {
+    //             continue
+    //         }
+    //         if (privateUserIds.includes(post.author) && !followingUserIds.includes(post.author)) {
+    //             continue
+    //         }
+    //         result.push(post)
+    //         if (result.length === 25) return result
+    //     }
+    //     return result
+    // }
 
     async search2(tag: Tag, followingUserIds: UserId[], usersAddedHimAsCloseFriend: UserId[], usersBlockedHim: UserId[], privateUserIds: UserId[], paginationInfo: PaginationInfo) {
         const { page, pageSize } = paginationInfo
@@ -154,6 +155,6 @@ export class PostRepository implements IPostRepository {
         query.skip((page - 1) * pageSize).take(pageSize)
 
         const result = await query.getMany()
-        return result
+        return postArrayDao(result).toPostList()
     }
 }

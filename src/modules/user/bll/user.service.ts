@@ -39,6 +39,7 @@ export interface IUserService {
     editProfile(user: UserBasic, data: EditProfileDto, file?: Express.Multer.File): Promise<{ user: User } | ServerError>
     getExploreUsers(userId: UserId, userIds: UserId[]): Promise<User[]>
     logout(userId: UserId): Promise<SimpleMessage | BadRequestError>
+    getAllPrivateIds(): Promise<UserId[]>
 }
 
 export const hash = async (input: string): Promise<Password> => {
@@ -52,6 +53,11 @@ export const hash = async (input: string): Promise<Password> => {
 @Service(UserRepository)
 export class UserService implements IUserService {
     constructor(private userRepo: IUserRepository) {}
+
+    async getAllPrivateIds(): Promise<UserId[]> {
+        const result = await this.userRepo.findAllPrivateIds()
+        return result
+    }
 
     async login(data: LoginDto): Promise<LoginSignUp | UnauthorizedError> {
         const usernameOrEmail = data.usernameOrEmail
@@ -121,7 +127,7 @@ export class UserService implements IUserService {
 
     async getBatchUserInfo(userIds: UserId[]) {
         const users = await this.userRepo.getInfoByIds(userIds)
-        for(let user of users) {
+        for (let user of users) {
             const photo = await MinioRepo.getProfileUrl(user.id)
             if (photo) user.photo = photo
         }

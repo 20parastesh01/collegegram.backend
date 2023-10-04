@@ -15,6 +15,7 @@ export interface ICloseFriendRepository {
     createCloseFriend(payload: CreateCloseFriend): Promise<ReturnType<typeof closeFriendDao>>
     removeCloseFriend(userA: UserId, userB: UserId): Promise<void>
     findCloseFriends(userId: UserId, paginationInfo: PaginationInfo): Promise<UserId[]>
+    findUsersWhoCloseFriended(userId: UserId): Promise<UserId[]>
 }
 
 @Repo()
@@ -43,6 +44,12 @@ export class CloseFriendRepository implements ICloseFriendRepository {
         const { page, pageSize } = paginationInfo
         const followersUserId = await this.closeFriendRepo.find({ where: { userA: userId }, take: pageSize, skip: (page - 1) * pageSize })
         const result = followersUserId.map((a) => a.userB)
+        return result
+    }
+
+    async findUsersWhoCloseFriended(userId: UserId): Promise<UserId[]> {
+        const followersUserId = await this.closeFriendRepo.find({ where: { userB: userId } })
+        const result = followersUserId.map((a) => a.userA)
         return result
     }
 }

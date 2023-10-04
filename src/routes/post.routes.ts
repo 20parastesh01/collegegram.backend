@@ -8,6 +8,9 @@ import { zodJustId } from '../data/just-id'
 import { LikeService } from '../modules/postAction/bll/like.service'
 import { BookmarkService } from '../modules/postAction/bll/bookmark.service'
 import { zodEditPostDTO } from '../modules/post/dto/editPost.dto'
+import { z } from 'zod'
+import { isTag } from '../modules/post/model/tag'
+import { extractPaginationInfo } from '../data/pagination'
 
 @Route('/post', PostService, LikeService, BookmarkService)
 export class PostRouter {
@@ -94,5 +97,13 @@ export class PostRouter {
     unbookmarkAPost(req: Request, res: Response) {
         const data = zodJustId.parse(req.params.id)
         handleExpress(res, () => this.bookmarkService.unbookmarkPost(req.user.userId, data))
+    }
+
+    @Get('/search/:tag')
+    @Auth()
+    search(req: Request, res: Response) {
+        const tag = z.string().refine(isTag).parse(req.params.tag)
+        const paginationInfo = extractPaginationInfo(req)
+        handleExpress(res, () => this.postService.search(req.user.userId, tag, paginationInfo))
     }
 }

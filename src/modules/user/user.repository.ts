@@ -40,6 +40,7 @@ export interface IUserRepository {
     changePassword(userId: UserId, newPassword: Password): Promise<ReturnType<typeof userDao>>
     edit(userId: UserId, data: EditUser): Promise<ReturnType<typeof userDao>>
     getInfoByIds(userIds: UserId[]): Promise<UserShort[]>
+    findAllPrivateIds(): Promise<UserId[]>
 }
 
 @Repo()
@@ -49,6 +50,12 @@ export class UserRepository implements IUserRepository {
     constructor(appDataSource: DataSource) {
         this.userRepo = appDataSource.getRepository(UserEntity)
     }
+
+    async findAllPrivateIds(): Promise<UserId[]> {
+        const entities = await this.userRepo.findBy({ private: true })
+        return entities.map((a) => a.id)
+    }
+
     async changePassword(userId: UserId, newPassword: Password): Promise<ReturnType<typeof userDao>> {
         const userEntity = await this.userRepo.save({ id: userId, password: newPassword })
         return userDao(userEntity)

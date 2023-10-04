@@ -28,6 +28,8 @@ export interface IRelationService {
     checkAccessAuth(userId: UserId, targetUser: User, status: RelationStatus): Promise<accessToUser>
     getNotExploreUsers(userId: UserId): Promise<UserId[]>
     getFollowing(id: UserId): Promise<UserId[]>
+    getAllFollowingIds(userId: UserId): Promise<UserId[]>
+    getBlockers(userId: UserId): Promise<UserId[]>
 }
 
 @Service(RelationRepository, UserService, NotificationService)
@@ -37,6 +39,11 @@ export class RelationService implements IRelationService {
         private userService: UserService,
         private notifService: NotificationService
     ) {}
+
+    async getBlockers(userId: UserId): Promise<UserId[]> {
+        const result = await this.relationRepo.findBlockers(userId)
+        return result
+    }
 
     async checkAccessAuth(userId: UserId, targetUser: User, status: RelationStatus) {
         const reverseRelation = (await this.getRelations(userId, targetUser.id)).reverseRelation
@@ -134,14 +141,14 @@ export class RelationService implements IRelationService {
             const status = dao.toRelation().status
             await this.relationRepo.deleteRelation({ userA: target.id, userB: userId })
         }
-        
+
         const promises = [
             (services['LikeService'] as LikeService).removePostLikesWhenBlockingUser(userId, targetId),
             (services['CommentLikeService'] as CommentLikeService).removeCommentLikesWhenBlockingUser(userId, targetId),
             (services['CommentService'] as CommentService).removeCommentsWhenBlockingUser(userId, targetId),
         ]
         Promise.all(promises)
-        
+
         await this.relationRepo.updateRelation({ userA: userId, userB: targetId, status: 'Blocked' })
         return { msg: messages.blocked.persian }
     }
@@ -175,6 +182,11 @@ export class RelationService implements IRelationService {
         const followingUserIds = await this.relationRepo.findFollowings(userId, paginationInfo)
         const userShorts = await this.userService.getBatchUserInfo(followingUserIds)
         return userShorts
+    }
+
+    async getAllFollowingIds(userId: UserId) {
+        const followingUserIds = await this.relationRepo.findAllFollowings(userId)
+        return followingUserIds
     }
 
     async getBlockeds(userId: UserId, paginationInfo: PaginationInfo) {
@@ -227,5 +239,4 @@ export class RelationService implements IRelationService {
         const users = relations.map((relation) => relation.userB)
         return users
     }
-    
 }

@@ -9,7 +9,8 @@ import { RelationService } from './relation.service'
 import { UserService } from './user.service'
 
 export interface ICloseFriendService {
-    getCloseFriend(userId: UserId, targetUserId: UserId):Promise<CloseFriend | undefined>
+    getCloseFriend(userId: UserId, targetUserId: UserId): Promise<CloseFriend | undefined>
+    getUsersWhoCloseFriended(userId: UserId): Promise<UserId[]>
 }
 
 @Service(CloseFriendRepository, UserService)
@@ -51,8 +52,13 @@ export class CloseFriendService implements ICloseFriendService {
     }
 
     async getCloseFriends(userId: UserId, paginationInfo: PaginationInfo) {
-        const followerUserIds = await this.closeFriendRepo.findCloseFriends(userId,paginationInfo)
+        const followerUserIds = await this.closeFriendRepo.findCloseFriends(userId, paginationInfo)
         const userShorts = await this.userService.getBatchUserInfo(followerUserIds)
-        return userShorts 
+        return userShorts
+    }
+
+    async getUsersWhoCloseFriended(userId: UserId) {
+        const result = await this.closeFriendRepo.findUsersWhoCloseFriended(userId)
+        return result
     }
 }

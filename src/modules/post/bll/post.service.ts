@@ -18,6 +18,8 @@ import { CloseFriendService, ICloseFriendService } from '../../user/bll/closefri
 import { LikeService } from '../../postAction/bll/like.service'
 import { BookmarkService } from '../../postAction/bll/bookmark.service'
 import { WholeNumber } from '../../../data/whole-number'
+import { Tag } from '../model/tag'
+import { PaginationInfo } from '../../../data/pagination'
 
 export type arrayResult = { result: BasicPost[]; total: number }
 export type timelineArrayResult = { result: { user: User; post: PostWithDetail }[]; total: number }
@@ -201,5 +203,13 @@ export class PostService implements IPostService {
             result.push({ user, posts })
         }
         return result
+    }
+
+    async search(userId: UserId, tag: Tag, paginationInfo: PaginationInfo) {
+        const followings = await this.relationService.getAllFollowingIds(userId)
+        const closefriend = await this.closeFriendService.getUsersWhoCloseFriended(userId)
+        const blockers = await this.relationService.getBlockers(userId)
+        const privates = await this.userService.getAllPrivateIds()
+        return await this.postRepo.search2(tag, followings, closefriend, blockers, privates, paginationInfo)
     }
 }

@@ -32,9 +32,11 @@ export interface IRelationRepository {
     findByRelation(userId: UserId, status: RelationStatus): Promise<ReturnType<typeof relationListDao>>
     findFollowers(userId: UserId, paginationInfo: PaginationInfo): Promise<UserId[]>
     findFollowings(userId: UserId, paginationInfo: PaginationInfo): Promise<UserId[]>
+    findAllFollowings(userId: UserId): Promise<UserId[]>
     findBlockeds(userId: UserId, paginationInfo: PaginationInfo): Promise<UserId[]>
     findFollowersCount(userId: UserId): Promise<number>
     findFollowingsCount(userId: UserId): Promise<number>
+    findBlockers(userId: UserId): Promise<UserId[]>
 }
 
 @Repo()
@@ -43,6 +45,16 @@ export class RelationRepository implements IRelationRepository {
 
     constructor(appDataSource: DataSource) {
         this.relationRepo = appDataSource.getRepository(RelationEntity)
+    }
+    async findBlockers(userId: UserId) {
+        const followersUserId = await this.relationRepo.find({ where: { userB: userId, status: 'Blocked' } })
+        const result = followersUserId.map((a) => a.userA)
+        return result
+    }
+    async findAllFollowings(userId: UserId): Promise<UserId[]> {
+        const followersUserId = await this.relationRepo.find({ where: { userA: userId, status: 'Following' } })
+        const result = followersUserId.map((a) => a.userB)
+        return result
     }
 
     async getRelation(userA: UserId, userB: UserId) {
