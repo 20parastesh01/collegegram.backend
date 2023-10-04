@@ -79,6 +79,12 @@ export class NotificationService {
         return result
     }
 
+    async getFriendNotification(userId:UserId) {
+        const friends = await (services['RelationService'] as RelationService).getAllFollowingIds(userId)
+        const notifs = await this.notifRepo.getNotificationByUserList(friends)
+        return notifs
+    }
+
     async deleteNotification(user: UserId, actor: UserId, type: NotificationType) {
         await this.notifRepo.deleteNotification(user, actor, type)
     }

@@ -1,4 +1,4 @@
-import { DataSource, Repository } from 'typeorm'
+import { DataSource, In, Repository } from 'typeorm'
 import { NotificationEntity } from './entity/notification.entity'
 import { Email } from '../../data/email'
 import { NotificationId } from './model/notification-id'
@@ -23,6 +23,7 @@ export interface CreateNotification {
 export interface INotificationRepository {
     create(data: CreateNotification): Promise<ReturnType<typeof notificationDao>>
     getNotificationByUser(userId: UserId): Promise<ReturnType<typeof notificationListDao>>
+    getNotificationByUserList(userIds: UserId[]): Promise<ReturnType<typeof notificationListDao>>
     deleteNotification(userId: UserId, actorId: UserId, type: NotificationType): Promise<void>
 }
 
@@ -41,6 +42,11 @@ export class NotificationRepository implements INotificationRepository {
 
     async getNotificationByUser(userId: UserId) {
         const notificationEntities = await this.notificationRepo.find({ where: { userId }, relations: ['actor', 'user', 'post', 'comment'] })
+        return notificationListDao(notificationEntities)
+    }
+
+    async getNotificationByUserList(userIds: UserId[]) {
+        const notificationEntities = await this.notificationRepo.find({ where: { userId: In(userIds), type: In(['Like' , 'Comment' , 'Follow']) }, relations: ['actor', 'user', 'post', 'comment'] })
         return notificationListDao(notificationEntities)
     }
 

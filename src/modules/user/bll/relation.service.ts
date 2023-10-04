@@ -28,6 +28,7 @@ export interface IRelationService {
     checkAccessAuth(userId: UserId, targetUser: User, status: RelationStatus): Promise<accessToUser>
     getNotExploreUsers(userId: UserId): Promise<UserId[]>
     getFollowing(id: UserId): Promise<UserId[]>
+    getAllFollowingIds(userId: UserId): Promise<UserId[]>
 }
 
 @Service(RelationRepository, UserService, NotificationService)
@@ -228,4 +229,8 @@ export class RelationService implements IRelationService {
         return users
     }
     
+    async getAllFollowingIds(userId: UserId) {
+        const followingUserIds = await this.relationRepo.findAllFollowings(userId)
+        return followingUserIds
+    }
 }
