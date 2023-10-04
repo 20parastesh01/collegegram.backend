@@ -37,6 +37,7 @@ export interface IRelationRepository {
     findFollowersCount(userId: UserId): Promise<number>
     findFollowingsCount(userId: UserId): Promise<number>
     findBlockers(userId: UserId): Promise<UserId[]>
+    findAllBlockeds(userId: UserId): Promise<UserId[]>
 }
 
 @Repo()
@@ -49,6 +50,11 @@ export class RelationRepository implements IRelationRepository {
     async findBlockers(userId: UserId) {
         const followersUserId = await this.relationRepo.find({ where: { userB: userId, status: 'Blocked' } })
         const result = followersUserId.map((a) => a.userA)
+        return result
+    }
+    async findAllBlockeds(userId: UserId) {
+        const followersUserId = await this.relationRepo.find({ where: { userA: userId, status: 'Blocked' } })
+        const result = followersUserId.map((a) => a.userB)
         return result
     }
     async findAllFollowings(userId: UserId): Promise<UserId[]> {

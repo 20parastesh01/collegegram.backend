@@ -208,8 +208,9 @@ export class PostService implements IPostService {
     async search(userId: UserId, tag: Tag, paginationInfo: PaginationInfo) {
         const followings = await this.relationService.getAllFollowingIds(userId)
         const closefriend = await this.closeFriendService.getUsersWhoCloseFriended(userId)
-        const blockers = await this.relationService.getBlockers(userId)
+        const blockers = await this.relationService.getAllBlockers(userId)
+        const blockeds = await this.relationService.getAllBlockeds(userId)
         const privates = await this.userService.getAllPrivateIds()
-        return await this.postRepo.search2(tag, followings, closefriend, blockers, privates, paginationInfo)
+        return await this.postRepo.search2(tag, followings, closefriend, [...blockers, ...blockeds], privates, paginationInfo)
     }
 }

@@ -145,6 +145,8 @@ export class PostRepository implements IPostRepository {
         }
         if (usersAddedHimAsCloseFriend.length > 0) {
             query.andWhere('(post.closeFriend = false OR post.author IN (:...closeFriends))', { closeFriends: usersAddedHimAsCloseFriend })
+        }else{
+            query.andWhere('(post.closeFriend = false)')
         }
 
         if (privateUserIds.length > 0) {

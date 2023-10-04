@@ -29,7 +29,8 @@ export interface IRelationService {
     getNotExploreUsers(userId: UserId): Promise<UserId[]>
     getFollowing(id: UserId): Promise<UserId[]>
     getAllFollowingIds(userId: UserId): Promise<UserId[]>
-    getBlockers(userId: UserId): Promise<UserId[]>
+    getAllBlockers(userId: UserId): Promise<UserId[]>
+    getAllBlockeds(userId: UserId): Promise<UserId[]>
 }
 
 @Service(RelationRepository, UserService, NotificationService)
@@ -40,8 +41,13 @@ export class RelationService implements IRelationService {
         private notifService: NotificationService
     ) {}
 
-    async getBlockers(userId: UserId): Promise<UserId[]> {
+    async getAllBlockers(userId: UserId): Promise<UserId[]> {
         const result = await this.relationRepo.findBlockers(userId)
+        return result
+    }
+
+    async getAllBlockeds(userId: UserId): Promise<UserId[]> {
+        const result = await this.relationRepo.findAllBlockeds(userId)
         return result
     }
 
