@@ -36,6 +36,7 @@ export class NotificationService {
             type: 'Like',
             postId: post.id,
         })
+        console.log('notification in like', notification)
         return notification
     }
 
@@ -79,9 +80,9 @@ export class NotificationService {
         return result
     }
 
-    async getFriendNotification(userId:UserId) {
+    async getFriendNotification(userId: UserId) {
         const friends = await (services['RelationService'] as RelationService).getAllFollowingIds(userId)
-        const notifs = await this.notifRepo.getNotificationByUserList(friends)
+        const notifs = await (await this.notifRepo.getNotificationByUserList(friends)).toNotificationList()
         return notifs
     }
 
