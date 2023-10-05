@@ -8,6 +8,7 @@ import { Comment } from '../model/comment'
 import { mockJustId, mockPostId, mockUser } from '../../../data/fakeData'
 import { IUserService } from '../../user/bll/user.service'
 import { IPostService } from '../../post/bll/post.service'
+import { NotificationService } from '../../notification/bll/notification.service'
 const mockcreateCommentDto = {
     content: 'Test content' as Content,
     postId: mockJustId.id1,
@@ -37,13 +38,14 @@ describe('CommentService', () => {
     let mockCommentRepository: jest.Mocked<ICommentRepository>
     let userService: jest.Mocked<IUserService>
     let postService: jest.Mocked<IPostService>
+    let notificationService: jest.Mocked<NotificationService>
 
     beforeEach(() => {
         mockCommentRepository = {
             create: jest.fn(),
         } as any
 
-        commentService = new CommentService(mockCommentRepository, userService, postService)
+        commentService = new CommentService(mockCommentRepository, userService, postService, notificationService)
     })
 
     it('should create a comment', async () => {

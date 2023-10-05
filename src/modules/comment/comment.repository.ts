@@ -23,6 +23,7 @@ export interface ICommentRepository {
     findAllByPost(postId: PostId): Promise<Comment[]>
     findByID(commentId: CommentId): Promise<Comment | undefined>
     getUserCommentsOnTargetUserPosts(userId: UserId, targetId: UserId): Promise<Comment[]>
+    getRepliesCommentByCommentId(commentId: CommentId):  Promise<Comment[]>
 }
 
 @Repo()
@@ -32,8 +33,18 @@ export class CommentRepository implements ICommentRepository {
     constructor(appDataSource: DataSource) {
         this.CommentRepo = appDataSource.getRepository(CommentEntity)
     }
+
+    async getRepliesCommentByCommentId(commentId: CommentId) {
+        const comments: CommentEntity[] = await this.CommentRepo.createQueryBuilder('comment')
+            .loadRelationCountAndMap('comment.likeCount', 'comment.likes')
+            .where('comment.parentId = :commentId', { commentId })
+            .leftJoinAndSelect('comment.author', 'user')
+            .leftJoinAndSelect('comment.post', 'postId')
+            .orderBy('comment.createdAt', 'DESC')
+            .getMany()
+        return commentListDao(comments).toCommentList()
+    }
     async findAllByPost(postId: PostId) {
-        const nullParentID = 0
         const comments: CommentEntity[] = await this.CommentRepo.createQueryBuilder('comment')
             .loadRelationCountAndMap('comment.likeCount', 'comment.likes')
             .where('comment.postId = :postId', { postId })

@@ -8,6 +8,7 @@ import { JustId } from '../../../data/just-id'
 import { PostId, zodPostId } from '../../post/model/post-id'
 import { PostService, IPostService } from '../../post/bll/post.service'
 import { UserService, IUserService } from '../../user/bll/user.service'
+import { NotificationService } from '../../notification/bll/notification.service'
 
 type Message = { msg: Msg }
 
@@ -18,12 +19,13 @@ export interface ILikeService {
     getLikeByUserAndPost(userId: UserId, postId: PostId): Promise<boolean>
 }
 
-@Service(LikeRepository, PostService, UserService)
+@Service(LikeRepository, PostService, UserService, NotificationService)
 export class LikeService implements ILikeService {
     constructor(
         private likeRepo: ILikeRepository,
         private postService: IPostService,
-        private userService: IUserService
+        private userService: IUserService,
+        private notifService: NotificationService
     ) {}
     
     async getLikeByUserAndPost(userId: UserId, postId: PostId): Promise<boolean> {
@@ -42,6 +44,7 @@ export class LikeService implements ILikeService {
         if (user === null) return new ServerError(PersianErrors.ServerError)
         if ('msg' in post) return { msg: messages.postNotFound.persian }
 
+        this.notifService.createLikeNotification(post.author, userId, post)
         const input = toCreateLike(user, post)
         await this.likeRepo.create(input)
         
@@ -55,6 +58,7 @@ export class LikeService implements ILikeService {
         const post = await this.postService.getPost(id, userId)
         if('msg' in post) return { msg: messages.postNotFound.persian }
 
+        
         const removedLike = (await this.likeRepo.remove(like.id))
         if (!removedLike) return new ServerError(PersianErrors.ServerError)
 

@@ -6,6 +6,7 @@ import { IPostService, PostService } from '../../post/bll/post.service'
 import { LikeService } from '../bll/like.service'
 import { BookmarkService } from '../bll/bookmark.service'
 import { IUserService } from '../../user/bll/user.service'
+import { NotificationService } from '../../notification/bll/notification.service'
 
 describe('PostActionService', () => {
     let postService: PostService
@@ -15,6 +16,7 @@ describe('PostActionService', () => {
     let mockLikeRepository: jest.Mocked<ILikeRepository>
     let mockBookmarkRepository: jest.Mocked<IBookmarkRepository>
     let mockUserService: jest.Mocked<IUserService>
+    let mockNotificationService: jest.Mocked<NotificationService>
 
     beforeEach(() => {
         mockPostService = {
@@ -34,8 +36,10 @@ describe('PostActionService', () => {
         mockUserService = {
             getUserById: jest.fn(),
         } as any
+        mockNotificationService = {
+        } as any
         bookmarkService = new BookmarkService(mockBookmarkRepository, mockPostService, mockUserService)
-        likeService = new LikeService(mockLikeRepository, mockPostService, mockUserService)
+        likeService = new LikeService(mockLikeRepository, mockPostService, mockUserService, mockNotificationService)
     })
 
     it('should like a post', async () => {
