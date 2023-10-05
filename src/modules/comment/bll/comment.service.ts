@@ -9,7 +9,7 @@ import { Service, services } from '../../../registry/layer-decorators'
 import { MinioRepo } from '../../../data-source'
 import { IUserService, UserService } from '../../user/bll/user.service'
 import { Msg, PersianErrors, messages } from '../../../utility/persian-messages'
-import { zodCommentId } from '../model/comment-id'
+import { CommentId, zodCommentId } from '../model/comment-id'
 import { JustId } from '../../../data/just-id'
 import { IPostService, PostService } from '../../post/bll/post.service'
 import { CommentLikeService } from './commentLike.service'
@@ -21,6 +21,7 @@ export interface ICommentService {
     getComment(id: JustId): Promise<Comment | null>
     getAllComments(id: JustId, userId: UserId): Promise<arrayResult>
     removeCommentsWhenBlockingUser(userId: UserId, targetId: UserId): Promise<Message | ServerError>
+    removeAllRepliesByCommentId(commentId: CommentId): Promise<Comment[]>
 }
 
 @Service(CommentRepository, UserService, PostService)
@@ -35,7 +36,9 @@ export class CommentService implements ICommentService {
         const comments = await this.commentRepo.getUserCommentsOnTargetUserPosts(userId, targetId)
 
         await Promise.all(comments.map(async (comment) => {
-            const removedComment = await this.commentRepo.remove(comment.id)
+            
+            const replies = this.removeAllRepliesByCommentId(comment.id)
+            const removedComment = this.commentRepo.remove(comment.id)
             if (!removedComment) {
                 console.log(`Removing Comment element in remove comments when User block targetUser was not successful. Target Comment : :comment`, {comment})
             }
@@ -43,6 +46,18 @@ export class CommentService implements ICommentService {
         }))
 
         return { msg: messages.done.persian }
+    }
+    async removeAllRepliesByCommentId(commentId: CommentId) {
+        const replies = await this.commentRepo.getRepliesCommentByCommentId(commentId)
+        await Promise.all(replies.map(async (reply) => {
+            
+            const removedReply = await this.commentRepo.remove(reply.id)
+            if (!removedReply) {
+                console.log(`Removing Comment element in remove reply comments when User block targetUser was not successful. Target Comment : :reply`, {reply})
+            }
+            return removedReply
+        }))
+        return replies
     }
     async getAllComments(id: JustId, userId: UserId) {
         const postId = zodPostId.parse(id)

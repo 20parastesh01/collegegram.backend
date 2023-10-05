@@ -1,5 +1,4 @@
 import { WholeNumber, zodWholeNumber } from '../../../data/whole-number'
-import { UserId } from '../../user/model/user-id'
 import { Content, zodContent } from './content'
 import { CommentId, zodCommentId } from './comment-id'
 import { PostId, zodPostId } from '../../post/model/post-id'
@@ -14,13 +13,13 @@ export const zodComment = z.object({
     postId: zodPostId,
     author: zodUserShort,
     likeCount: zodWholeNumber,
-    parentId: zodCommentId.optional(),
+    parentId: zodCommentId.nullable().optional(),
     createdAt: z.instanceof(Date),
     ifLiked: zodBooleanOrBooleanString.optional(),
 })
 export interface Comment extends BasicComment {
     likeCount: WholeNumber
-    parentId?: CommentId
+    parentId?: CommentId | null
     createdAt: Date
     ifLiked?: boolean
 }

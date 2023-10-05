@@ -41,6 +41,7 @@ export const commentLikeArrayDao = (input: CommentLikeEntity[]) => {
     }
 }
 export const toCreateCommentLike = (user: User, comment: Comment): CreateCommentLike => {
-    const createCommentLikeEntity: CreateCommentLike = { user: user, comment: comment }
+    const {parentId, ...rest} = comment
+    const createCommentLikeEntity: CreateCommentLike = { user: user, comment: rest }
     return createCommentLikeEntity
 }

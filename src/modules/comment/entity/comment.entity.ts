@@ -24,8 +24,7 @@ export class CommentEntity {
     @JoinColumn({ name: 'postId' })
     post!: PostEntity
 
-    @ManyToOne(() => CommentEntity, (comment) => comment.id, { nullable: true })
-    @JoinColumn()
+    @Column({ nullable: true, default: null })
     parentId!: CommentId
 
     @Column('integer', { name: 'likeCount', default: 0 })
