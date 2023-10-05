@@ -1,4 +1,3 @@
-import { zodUserShort } from '../../user/model/user'
 import { CreateComment } from '../comment.repository'
 import { CommentEntity } from '../entity/comment.entity'
 import { NewComment, Comment, zodComment } from '../model/comment'
@@ -6,7 +5,9 @@ import { CommentId } from '../model/comment-id'
 
 export const toComment = (entity: CommentEntity) => {
     const { updatedAt, author, ...rest } = entity
-    const output : Comment = zodComment.parse({author: { photo: '', ...author }, ...rest})
+    const { id, ...comment } = rest
+    const ID = id ?? (0 as CommentId)
+    const output : Comment = zodComment.parse({id:ID, author: { photo: '', ...author }, ...comment})
     return output
 }
 
