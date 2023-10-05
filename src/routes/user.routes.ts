@@ -56,6 +56,12 @@ export class UserRouter {
         handleExpress(res, () => this.notificationService.getUserNotificationsWithRelation(req.user.userId))
     }
 
+    @Get('/friends/notification')
+    @Auth()
+    getFriendsNotifs(req: Request, res: Response) {
+        handleExpress(res, () => this.notificationService.getFriendNotification(req.user.userId))
+    }
+
     @Post('/forgetpassword')
     forgetpass(req: Request, res: Response) {
         const data = sendEmailDto.parse(req.body)

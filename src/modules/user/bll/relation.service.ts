@@ -245,4 +245,5 @@ export class RelationService implements IRelationService {
         const users = relations.map((relation) => relation.userB)
         return users
     }
+    
 }
