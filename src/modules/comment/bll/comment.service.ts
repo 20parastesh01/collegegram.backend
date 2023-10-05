@@ -13,6 +13,7 @@ import { CommentId, zodCommentId } from '../model/comment-id'
 import { JustId } from '../../../data/just-id'
 import { IPostService, PostService } from '../../post/bll/post.service'
 import { CommentLikeService } from './commentLike.service'
+import { NotificationService } from '../../notification/bll/notification.service'
 
 type arrayResult = { result: Comment[], total: number }
 type Message = { msg: Msg }
@@ -24,12 +25,13 @@ export interface ICommentService {
     removeAllRepliesByCommentId(commentId: CommentId): Promise<Comment[]>
 }
 
-@Service(CommentRepository, UserService, PostService)
+@Service(CommentRepository, UserService, PostService, NotificationService)
 export class CommentService implements ICommentService {
     constructor(
         private commentRepo: ICommentRepository,
         private userService: IUserService,
         private postService: IPostService,
+        private notifService: NotificationService,
     ) {}
 
     async removeCommentsWhenBlockingUser(userId: UserId, targetId: UserId) {
@@ -86,6 +88,7 @@ export class CommentService implements ICommentService {
             ...rest,
         })
         const createdComment = (await this.commentRepo.create(commentEntity))
+        this.notifService.createCommentNotification(post.author, userId, createdComment)
         return createdComment ?? new ServerError()
     }
 
