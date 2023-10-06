@@ -153,6 +153,7 @@ export class RelationService implements IRelationService {
         const closeFriend = await closeFriendService.getCloseFriend(userId, targetId)
         if (closeFriend) {
             await closeFriendService.removeCloseFriend(userId, targetId)
+            await closeFriendService.removeCloseFriend(targetId, userId)
         }
 
         const promises = [
