@@ -153,6 +153,9 @@ export class RelationService implements IRelationService {
         const closeFriend = await closeFriendService.getCloseFriend(userId, targetId)
         if (closeFriend) {
             await closeFriendService.removeCloseFriend(userId, targetId)
+        }
+        const reverseCloseFriend = await closeFriendService.getCloseFriend(targetId, userId)
+        if (reverseCloseFriend) {
             await closeFriendService.removeCloseFriend(targetId, userId)
         }
 
