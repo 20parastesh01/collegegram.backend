@@ -41,12 +41,24 @@ export class NotificationRepository implements INotificationRepository {
     }
 
     async getNotificationByUser(userId: UserId) {
-        const notificationEntities = await this.notificationRepo.find({ where: { userId }, relations: ['actor', 'user', 'post', 'comment'] })
+        const notificationEntities = await this.notificationRepo.find({
+            where: { userId },
+            relations: ['actor', 'user', 'post', 'comment'],
+            order: {
+                createdAt: 'DESC',
+            },
+        })
         return notificationListDao(notificationEntities)
     }
 
     async getNotificationByUserList(userIds: UserId[]) {
-        const notificationEntities = await this.notificationRepo.find({ where: { userId: In(userIds), type: In(['Like' , 'Comment' , 'Follow']) }, relations: ['actor', 'user', 'post', 'comment'] })
+        const notificationEntities = await this.notificationRepo.find({
+            where: { actor: In(userIds), type: In(['Like', 'Comment', 'Follow']) },
+            relations: ['actor', 'user', 'post', 'comment'],
+            order: {
+                createdAt: 'DESC',
+            },
+        })
         return notificationListDao(notificationEntities)
     }
 

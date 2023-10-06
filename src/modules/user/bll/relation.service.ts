@@ -13,6 +13,7 @@ import { Relation, RelationStatus } from '../model/relation'
 import { User, UserWithStatus } from '../model/user'
 import { UserId } from '../model/user-id'
 import { CreateRelation, IRelationRepository, RelationRepository } from '../relation.repository'
+import { CloseFriendService } from './closefriend.service'
 import { UserService } from './user.service'
 
 export type accessToUser = 'FullAccess' | 'JustProfile' | 'Denied'
@@ -148,6 +149,16 @@ export class RelationService implements IRelationService {
             await this.relationRepo.deleteRelation({ userA: target.id, userB: userId })
         }
 
+        const closeFriendService = services['CloseFriendService'] as CloseFriendService
+        const closeFriend = await closeFriendService.getCloseFriend(userId, targetId)
+        if (closeFriend) {
+            await closeFriendService.removeCloseFriend(userId, targetId)
+        }
+        const reverseCloseFriend = await closeFriendService.getCloseFriend(targetId, userId)
+        if (reverseCloseFriend) {
+            await closeFriendService.removeCloseFriend(targetId, userId)
+        }
+
         const promises = [
             (services['LikeService'] as LikeService).removePostLikesWhenBlockingUser(userId, targetId),
             (services['CommentLikeService'] as CommentLikeService).removeCommentLikesWhenBlockingUser(userId, targetId),
@@ -245,5 +256,4 @@ export class RelationService implements IRelationService {
         const users = relations.map((relation) => relation.userB)
         return users
     }
-    
 }

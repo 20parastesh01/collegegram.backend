@@ -211,6 +211,13 @@ export class PostService implements IPostService {
         const blockers = await this.relationService.getAllBlockers(userId)
         const blockeds = await this.relationService.getAllBlockeds(userId)
         const privates = await this.userService.getAllPrivateIds()
-        return await this.postRepo.search2(tag, followings, closefriend, [...blockers, ...blockeds], privates, paginationInfo)
+        const posts = await this.postRepo.search2(tag, followings, closefriend, [...blockers, ...blockeds], privates, paginationInfo)
+        for (let post of posts) {
+            const like = await (services['LikeService'] as LikeService).getLikeByUserAndPost(userId, post.id)
+            post.ifLiked = like
+            const photos = await MinioRepo.getPostPhotoUrl(post.id)
+            if (photos) post.photos = photos
+        }
+        return posts
     }
 }

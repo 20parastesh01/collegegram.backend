@@ -138,8 +138,7 @@ export class PostRepository implements IPostRepository {
     async search2(tag: Tag, followingUserIds: UserId[], usersAddedHimAsCloseFriend: UserId[], usersBlockedHim: UserId[], privateUserIds: UserId[], paginationInfo: PaginationInfo) {
         const { page, pageSize } = paginationInfo
 
-        const query = this.PostRepo.createQueryBuilder('post').where(':tag = ANY(post.tags)', { tag })
-
+        const query = this.PostRepo.createQueryBuilder('post').where(':tag = ANY(post.tags)', { tag }).loadRelationCountAndMap('post.likeCount', 'post.likes')
         if (usersBlockedHim.length > 0) {
             query.andWhere('post.author NOT IN (:...blockedUsers)', { blockedUsers: usersBlockedHim })
         }
