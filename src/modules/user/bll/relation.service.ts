@@ -154,6 +154,10 @@ export class RelationService implements IRelationService {
         if (closeFriend) {
             await closeFriendService.removeCloseFriend(userId, targetId)
         }
+        const reverseCloseFriend = await closeFriendService.getCloseFriend(targetId, userId)
+        if (reverseCloseFriend) {
+            await closeFriendService.removeCloseFriend(targetId, userId)
+        }
 
         const promises = [
             (services['LikeService'] as LikeService).removePostLikesWhenBlockingUser(userId, targetId),
