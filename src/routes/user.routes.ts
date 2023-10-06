@@ -40,6 +40,7 @@ export class UserRouter {
     }
 
     @Delete('/logout')
+    @Auth()
     logout(req: Request, res: Response) {
         handleExpress(res, () => this.userService.logout(req.user.userId))
     }
