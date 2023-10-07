@@ -24,7 +24,7 @@ export class CommentEntity {
     @JoinColumn({ name: 'postId' })
     post!: PostEntity
 
-    @Column({ default: 0 })
+    @Column({ nullable: true, default: null })
     parentId!: CommentId
 
     @Column('integer', { name: 'likeCount', default: 0 })
