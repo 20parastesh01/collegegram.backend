@@ -107,6 +107,9 @@ export class RelationService implements IRelationService {
         if (!dao) return { msg: messages.notFollowing.persian }
         const status = dao.toRelation().status
         await this.relationRepo.deleteRelation({ userA: userId, userB: target.id })
+        await this.notifService.deleteNotification(target.id, userId, 'Request')
+        await this.notifService.deleteNotification(target.id, userId, 'Follow')
+        await this.notifService.deleteNotification(userId, target.id, 'Accept')
         if (status == 'Following') {
             return { msg: messages.unfollowSuccess.persian }
         }
@@ -122,7 +125,7 @@ export class RelationService implements IRelationService {
         const status = dao.toRelation().status
         if (status !== 'Pending') return { msg: messages.requestNotFound.persian }
         await this.relationRepo.updateRelation({ userA: target.id, userB: userId, status: 'Following' })
-        this.notifService.createAcceptNotification(userId, target.id)
+        this.notifService.createAcceptNotification(target.id, userId)
         return { msg: messages.accepted.persian }
     }
 
@@ -165,7 +168,12 @@ export class RelationService implements IRelationService {
             (services['CommentService'] as CommentService).removeCommentsWhenBlockingUser(userId, targetId),
         ]
         Promise.all(promises)
-
+        await this.notifService.deleteNotification(target.id, userId, 'Request')
+        await this.notifService.deleteNotification(target.id, userId, 'Follow')
+        await this.notifService.deleteNotification(userId, target.id, 'Accept')
+        await this.notifService.deleteNotification(userId, target.id, 'Request')
+        await this.notifService.deleteNotification(userId, target.id, 'Follow')
+        await this.notifService.deleteNotification(target.id, userId, 'Accept')
         await this.relationRepo.updateRelation({ userA: userId, userB: targetId, status: 'Blocked' })
         return { msg: messages.blocked.persian }
     }
