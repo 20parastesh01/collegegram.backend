@@ -12,6 +12,7 @@ export class NotificationService {
     constructor(private notifRepo: INotificationRepository) {}
 
     async createFollowNotification(user: UserId, actor: UserId) {
+        if (user == actor) return
         const notification = await this.notifRepo.create({
             actorId: actor,
             userId: user,
@@ -21,6 +22,7 @@ export class NotificationService {
     }
 
     async createAcceptNotification(user: UserId, actor: UserId) {
+        if (user == actor) return
         const notification = await this.notifRepo.create({
             actorId: actor,
             userId: user,
@@ -30,6 +32,7 @@ export class NotificationService {
     }
 
     async createLikeNotification(user: UserId, actor: UserId, post: BasicPost) {
+        if (user == actor) return
         const notification = await this.notifRepo.create({
             actorId: actor,
             userId: user,
@@ -41,6 +44,7 @@ export class NotificationService {
     }
 
     async createCommentNotification(user: UserId, actor: UserId, comment: Comment) {
+        if (user == actor) return
         const notification = await this.notifRepo.create({
             actorId: actor,
             userId: user,
@@ -52,6 +56,7 @@ export class NotificationService {
     }
 
     async createRequestNotification(user: UserId, actor: UserId) {
+        if (user == actor) return
         const notification = await this.notifRepo.create({
             actorId: actor,
             userId: user,
