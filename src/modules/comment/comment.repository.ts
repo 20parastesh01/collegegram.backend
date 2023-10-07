@@ -40,7 +40,7 @@ export class CommentRepository implements ICommentRepository {
             .where('comment.parentId = :commentId', { commentId })
             .leftJoinAndSelect('comment.author', 'user')
             .leftJoinAndSelect('comment.post', 'postId')
-            .orderBy('comment.createdAt', 'DESC')
+            .orderBy('comment.createdAt', 'ASC')
             .getMany()
         return commentListDao(comments).toCommentList()
     }
@@ -50,7 +50,7 @@ export class CommentRepository implements ICommentRepository {
             .where('comment.postId = :postId', { postId })
             .leftJoinAndSelect('comment.author', 'user')
             .leftJoinAndSelect('comment.post', 'postId')
-            .orderBy('comment.createdAt', 'DESC')
+            .orderBy('comment.createdAt', 'ASC')
             .getMany()
         return commentListDao(comments).toCommentList()
     }
@@ -63,7 +63,6 @@ export class CommentRepository implements ICommentRepository {
             .leftJoinAndSelect('comment.author', 'user')
             .leftJoinAndSelect('comment.post', 'postId')
             .where('comment.id = :commentId', { commentId })
-            .orderBy('comment.createdAt', 'DESC')
             .getOne()
         return commentOrNullDao(commentEntity).toComment()
     }

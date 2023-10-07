@@ -79,9 +79,10 @@ export class NotificationService {
             const actorProf = await MinioRepo.getProfileUrl(notif.actor.id)
             if (userProf) notif.user.photo = userProf
             if (actorProf) notif.actor.photo = actorProf
-            if (!notif.post) continue
-            const postPhoto = await MinioRepo.getPostPhotoUrl(notif.post.id)
-            notif.post.photos = postPhoto
+            if (notif.post) {
+                const postPhoto = await MinioRepo.getPostPhotoUrl(notif.post.id)
+                notif.post.photos = postPhoto
+            }
             const relationService = services['RelationService'] as RelationService
             const relations = await relationService.getRelations(notif.actor.id, notif.user.id)
             result.push({ ...notif, relation: relations.relation?.status, reverseRelation: relations.reverseRelation?.status })
@@ -91,13 +92,14 @@ export class NotificationService {
 
     async getFriendNotification(userId: UserId) {
         const friends = await (services['RelationService'] as RelationService).getAllFollowingIds(userId)
-        const notifs = await (await this.notifRepo.getNotificationByUserList(friends)).toNotificationList()
+        const notifs = (await this.notifRepo.getNotificationByUserList(friends)).toNotificationList()
         for (let notif of notifs) {
             const actorProf = await MinioRepo.getProfileUrl(notif.actor.id)
             if (actorProf) notif.actor.photo = actorProf
-            if (!notif.post) continue
-            const postPhoto = await MinioRepo.getPostPhotoUrl(notif.post.id)
-            notif.post.photos = postPhoto
+            if (notif.post) {
+                const postPhoto = await MinioRepo.getPostPhotoUrl(notif.post.id)
+                notif.post.photos = postPhoto
+            }
         }
         return notifs
     }
