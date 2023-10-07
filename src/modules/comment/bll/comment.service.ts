@@ -34,6 +34,34 @@ export class CommentService implements ICommentService {
         private notifService: NotificationService,
     ) {}
 
+    sortComments(comments: Comment[]): Comment[] {
+        const sortedComments: Comment[] = [];
+        const commentMap: Map<number, Comment[]> = new Map();
+        
+        // Group comments by their parent ID
+        comments.forEach((comment) => {
+            if(!comment.parentId) comment.parentId = zodCommentId.parse(0)
+            if (!commentMap.has(comment.parentId)) {
+            commentMap.set(comment.parentId, []);
+            }
+            commentMap.get(comment.parentId)!.push(comment);
+        });
+
+        // Helper function to recursively add comments and replies
+        function addComments(parentId: number) {
+            const parentComments = commentMap.get(parentId) || [];
+            parentComments.forEach((comment) => {
+            sortedComments.push(comment);
+            addComments(comment.id);
+            });
+        }
+        
+        // Start with comments that have a parent ID of 0
+        addComments(0);
+        
+        return sortedComments;
+    }
+
     async removeCommentsWhenBlockingUser(userId: UserId, targetId: UserId) {
         const comments = await this.commentRepo.getUserCommentsOnTargetUserPosts(userId, targetId)
 
@@ -72,7 +100,8 @@ export class CommentService implements ICommentService {
             if (profilePhoto) comment.author.photo = profilePhoto
             return comment
         }))
-        return { result: commentsWithProfilePhotos , total: comments.length }
+        const sortedComments = this.sortComments(comments);
+        return { result: sortedComments , total: comments.length }
     }
 
     async createComment(dto: CreateCommentDTO, userId: UserId) {

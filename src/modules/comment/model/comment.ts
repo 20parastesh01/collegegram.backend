@@ -13,13 +13,13 @@ export const zodComment = z.object({
     postId: zodPostId,
     author: zodUserShort,
     likeCount: zodWholeNumber,
-    parentId: zodCommentId.nullable().optional(),
+    parentId: zodCommentId,
     createdAt: z.instanceof(Date),
     ifLiked: zodBooleanOrBooleanString.optional(),
 })
 export interface Comment extends BasicComment {
     likeCount: WholeNumber
-    parentId?: CommentId | null
+    parentId: CommentId
     createdAt: Date
     ifLiked?: boolean
 }
