@@ -31,13 +31,13 @@ export class NotificationEntity {
     @Column({ nullable: true })
     postId!: PostId
 
-    @ManyToOne(() => PostEntity)
+    @ManyToOne(() => PostEntity, {onDelete: 'CASCADE'})
     post!: PostEntity
 
     @Column({ nullable: true })
     commentId!: CommentId
 
-    @ManyToOne(() => CommentEntity)
+    @ManyToOne(() => CommentEntity, {onDelete: 'CASCADE'})
     comment!: CommentEntity
 
     @CreateDateColumn()
